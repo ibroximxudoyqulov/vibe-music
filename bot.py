@@ -304,7 +304,20 @@ def admin_decision_callback(call):
         bot.send_message(target_user_id, "❌ To'lov chekingiz tasdiqlanmadi. Qaytadan tekshirib yuboring.")
 
 
-print("Bot 24/7 ishga tushdi...")
+import time
+
 if __name__ == '__main__':
-    bot.delete_webhook(drop_pending_updates=True)
-    bot.infinity_polling(skip_pending=True)
+    try:
+        bot.delete_webhook(drop_pending_updates=True)
+    except Exception:
+        pass
+    
+    time.sleep(2)  # Eski ulanish to'liq yopilishi uchun 2 soniya kutadi
+    
+    print("Bot 24/7 uzluksiz ishga tushdi...")
+    while True:
+        try:
+            bot.infinity_polling(skip_pending=True, timeout=20)
+        except Exception as e:
+            print(f"Qayta ulanmoqda: {e}")
+            time.sleep(3)
