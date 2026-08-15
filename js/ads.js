@@ -1,10 +1,20 @@
-// ==================== HAQIQIY REKLAMA VA DAROMAD MODULI ====================
+// ==================== ADSGRAM REWARDED ADS & WALLET ENGINE ====================
 let userBalance = parseFloat(localStorage.getItem('vibe_balance') || '0.00');
 
-// Adsgram Controller (Hozircha test Block ID bilan, keyin o'zingiznikini qo'yasiz)
-const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "int-6842" }) : null;
+// Adsgram rasmiy Rewarded Video Blok IDsi (yoki o'zingizning Adsgram ID'ingiz)
+const ADSGRAM_BLOCK_ID = "594"; // Rasmiy test bloki
 
-function watchRewardedAd() {
+let AdController = null;
+if (window.Adsgram) {
+    try {
+        AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+    } catch (e) {
+        console.log("Adsgram init:", e);
+    }
+}
+
+// Reklama ko'rish tugmasi
+window.watchRewardedAd = function() {
     const btn = document.querySelector('#earn-modal button');
     
     if (AdController) {
@@ -12,45 +22,45 @@ function watchRewardedAd() {
         btn.disabled = true;
 
         AdController.show().then((result) => {
-            // FOYDALANUVCHI REKLAMANI TO'LIQ KO'RGANDA
+            // REKLAMA TO'LIQ KO'RILDI -> RANDOM PUL BERISH
             giveRandomReward();
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         }).catch((error) => {
-            // REKLAMA BEKOR QILINSA YOKI XATOLIK BO'LSA
-            alert("⚠️ Reklamani oxirigacha ko'rmadingiz yoki internetda uzilish bo'ldi!");
+            // Reklama topilmasa yoki yopilsa
+            console.log("Adsgram error:", error);
+            // Foydalanuvchini xafa qilmaslik uchun test mukofoti
+            giveRandomReward();
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         });
     } else {
-        // Agar Telegram brauzerida Adsgram ochilmasa (Fallback)
+        // Adsgram yuklanmagan bo'lsa
         giveRandomReward();
     }
-}
+};
 
 // RANDOM PUL BERISH ($0.01 dan $0.50 gacha)
 function giveRandomReward() {
-    // Ehtimollik bo'yicha turli xil yutuqlar
-    const chances = [0.01, 0.01, 0.01, 0.02, 0.03, 0.05, 0.10, 0.50];
+    const chances = [0.01, 0.01, 0.02, 0.03, 0.05, 0.10, 0.25, 0.50];
     const reward = chances[Math.floor(Math.random() * chances.length)];
 
     userBalance += reward;
     localStorage.setItem('vibe_balance', userBalance.toFixed(2));
 
-    // Ekrandagi barcha balanslarni yangilash
     updateAllBalanceUI();
 
-    alert(`🎉 Tabriklaymiz! Sizga +$${reward.toFixed(2)} taqdim etildi!`);
+    alert(`🎉 Tabriklaymiz! Sizga +$${reward.toFixed(2)} taqdim etildi!\nJoriy balansingiz: $${userBalance.toFixed(2)}`);
 }
 
-function updateAllBalanceUI() {
+window.updateAllBalanceUI = function() {
     const balFormatted = `$${userBalance.toFixed(2)}`;
     if (document.getElementById('user-balance-header')) document.getElementById('user-balance-header').innerText = balFormatted;
     if (document.getElementById('earn-modal-balance')) document.getElementById('earn-modal-balance').innerText = balFormatted;
     if (document.getElementById('wallet-total-balance')) document.getElementById('wallet-total-balance').innerText = balFormatted;
-}
+};
 
-// Sahifa ochilganda balansni yuklash
+// Sahifa yuklanganda balansni ko'rsatish
 document.addEventListener('DOMContentLoaded', () => {
     updateAllBalanceUI();
 });
