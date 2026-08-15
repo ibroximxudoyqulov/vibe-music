@@ -1,18 +1,16 @@
-// ==================== STYLES, FONTS, EFFECTS & 60FPS EXPORTER ====================
+// ==================== 1080x1920 60FPS SMART EXPORTER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
 
-// 1. Shriftni jonli o'zgartirish
+// 1. Shriftni yangilash
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
-    lyricsLines.forEach(line => {
-        line.style.fontFamily = fontFamily;
-    });
+    lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
-// 2. O'z telefonidan fon yuklash (Rasm yoki Video)
+// 2. Fon yuklash
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -27,12 +25,11 @@ window.handleCustomBgUpload = function(event) {
     }
 };
 
-// 3. Vinil Diskni yoqish / o'chirish
+// 3. Vinil va Ekvalayzer
 window.toggleVinylEffect = function() {
     isVinylActive = !isVinylActive;
     const vinylBox = document.getElementById('preview-vinyl-box');
     const btn = document.getElementById('btn-vinyl');
-    
     if (isVinylActive) {
         vinylBox.classList.remove('hidden');
         btn.classList.add('border-brand-red', 'text-brand-red');
@@ -42,12 +39,10 @@ window.toggleVinylEffect = function() {
     }
 };
 
-// 4. Bas Ekvalayzerni yoqish / o'chirish
 window.toggleSpectrumEffect = function() {
     isSpectrumActive = !isSpectrumActive;
     const spectrumBox = document.getElementById('preview-spectrum-box');
     const btn = document.getElementById('btn-spectrum');
-
     if (isSpectrumActive) {
         spectrumBox.classList.remove('hidden');
         spectrumBox.classList.add('flex');
@@ -59,7 +54,7 @@ window.toggleSpectrumEffect = function() {
     }
 };
 
-// 5. 1080x1920 60FPS Tiniq MP4 Video Eksport (Galereyaga)
+// 4. SMART 60FPS VIDEO EKSPORT (MATN TUGAGAN JOYDA KESUVCHI)
 window.exportHighQualityVideo = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -71,14 +66,21 @@ window.exportHighQualityVideo = function() {
         return;
     }
 
-    alert("🎬 60FPS Video yozilmoqda... Qo'shiq tugagach avtomatik yuklanadi!");
+    // OXIRGI SATRNING VAQTINI HISOBLASH (Qo'shiqni shu yerda kesish uchun)
+    let lastLyricTime = 0;
+    lyricsData.forEach(l => {
+        if (l.time !== null && l.time > lastLyricTime) lastLyricTime = l.time;
+    });
+    const videoEndTime = lastLyricTime > 0 ? lastLyricTime + 3 : audio.duration || 10;
+
+    alert(`🎬 60FPS Video tayyorlanmoqda... (Davomiyligi: ${Math.ceil(videoEndTime)} soniya). Iltimos, kuting!`);
 
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
     canvas.height = 1920;
     const ctx = canvas.getContext('2d');
 
-    const stream = canvas.captureStream(60); // 60 FPS
+    const stream = canvas.captureStream(60);
     let recorder;
     try {
         recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
@@ -91,11 +93,18 @@ window.exportHighQualityVideo = function() {
     recorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `VibeStudio_Spotify_${Date.now()}.mp4`;
-        a.click();
-        alert("🎉 Video tayyor bo'ldi va galereyangizga yuklandi!");
+        
+        // Telefonda yuklab olishni majburlash
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = `Spotify_Lyrics_${Date.now()}.mp4`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        audio.pause();
+        audio.currentTime = 0;
+        alert("🎉 Video muvaffaqiyatli yuklab olindi! Galereyangiz yoki Yuklamalar (Downloads) papkasini tekshiring.");
     };
 
     recorder.start();
@@ -105,16 +114,19 @@ window.exportHighQualityVideo = function() {
     const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
 
     function renderLoop() {
-        if (audio.paused || audio.ended) {
-            recorder.stop();
+        // MATN TUGAGANDA MUSIQANI KESISH VA VIDEONI YOPISH
+        if (audio.currentTime >= videoEndTime || audio.ended || audio.paused) {
+            if (recorder.state === "recording") {
+                recorder.stop();
+            }
             return;
         }
 
-        // 1. Fon chizish
+        // Fon
         ctx.fillStyle = "#121212";
         ctx.fillRect(0, 0, 1080, 1920);
 
-        // 2. Spotify Header (Qo'shiqchi va Qo'shiq)
+        // Header
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 40px Montserrat, sans-serif";
         ctx.textAlign = "left";
@@ -124,7 +136,7 @@ window.exportHighQualityVideo = function() {
         ctx.font = "30px Montserrat, sans-serif";
         ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
 
-        // Ajratuvchi chiziq
+        // Chiziq
         ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -132,7 +144,7 @@ window.exportHighQualityVideo = function() {
         ctx.lineTo(980, 270);
         ctx.stroke();
 
-        // 3. Spotify Matnlari Almashinishi
+        // Spotify Matnlari
         const curTime = audio.currentTime;
         let activeIdx = 0;
         lyricsData.forEach((l, i) => {
@@ -144,17 +156,14 @@ window.exportHighQualityVideo = function() {
             const y = startY + (i * 120);
             if (y > 350 && y < 1700) {
                 if (i === activeIdx) {
-                    // FAOL SATR: Katta, Yorqin Oppoq
                     ctx.fillStyle = "#ffffff";
                     ctx.font = `bold 56px ${selectedFont}`;
                     ctx.fillText(l.text, 100, y);
                 } else if (i < activeIdx) {
-                    // O'TIB KETGAN SATRLAR: Joyiga qaytgan, xiralashgan
                     ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.fillText(l.text, 100, y);
                 } else {
-                    // KELAYOTGAN SATRLAR: Xira
                     ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.fillText(l.text, 100, y);
@@ -169,5 +178,5 @@ window.exportHighQualityVideo = function() {
 };
 
 window.exportStoryImage = function() {
-    alert("🖼 Story formati tayyorlanmoqda...");
+    alert("🖼 Story rasm formati saqlanmoqda...");
 };
