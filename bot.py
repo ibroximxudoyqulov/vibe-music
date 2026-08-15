@@ -1,10 +1,32 @@
+import os
 import sqlite3
 import datetime
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import telebot
 from telebot.types import (
     InlineKeyboardMarkup, InlineKeyboardButton, 
     ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 )
+
+# ==================== RENDER HEALTH-CHECK SERVER ====================
+# Render botni to'xtatib qo'ymasligi uchun fon veb-serveri
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"VibeBot is Active & 24/7 Running!")
+
+    def log_message(self, format, *args):
+        return  # Loglarni to'ldirmaslik uchun
+
+def run_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_health_server, daemon=True).start()
 
 # ==================== SOZLAMALAR ====================
 BOT_TOKEN = "8838751150:AAH3eyk3r_IxauPtnQvJ97rbNZmc9OjDQsg"
