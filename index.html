@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru" class="dark">
 <head>
-    <!-- ADSGRAM TELEGRAM REKLAMA SDK -->
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - Aesthetic Lyric Video & Music</title>
+    <title>VibeStudio - Spotify Aesthetic Lyric Video & Music</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,10 +18,12 @@
         };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- GOOGLE FONTS (70+ SHRIFTLAR TO'PLAMI) -->
+    <!-- GOOGLE FONTS (70+ Shriftlar) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Comfortaa:wght@700&family=Cormorant+Garamond:ital,wght@1,700&family=Great+Vibes&family=Lobster&family=Montserrat:wght@800&family=Neucha&family=Pacifico&family=Playfair+Display:ital,wght@1,800&family=Press+Start+2P&family=Ruslan+Display&family=Russo+One&family=Underdog&family=Yeseva+One&display=swap" rel="stylesheet">
+    <!-- ADSGRAM SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #09090d; color: #ffffff; user-select: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -42,13 +42,12 @@
             <span data-i18n="app_name" class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
         <div class="flex items-center space-x-2.5">
-            <!-- 1-CLICK TILNI TANLASH TUGMALARI -->
+            <!-- 1-Click Til Tanlash -->
             <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
                 <button id="btn-lang-uz" onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
                 <button id="btn-lang-ru" onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
             </div>
-
-            <!-- HAMYON BALANSI TUGMASI -->
+            <!-- Balans -->
             <button onclick="openWalletModal()" class="px-3 py-1.5 bg-brand-input border border-yellow-500/30 rounded-2xl flex items-center space-x-1.5 active:scale-95 transition">
                 <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
                 <span id="user-balance-header" class="text-xs font-bold text-yellow-400">$0.00</span>
@@ -56,14 +55,14 @@
         </div>
     </header>
 
-    <!-- ==================== MAIN STUDIO CONTENT ==================== -->
+    <!-- ==================== ASOSIY STUDIYA QISMI ==================== -->
     <main class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
 
-        <!-- 1. STEP: O'Z TELEFONIDAN MP3 YUKLASH -->
+        <!-- 1. STEP: MP3 VA QO'SHIQ MA'LUMOTLARI -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 data-i18n="step1_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-file-audio text-brand-cyan"></i>
-                <span>1. Выберите MP3 файл с телефона</span>
+                <span>1. Выберите MP3 и укажите название</span>
             </h3>
             
             <label for="audio-file-input" class="w-full py-4 bg-brand-input hover:bg-gray-800 border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer active:scale-95 transition">
@@ -72,7 +71,13 @@
             </label>
             <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
             
-            <!-- Audio Pleyer Boshqaruvi -->
+            <!-- Ijrochi va Qo'shiq Nomi -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <input type="text" id="track-artist-input" placeholder="Исполнитель (Munisa Rizaeva)" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-title-input" placeholder="Песня (Yetmadimi)" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+            </div>
+
+            <!-- Audio Player Boshqaruvi -->
             <div id="audio-player-box" class="hidden items-center justify-between bg-brand-input p-3 rounded-2xl border border-gray-800">
                 <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
                     <i id="btn-audio-icon" class="fa-solid fa-play"></i>
@@ -83,7 +88,7 @@
             </div>
         </section>
 
-        <!-- 2. STEP: MUSIXMATCH USLUBIDAGI QO'LDA MATN SINXRONLASH -->
+        <!-- 2. STEP: SPOTIFY / MUSIXMATCH MATN SINXRONLASH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 data-i18n="step2_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-align-left text-brand-red"></i>
@@ -96,7 +101,6 @@
                 Подготовить строки к синхронизации
             </button>
 
-            <!-- Sinxronlangan satrlar qutisi -->
             <div id="sync-container" class="hidden space-y-2 max-h-48 overflow-y-auto hide-scrollbar p-1"></div>
 
             <button id="btn-stamp-line" onclick="timestampCurrentLine()" data-i18n="step2_stamp" class="hidden w-full py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition animate-pulse">
@@ -104,19 +108,19 @@
             </button>
         </section>
 
-        <!-- 3. STEP: 70+ SHRIFT VA O'ZIDAN FON YUKLASH -->
+        <!-- 3. STEP: 70+ SHRIFT, FON, VINIL VA BAS EKVALAYZER -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
             <h3 data-i18n="step3_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-palette text-yellow-400"></i>
                 <span>3. Стили, 70+ Шрифтов и Загрузка Фона</span>
             </h3>
 
-            <!-- 70+ Shriftlar Tanlagichi -->
+            <!-- 70+ Shriftlar -->
             <div>
                 <label data-i18n="select_font" class="text-[10px] text-gray-400 block mb-1">Выберите шрифт текста:</label>
                 <select id="font-family-select" onchange="updatePreviewFont(this.value)" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs focus:outline-none text-white">
+                    <option value="'Montserrat', sans-serif">Montserrat Bold (Spotify Default)</option>
                     <option value="'Playfair Display', serif">Playfair Display (Vintage Serif)</option>
-                    <option value="'Montserrat', sans-serif">Montserrat Bold (Modern)</option>
                     <option value="'Caveat', cursive">Caveat (Рукописный)</option>
                     <option value="'Lobster', cursive">Lobster (Retro Cyrillic)</option>
                     <option value="'Russo One', sans-serif">Russo One (Car / Brabus Style)</option>
@@ -129,7 +133,7 @@
                 </select>
             </div>
 
-            <!-- O'z Telefonidan Fon Yuklash (100% Haqiqiy, Soxta Fonlarsiz!) -->
+            <!-- O'z Telefonidan Fon Yuklash (Rasm yoki Video) -->
             <div>
                 <label data-i18n="select_bg" class="text-[10px] text-gray-400 block mb-1">Загрузите свой фон с телефона:</label>
                 <label for="custom-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
@@ -139,7 +143,7 @@
                 <input type="file" id="custom-bg-input" accept="image/*,video/*" class="hidden" onchange="handleCustomBgUpload(event)">
             </div>
 
-            <!-- 4 Super Funksiyalar (Vinil & Ekvalayzer) -->
+            <!-- Vinil & Ekvalayzer Tugmalari -->
             <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
                 <button onclick="toggleVinylEffect()" id="btn-vinyl" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
                     <i class="fa-solid fa-compact-disc"></i>
@@ -152,42 +156,60 @@
             </div>
         </section>
 
-        <!-- 4. LIVE 9:16 PREVIEW KARTOCKA -->
+        <!-- 4. STEP: SPOTIFY 9:16 PREVIEW & 60FPS EKSPORT -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
-            <h3 data-i18n="preview_title" class="font-bold text-xs text-gray-300">Превью (9:16 TikTok / Instagram):</h3>
+            <h3 class="font-bold text-xs text-gray-300">Превью (Spotify 9:16 HD):</h3>
             
-            <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-gradient-to-b from-gray-900 to-black border border-gray-700 flex flex-col justify-between p-6 shadow-2xl">
-                <!-- Vinil Animatsiya -->
-                <div id="preview-vinyl-box" class="hidden justify-center">
-                    <i class="fa-solid fa-compact-disc text-6xl text-white/90 vinyl-spin drop-shadow-2xl"></i>
+            <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-[#121212] border border-gray-700 flex flex-col justify-between p-5 shadow-2xl select-none">
+                
+                <!-- Fon Rasmi / Videosi uchun qatlam -->
+                <div id="custom-bg-layer" class="absolute inset-0 bg-cover bg-center z-0 opacity-40"></div>
+
+                <!-- Spotify Header -->
+                <div class="flex items-center space-x-3 text-white/80 border-b border-white/10 pb-3 z-10">
+                    <i class="fa-solid fa-chevron-down text-sm text-gray-400"></i>
+                    <div class="text-left flex-1">
+                        <p id="preview-track-title" class="text-xs font-bold text-white tracking-wide">Yetmadimi</p>
+                        <p id="preview-track-artist" class="text-[10px] text-gray-400">Munisa Rizaeva</p>
+                    </div>
+                    <!-- Aylanuvchi Vinil (agar yoqilsa) -->
+                    <div id="preview-vinyl-box" class="hidden">
+                        <i class="fa-solid fa-compact-disc text-2xl text-white/90 vinyl-spin"></i>
+                    </div>
+                    <i class="fa-solid fa-ellipsis text-sm text-gray-400"></i>
                 </div>
 
-                <!-- Jonli Sinxron Matn -->
-                <div class="my-auto text-center space-y-3">
-                    <p id="preview-active-line" data-i18n="preview_placeholder" class="text-xl font-bold leading-relaxed drop-shadow-lg transition-all duration-300" style="font-family: 'Playfair Display', serif;">
-                        Здесь появится ваш синхронизированный текст...
-                    </p>
+                <!-- Spotify Matnlar Ro'yxati (Chapda, Tartib bilan) -->
+                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-4 text-left relative z-10">
+                    <p class="text-sm font-bold text-white/40">Qo'shiq matnini yuklang va sinxronlang...</p>
                 </div>
 
-                <!-- Bas Ekvalayzer To'lqinlari -->
-                <div id="preview-spectrum-box" class="hidden justify-center items-end space-x-1 h-6">
+                <!-- Bas Ekvalayzer (agar yoqilsa) -->
+                <div id="preview-spectrum-box" class="hidden justify-center items-end space-x-1 h-6 z-10">
                     <span class="w-1 bg-brand-cyan h-3 animate-pulse"></span>
                     <span class="w-1 bg-brand-cyan h-5 animate-pulse"></span>
                     <span class="w-1 bg-brand-cyan h-6 animate-pulse"></span>
                     <span class="w-1 bg-brand-cyan h-4 animate-pulse"></span>
                     <span class="w-1 bg-brand-cyan h-2 animate-pulse"></span>
                 </div>
+
+                <!-- Spotify Footer -->
+                <div class="flex justify-between items-center text-gray-400 pt-3 border-t border-white/10 text-xs z-10">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio Lyrics</span>
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
             </div>
 
             <!-- Eksport Tugmalari -->
             <div class="grid grid-cols-2 gap-2 pt-2">
-                <button onclick="triggerExport('video')" data-i18n="export_video" class="py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-video"></i>
-                    <span>🎬 9:16 Video</span>
+                <button onclick="exportHighQualityVideo()" class="py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span>🎬 60FPS Video (Galereyaga)</span>
                 </button>
-                <button onclick="triggerExport('image')" data-i18n="export_image" class="py-3.5 bg-brand-input border border-gray-700 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
+                <button onclick="exportStoryImage()" class="py-3.5 bg-brand-input border border-gray-700 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
                     <i class="fa-solid fa-image"></i>
-                    <span>🖼 История (PNG)</span>
+                    <span>🖼 PNG Rasm</span>
                 </button>
             </div>
         </section>
@@ -210,7 +232,7 @@
         </button>
     </nav>
 
-    <!-- ==================== 1. MODAL: РЕКЛАМА КЎРИБ ПУЛ ИШЛА (65% / 35%) ==================== -->
+    <!-- ==================== 1. MODAL: REKLAMA KO'RIB PUL ISHLASH (ADSGRAM) ==================== -->
     <div id="earn-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
         <div class="w-full max-w-sm bg-brand-card border border-yellow-500/40 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative">
             <button onclick="closeEarnAdsModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -220,7 +242,7 @@
             </div>
             
             <h3 data-i18n="earn_title" class="text-lg font-bold text-white">Смотри рекламу & Зарабатывай!</h3>
-            <p data-i18n="earn_desc" class="text-xs text-gray-300">Вы получаете 65% прибыли ($0.01 за видео) прямо на баланс кошелька!</p>
+            <p data-i18n="earn_desc" class="text-xs text-gray-300">Вы получаете 65% прибыли ($0.01 - $0.50 за видео) прямо на баланс кошелька!</p>
             
             <div class="p-3 bg-brand-input rounded-2xl border border-gray-800 space-y-1 text-xs">
                 <p data-i18n="wallet_balance" class="text-gray-400">Ваш баланс:</p>
@@ -228,12 +250,12 @@
             </div>
 
             <button onclick="watchRewardedAd()" data-i18n="earn_btn" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold text-xs rounded-2xl active:scale-95 transition shadow-lg shadow-yellow-500/20">
-                ▶️ ПОСМОТРЕТЬ РЕКЛАМУ (+ $0.01)
+                ▶️ ПОСМОТРЕТЬ РЕКЛАМУ
             </button>
         </div>
     </div>
 
-    <!-- ==================== 2. MODAL: КОШЕЛЕК & ВЫВОД НА КАРТЫ СНГ ==================== -->
+    <!-- ==================== 2. MODAL: HAMYON & SNG KARTALARIGA PUL YECHISH ==================== -->
     <div id="wallet-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
         <div class="w-full max-w-sm bg-brand-card border border-gray-800 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeWalletModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -278,7 +300,7 @@
         </div>
     </div>
 
-    <!-- ==================== MICRO-SCRIPTS BOG'LANISHI ==================== -->
+    <!-- SCRIPT MODULLAR -->
     <script src="js/i18n.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/sync.js"></script>
