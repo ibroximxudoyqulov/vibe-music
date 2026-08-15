@@ -208,14 +208,18 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS[lang]["balance_text"].format(bal), parse_mode="HTML")
         return
 
-    # REKLAMA KO'RISH (+ $0.01)
+    # REKLAMA KO'RISH TUGMASI (Mini App'ga yo'naltirish)
     if text in [TEXTS["uz"]["btn_watch_ad"], TEXTS["ru"]["btn_watch_ad"]]:
-        conn = sqlite3.connect("users.db")
-        cursor = conn.cursor()
-        cursor.execute("UPDATE users SET balance = balance + 0.01 WHERE user_id=?", (user_id,))
-        conn.commit()
-        conn.close()
-        bot.send_message(message.chat.id, TEXTS[lang]["ad_watched"], parse_mode="HTML")
+        markup = InlineKeyboardMarkup()
+        btn_text = "▶️ Reklama Ko'rish (Mini App)" if lang == 'uz' else "▶️ Смотреть Рекламу (Mini App)"
+        markup.add(InlineKeyboardButton(text=btn_text, web_app=WebAppInfo(url=WEBAPP_URL)))
+        
+        msg = (
+            "🎬 <b>Haqiqiy reklama ko'rish:</b>\nVideoni oxirigacha tomosha qiling va hisobingizga pul oling!" 
+            if lang == 'uz' else 
+            "🎬 <b>Просмотр рекламы:</b>\nПосмотрите видео до конца, чтобы получить вознаграждение!"
+        )
+        bot.send_message(message.chat.id, msg, parse_mode="HTML", reply_markup=markup)
         return
 
     # KARAOKE YASASH TUGMASI (TO'LOVNI TEKSHIRISH)
