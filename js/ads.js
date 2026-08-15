@@ -2,12 +2,12 @@
 let userBalance = parseFloat(localStorage.getItem('vibe_balance') || '0.00');
 
 // Siz partner.adsgram.ai dan olgan Block ID'ingizni shu yerga yozasiz:
-const ADSGRAM_BLOCK_ID = "YOUR_BLOCK_ID"; 
+const ADSGRAM_BLOCK_ID = "43028"; 
 
 let AdController = null;
 if (window.Adsgram) {
     try {
-        AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+        AdController = window.Adsgram.init({ blockId: 43028 });
     } catch (e) {
         console.log("Adsgram Init Error:", e);
     }
