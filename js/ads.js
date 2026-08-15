@@ -1,42 +1,56 @@
-// ==========================================
-// MICRO-FILE: WATCH ADS & EARN (65% / 35%)
-// ==========================================
+// ==================== HAQIQIY REKLAMA VA DAROMAD MODULI ====================
+let userBalance = parseFloat(localStorage.getItem('vibe_balance') || '0.00');
 
-function openEarnAdsModal() {
-    const modal = document.getElementById('earn-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-        if (window.updateBalanceUI) updateBalanceUI();
-    }
-}
-
-function closeEarnAdsModal() {
-    const modal = document.getElementById('earn-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
-}
+// Adsgram Controller (Hozircha test Block ID bilan, keyin o'zingiznikini qo'yasiz)
+const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "int-6842" }) : null;
 
 function watchRewardedAd() {
-    const isUz = (currentLang === 'uz');
-    alert(isUz ? "📺 30 soniyalik video reklama ko'rilmoqda..." : "📺 Просмотр 30-секундной рекламы...");
+    const btn = document.querySelector('#earn-modal button');
+    
+    if (AdController) {
+        btn.innerHTML = "⏳ Reklama yuklanmoqda...";
+        btn.disabled = true;
 
-    setTimeout(() => {
-        userBalance += 0.01; // Foydalanuvchiga 65% ulush ($0.01) yoziladi
-        localStorage.setItem('vibe_balance', userBalance.toFixed(2));
-        if (window.updateBalanceUI) updateBalanceUI();
-
-        alert(isUz 
-            ? "🎉 Tabriklaymiz! Balansingizga +$0.01 sof pul qo'shildi!" 
-            : "🎉 Поздравляем! Вам начислено +$0.01 на баланс!");
-    }, 1000);
+        AdController.show().then((result) => {
+            // FOYDALANUVCHI REKLAMANI TO'LIQ KO'RGANDA
+            giveRandomReward();
+            btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
+            btn.disabled = false;
+        }).catch((error) => {
+            // REKLAMA BEKOR QILINSA YOKI XATOLIK BO'LSA
+            alert("⚠️ Reklamani oxirigacha ko'rmadingiz yoki internetda uzilish bo'ldi!");
+            btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
+            btn.disabled = false;
+        });
+    } else {
+        // Agar Telegram brauzerida Adsgram ochilmasa (Fallback)
+        giveRandomReward();
+    }
 }
 
-function triggerExport(format) {
-    const isUz = (currentLang === 'uz');
-    alert(isUz 
-        ? `🎬 ${format.toUpperCase()} eksport boshlandi! Video HD sifatda tayyorlanadi.` 
-        : `🎬 Экспорт ${format.toUpperCase()} начался! Видео будет сгенерировано в HD качестве.`);
+// RANDOM PUL BERISH ($0.01 dan $0.50 gacha)
+function giveRandomReward() {
+    // Ehtimollik bo'yicha turli xil yutuqlar
+    const chances = [0.01, 0.01, 0.01, 0.02, 0.03, 0.05, 0.10, 0.50];
+    const reward = chances[Math.floor(Math.random() * chances.length)];
+
+    userBalance += reward;
+    localStorage.setItem('vibe_balance', userBalance.toFixed(2));
+
+    // Ekrandagi barcha balanslarni yangilash
+    updateAllBalanceUI();
+
+    alert(`🎉 Tabriklaymiz! Sizga +$${reward.toFixed(2)} taqdim etildi!`);
 }
+
+function updateAllBalanceUI() {
+    const balFormatted = `$${userBalance.toFixed(2)}`;
+    if (document.getElementById('user-balance-header')) document.getElementById('user-balance-header').innerText = balFormatted;
+    if (document.getElementById('earn-modal-balance')) document.getElementById('earn-modal-balance').innerText = balFormatted;
+    if (document.getElementById('wallet-total-balance')) document.getElementById('wallet-total-balance').innerText = balFormatted;
+}
+
+// Sahifa ochilganda balansni yuklash
+document.addEventListener('DOMContentLoaded', () => {
+    updateAllBalanceUI();
+});
