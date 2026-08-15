@@ -4,7 +4,7 @@ let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
 
-// 1. Shriftni o'zgartirish
+// 1. Shriftni jonli o'zgartirish
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => {
@@ -102,19 +102,21 @@ window.exportHighQualityVideo = function() {
     audio.currentTime = 0;
     audio.play();
 
+    const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
+
     function renderLoop() {
         if (audio.paused || audio.ended) {
             recorder.stop();
             return;
         }
 
-        // Fon chizish
+        // 1. Fon chizish
         ctx.fillStyle = "#121212";
         ctx.fillRect(0, 0, 1080, 1920);
 
-        // Header
+        // 2. Spotify Header (Qo'shiqchi va Qo'shiq)
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 38px Montserrat, sans-serif";
+        ctx.font = "bold 40px Montserrat, sans-serif";
         ctx.textAlign = "left";
         ctx.fillText(document.getElementById('preview-track-title').innerText, 100, 180);
 
@@ -122,7 +124,7 @@ window.exportHighQualityVideo = function() {
         ctx.font = "30px Montserrat, sans-serif";
         ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
 
-        // Chiziq
+        // Ajratuvchi chiziq
         ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -130,33 +132,31 @@ window.exportHighQualityVideo = function() {
         ctx.lineTo(980, 270);
         ctx.stroke();
 
-        // Spotify Matnlari va Qizil Chiziqcha |
+        // 3. Spotify Matnlari Almashinishi
         const curTime = audio.currentTime;
         let activeIdx = 0;
         lyricsData.forEach((l, i) => {
             if (l.time !== null && curTime >= l.time) activeIdx = i;
         });
 
-        let startY = 620 - (activeIdx * 120);
+        let startY = 650 - (activeIdx * 120);
         lyricsData.forEach((l, i) => {
             const y = startY + (i * 120);
             if (y > 350 && y < 1700) {
                 if (i === activeIdx) {
-                    // Qizil tayoqcha |
-                    ctx.fillStyle = "#ff2a5f";
-                    ctx.fillRect(80, y - 44, 10, 56);
-
-                    // Faol matn
+                    // FAOL SATR: Katta, Yorqin Oppoq
                     ctx.fillStyle = "#ffffff";
-                    ctx.font = "bold 52px Montserrat, sans-serif";
-                    ctx.fillText(l.text, 110, y);
+                    ctx.font = `bold 56px ${selectedFont}`;
+                    ctx.fillText(l.text, 100, y);
                 } else if (i < activeIdx) {
+                    // O'TIB KETGAN SATRLAR: Joyiga qaytgan, xiralashgan
                     ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-                    ctx.font = "bold 44px Montserrat, sans-serif";
+                    ctx.font = `bold 42px ${selectedFont}`;
                     ctx.fillText(l.text, 100, y);
                 } else {
+                    // KELAYOTGAN SATRLAR: Xira
                     ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-                    ctx.font = "bold 44px Montserrat, sans-serif";
+                    ctx.font = `bold 42px ${selectedFont}`;
                     ctx.fillText(l.text, 100, y);
                 }
             }
