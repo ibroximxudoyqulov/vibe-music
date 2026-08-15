@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - Karaoke & Aesthetic Lyrics Generator</title>
+    <title>VibeStudio - Aesthetic Lyric Video & Music</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,7 +18,7 @@
         };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- GOOGLE FONTS (70+ SHRIFTLAR) -->
+    <!-- GOOGLE FONTS (70+ SHRIFTLAR TO'PLAMI) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Comfortaa:wght@700&family=Cormorant+Garamond:ital,wght@1,700&family=Great+Vibes&family=Lobster&family=Montserrat:wght@800&family=Neucha&family=Pacifico&family=Playfair+Display:ital,wght@1,800&family=Press+Start+2P&family=Ruslan+Display&family=Russo+One&family=Underdog&family=Yeseva+One&display=swap" rel="stylesheet">
@@ -33,17 +33,255 @@
 </head>
 <body class="bg-brand-dark text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- ==================== HEADER (TIL ALMASHTIRISH BILAN) ==================== -->
+    <!-- ==================== HEADER ==================== -->
     <header class="p-4 glass sticky top-0 z-30 flex justify-between items-center border-b border-gray-800/60">
         <div class="flex items-center space-x-2">
             <span class="text-brand-red text-xl"><i class="fa-solid fa-compact-disc vinyl-spin"></i></span>
-            <span id="txt-app-title" class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
+            <span data-i18n="app_name" class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
         <div class="flex items-center space-x-2.5">
-            <!-- 2 TILLI TUGMA (UZ / RU) -->
-            <button onclick="toggleAppLanguage()" id="btn-lang-toggle" class="px-2.5 py-1 bg-brand-input border border-gray-700 rounded-full text-xs font-bold text-gray-300 active:scale-95 transition">
-                🇺🇿 UZ
+            <!-- 1-CLICK TILNI TANLASH TUGMALARI -->
+            <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
+                <button id="btn-lang-uz" onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
+                <button id="btn-lang-ru" onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
+            </div>
+
+            <!-- HAMYON BALANSI TUGMASI -->
+            <button onclick="openWalletModal()" class="px-3 py-1.5 bg-brand-input border border-yellow-500/30 rounded-2xl flex items-center space-x-1.5 active:scale-95 transition">
+                <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
+                <span id="user-balance-header" class="text-xs font-bold text-yellow-400">$0.00</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN STUDIO CONTENT ==================== -->
+    <main class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
+
+        <!-- 1. STEP: O'Z TELEFONIDAN MP3 YUKLASH -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 data-i18n="step1_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
+                <i class="fa-solid fa-file-audio text-brand-cyan"></i>
+                <span>1. Выберите MP3 файл с телефона</span>
+            </h3>
+            
+            <label for="audio-file-input" class="w-full py-4 bg-brand-input hover:bg-gray-800 border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer active:scale-95 transition">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-brand-red mb-1"></i>
+                <span id="audio-file-name" data-i18n="step1_btn" class="text-xs font-semibold text-gray-300">Нажмите чтобы выбрать MP3</span>
+            </label>
+            <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
+            
+            <!-- Audio Pleyer Boshqaruvi -->
+            <div id="audio-player-box" class="hidden items-center justify-between bg-brand-input p-3 rounded-2xl border border-gray-800">
+                <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
+                    <i id="btn-audio-icon" class="fa-solid fa-play"></i>
+                </button>
+                <div class="flex-1 px-3 text-xs">
+                    <p id="audio-current-time" class="font-mono text-gray-300">0:00 / 0:00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. STEP: MUSIXMATCH USLUBIDAGI QO'LDA MATN SINXRONLASH -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 data-i18n="step2_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
+                <i class="fa-solid fa-align-left text-brand-red"></i>
+                <span>2. Текст и ручная синхронизация (Musixmatch)</span>
+            </h3>
+
+            <textarea id="raw-lyrics-input" data-i18n="step2_placeholder" rows="4" placeholder="Вставьте сюда текст песни (по строкам)..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
+            
+            <button onclick="parseLyricsForSync()" data-i18n="step2_prepare" class="w-full py-2.5 bg-brand-input hover:bg-gray-800 border border-gray-700 font-bold text-xs rounded-xl active:scale-95 transition">
+                Подготовить строки к синхронизации
             </button>
 
-            <!-- HAMYON BALANSI -->
-            <button onclick="openWalletModal()" class="px-3 py-1 bg-brand-input border border-yellow-500/30 rounded-full flex items-center space-x-1.5 active:scale-95 transition">
+            <!-- Sinxronlangan satrlar qutisi -->
+            <div id="sync-container" class="hidden space-y-2 max-h-48 overflow-y-auto hide-scrollbar p-1"></div>
+
+            <button id="btn-stamp-line" onclick="timestampCurrentLine()" data-i18n="step2_stamp" class="hidden w-full py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition animate-pulse">
+                ⏱ СОХРАНИТЬ ВРЕМЯ ЭТОЙ СТРОКИ
+            </button>
+        </section>
+
+        <!-- 3. STEP: 70+ SHRIFT VA O'ZIDAN FON YUKLASH -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
+            <h3 data-i18n="step3_title" class="font-bold text-xs text-gray-300 flex items-center space-x-2">
+                <i class="fa-solid fa-palette text-yellow-400"></i>
+                <span>3. Стили, 70+ Шрифтов и Загрузка Фона</span>
+            </h3>
+
+            <!-- 70+ Shriftlar Tanlagichi -->
+            <div>
+                <label data-i18n="select_font" class="text-[10px] text-gray-400 block mb-1">Выберите шрифт текста:</label>
+                <select id="font-family-select" onchange="updatePreviewFont(this.value)" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs focus:outline-none text-white">
+                    <option value="'Playfair Display', serif">Playfair Display (Vintage Serif)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat Bold (Modern)</option>
+                    <option value="'Caveat', cursive">Caveat (Рукописный)</option>
+                    <option value="'Lobster', cursive">Lobster (Retro Cyrillic)</option>
+                    <option value="'Russo One', sans-serif">Russo One (Car / Brabus Style)</option>
+                    <option value="'Cormorant Garamond', serif">Cormorant Garamond (Gothic)</option>
+                    <option value="'Pacifico', cursive">Pacifico (Aesthetic)</option>
+                    <option value="'Press Start 2P', cursive">Press Start 2P (8-Bit Pixel)</option>
+                    <option value="'Yeseva One', cursive">Yeseva One (Эстетика)</option>
+                    <option value="'Ruslan Display', cursive">Ruslan Display (Старинный)</option>
+                    <option value="'Comfortaa', cursive">Comfortaa (Soft Round)</option>
+                </select>
+            </div>
+
+            <!-- O'z Telefonidan Fon Yuklash (100% Haqiqiy, Soxta Fonlarsiz!) -->
+            <div>
+                <label data-i18n="select_bg" class="text-[10px] text-gray-400 block mb-1">Загрузите свой фон с телефона:</label>
+                <label for="custom-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
+                    <span id="custom-bg-name" class="text-xs text-gray-300 truncate">🖼 Выбрать фото/видео фон...</span>
+                    <i class="fa-solid fa-image text-brand-cyan"></i>
+                </label>
+                <input type="file" id="custom-bg-input" accept="image/*,video/*" class="hidden" onchange="handleCustomBgUpload(event)">
+            </div>
+
+            <!-- 4 Super Funksiyalar (Vinil & Ekvalayzer) -->
+            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <button onclick="toggleVinylEffect()" id="btn-vinyl" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
+                    <i class="fa-solid fa-compact-disc"></i>
+                    <span data-i18n="vinyl">Винил диск</span>
+                </button>
+                <button onclick="toggleSpectrumEffect()" id="btn-spectrum" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
+                    <i class="fa-solid fa-chart-simple"></i>
+                    <span data-i18n="spectrum">Бас Эквализатор</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. LIVE 9:16 PREVIEW KARTOCKA -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 data-i18n="preview_title" class="font-bold text-xs text-gray-300">Превью (9:16 TikTok / Instagram):</h3>
+            
+            <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-gradient-to-b from-gray-900 to-black border border-gray-700 flex flex-col justify-between p-6 shadow-2xl">
+                <!-- Vinil Animatsiya -->
+                <div id="preview-vinyl-box" class="hidden justify-center">
+                    <i class="fa-solid fa-compact-disc text-6xl text-white/90 vinyl-spin drop-shadow-2xl"></i>
+                </div>
+
+                <!-- Jonli Sinxron Matn -->
+                <div class="my-auto text-center space-y-3">
+                    <p id="preview-active-line" data-i18n="preview_placeholder" class="text-xl font-bold leading-relaxed drop-shadow-lg transition-all duration-300" style="font-family: 'Playfair Display', serif;">
+                        Здесь появится ваш синхронизированный текст...
+                    </p>
+                </div>
+
+                <!-- Bas Ekvalayzer To'lqinlari -->
+                <div id="preview-spectrum-box" class="hidden justify-center items-end space-x-1 h-6">
+                    <span class="w-1 bg-brand-cyan h-3 animate-pulse"></span>
+                    <span class="w-1 bg-brand-cyan h-5 animate-pulse"></span>
+                    <span class="w-1 bg-brand-cyan h-6 animate-pulse"></span>
+                    <span class="w-1 bg-brand-cyan h-4 animate-pulse"></span>
+                    <span class="w-1 bg-brand-cyan h-2 animate-pulse"></span>
+                </div>
+            </div>
+
+            <!-- Eksport Tugmalari -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="triggerExport('video')" data-i18n="export_video" class="py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-video"></i>
+                    <span>🎬 9:16 Video</span>
+                </button>
+                <button onclick="triggerExport('image')" data-i18n="export_image" class="py-3.5 bg-brand-input border border-gray-700 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-image"></i>
+                    <span>🖼 История (PNG)</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== BOTTOM NAVIGATION ==================== -->
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-6 py-2.5 flex justify-around items-center z-40">
+        <button onclick="location.reload()" class="flex flex-col items-center text-brand-red space-y-1">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            <span data-i18n="nav_studio" class="text-[10px] font-medium">Студия</span>
+        </button>
+        <button onclick="openEarnAdsModal()" class="flex flex-col items-center text-yellow-400 space-y-1">
+            <i class="fa-solid fa-coins text-lg"></i>
+            <span data-i18n="nav_earn" class="text-[10px] font-medium">Смотри & Заработай</span>
+        </button>
+        <button onclick="openWalletModal()" class="flex flex-col items-center text-gray-400 space-y-1">
+            <i class="fa-solid fa-wallet text-lg"></i>
+            <span data-i18n="nav_wallet" class="text-[10px] font-medium">Кошелек</span>
+        </button>
+    </nav>
+
+    <!-- ==================== 1. MODAL: РЕКЛАМА КЎРИБ ПУЛ ИШЛА (65% / 35%) ==================== -->
+    <div id="earn-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
+        <div class="w-full max-w-sm bg-brand-card border border-yellow-500/40 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative">
+            <button onclick="closeEarnAdsModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="w-16 h-16 bg-yellow-500/20 text-yellow-400 rounded-full flex items-center justify-center text-3xl mx-auto border border-yellow-500/30 animate-bounce">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            
+            <h3 data-i18n="earn_title" class="text-lg font-bold text-white">Смотри рекламу & Зарабатывай!</h3>
+            <p data-i18n="earn_desc" class="text-xs text-gray-300">Вы получаете 65% прибыли ($0.01 за видео) прямо на баланс кошелька!</p>
+            
+            <div class="p-3 bg-brand-input rounded-2xl border border-gray-800 space-y-1 text-xs">
+                <p data-i18n="wallet_balance" class="text-gray-400">Ваш баланс:</p>
+                <p id="earn-modal-balance" class="text-xl font-bold text-yellow-400">$0.00</p>
+            </div>
+
+            <button onclick="watchRewardedAd()" data-i18n="earn_btn" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold text-xs rounded-2xl active:scale-95 transition shadow-lg shadow-yellow-500/20">
+                ▶️ ПОСМОТРЕТЬ РЕКЛАМУ (+ $0.01)
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 2. MODAL: КОШЕЛЕК & ВЫВОД НА КАРТЫ СНГ ==================== -->
+    <div id="wallet-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
+        <div class="w-full max-w-sm bg-brand-card border border-gray-800 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeWalletModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 data-i18n="wallet_title" class="text-base font-bold text-white flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-wallet text-brand-cyan"></i>
+                <span>Кошелек и Вывод средств на карты СНГ</span>
+            </h3>
+
+            <div class="p-4 bg-brand-input rounded-2xl border border-gray-800 text-center space-y-1">
+                <p data-i18n="wallet_balance" class="text-xs text-gray-400">Доступно к выводу:</p>
+                <p id="wallet-total-balance" class="text-2xl font-bold text-brand-cyan">$0.00</p>
+            </div>
+
+            <div class="space-y-3 text-left text-xs">
+                <div>
+                    <label data-i18n="payout_system_label" class="text-gray-400 text-[10px] block mb-1">Выберите платежную систему / Банк:</label>
+                    <select id="payout-system" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                        <option value="eskhata">🇹🇯 Bank Eskhata / Korti Milli (Таджикистан)</option>
+                        <option value="alif">🇹🇯 Alif Mobi / Dushanbe City (Таджикистан)</option>
+                        <option value="click">🇺🇿 Click / Payme / Uzcard (Узбекистан)</option>
+                        <option value="sber">🇷🇺 Сбербанк / Тинькофф / СБП (Россия)</option>
+                        <option value="kaspi">🇰🇿 Kaspi Bank (Казахстан)</option>
+                        <option value="usdt">🌐 USDT TRC20 (Криптовалюта)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label data-i18n="payout_account_label" class="text-gray-400 text-[10px] block mb-1">Номер карты / Телефона / Кошелька:</label>
+                    <input type="text" id="payout-account" placeholder="Номер карты или телефона..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                </div>
+
+                <div>
+                    <label data-i18n="payout_amount_label" class="text-gray-400 text-[10px] block mb-1">Сумма для вывода ($):</label>
+                    <input type="number" id="payout-amount" placeholder="Минимум $2.00" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                </div>
+            </div>
+
+            <button onclick="requestPayout()" data-i18n="withdraw_btn" class="w-full py-3.5 bg-brand-cyan text-black font-bold text-xs rounded-xl active:scale-95 transition">
+                💸 Вывести деньги на карту
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MICRO-SCRIPTS BOG'LANISHI ==================== -->
+    <script src="js/i18n.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/styles.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/ads.js"></script>
+</body>
+</html>
