@@ -1,15 +1,15 @@
-// ==================== ADSGRAM REWARDED ADS & WALLET ENGINE ====================
+// ==================== STRICT ADSGRAM REWARDED ADS ENGINE ====================
 let userBalance = parseFloat(localStorage.getItem('vibe_balance') || '0.00');
 
-// Adsgram rasmiy Rewarded Video Blok IDsi (yoki o'zingizning Adsgram ID'ingiz)
-const ADSGRAM_BLOCK_ID = "594"; // Rasmiy test bloki
+// Siz partner.adsgram.ai dan olgan Block ID'ingizni shu yerga yozasiz:
+const ADSGRAM_BLOCK_ID = "YOUR_BLOCK_ID"; 
 
 let AdController = null;
 if (window.Adsgram) {
     try {
         AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
     } catch (e) {
-        console.log("Adsgram init:", e);
+        console.log("Adsgram Init Error:", e);
     }
 }
 
@@ -22,21 +22,19 @@ window.watchRewardedAd = function() {
         btn.disabled = true;
 
         AdController.show().then((result) => {
-            // REKLAMA TO'LIQ KO'RILDI -> RANDOM PUL BERISH
+            // FAQATGINA REKLAMANI TO'LIQ KO'RGANDAGINA PUL YOZILADI
             giveRandomReward();
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         }).catch((error) => {
-            // Reklama topilmasa yoki yopilsa
-            console.log("Adsgram error:", error);
-            // Foydalanuvchini xafa qilmaslik uchun test mukofoti
-            giveRandomReward();
+            // AGAR REKLAMA KO'RILMASA YOKI YOPILSA -> UMUMAN PUL BERILMAYDI!
+            console.error("Adsgram Error:", error);
+            alert("⚠️ Reklama ko'rilmadi yoki internetda xatolik bo'ldi. Hisobingizga pul qo'shilmadi!");
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         });
     } else {
-        // Adsgram yuklanmagan bo'lsa
-        giveRandomReward();
+        alert("⚠️ Reklama tarmog'i hali ulanmagan. Iltimos, keyinroq urinib ko'ring!");
     }
 };
 
@@ -50,7 +48,7 @@ function giveRandomReward() {
 
     updateAllBalanceUI();
 
-    alert(`🎉 Tabriklaymiz! Sizga +$${reward.toFixed(2)} taqdim etildi!\nJoriy balansingiz: $${userBalance.toFixed(2)}`);
+    alert(`🎉 Tabriklaymiz! Siz reklamani to'liq ko'rdingiz va hisobingizga +$${reward.toFixed(2)} qo'shildi!`);
 }
 
 window.updateAllBalanceUI = function() {
@@ -60,7 +58,6 @@ window.updateAllBalanceUI = function() {
     if (document.getElementById('wallet-total-balance')) document.getElementById('wallet-total-balance').innerText = balFormatted;
 };
 
-// Sahifa yuklanganda balansni ko'rsatish
 document.addEventListener('DOMContentLoaded', () => {
     updateAllBalanceUI();
 });
