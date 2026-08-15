@@ -1,90 +1,115 @@
-// ==========================================
-// MICRO-FILE: MUSIXMATCH MANUAL LYRIC SYNC
-// ==========================================
+// ==================== SPOTIFY / MUSIXMATCH SYNC ENGINE ====================
+let lyricsData = []; // [{time: 0, text: "Satr"}]
+let currentActiveIndex = -1;
 
-window.parsedLines = [];
-window.activeLineIndex = 0;
-
-function parseLyricsForSync() {
-    const rawText = document.getElementById('raw-lyrics-input').value.trim();
-    if (!rawText) {
-        return alert(currentLang === 'uz' ? "Iltimos, qo'shiq matnini kiriting!" : "Пожалуйста, введите текст песни!");
+// 1. Matnni sinxronlashga tayyorlash
+window.parseLyricsForSync = function() {
+    const raw = document.getElementById('raw-lyrics-input').value.trim();
+    if (!raw) {
+        alert("⚠️ Iltimos, oldin qo'shiq matnini kiriting!");
+        return;
     }
 
-    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    window.parsedLines = lines.map(l => ({ text: l, time: null }));
-    window.activeLineIndex = 0;
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    lyricsData = lines.map(line => ({ time: null, text: line }));
 
     const container = document.getElementById('sync-container');
-    if (!container) return;
     container.innerHTML = '';
     container.classList.remove('hidden');
+    document.getElementById('btn-stamp-line').classList.remove('hidden');
 
-    window.parsedLines.forEach((item, index) => {
-        container.innerHTML += `
-            <div id="sync-line-${index}" class="p-2.5 bg-brand-input rounded-xl border border-gray-800 text-xs flex justify-between items-center transition">
-                <span class="truncate pr-2 text-gray-300">${escapeHtml(item.text)}</span>
-                <span id="sync-time-${index}" class="font-mono text-[10px] text-gray-500">--:--</span>
-            </div>
+    lyricsData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.id = `sync-line-${index}`;
+        div.className = "p-2.5 bg-brand-input rounded-xl border border-gray-800 flex justify-between items-center text-xs";
+        div.innerHTML = `
+            <span class="text-gray-300 flex-1">${index + 1}. ${item.text}</span>
+            <span id="time-badge-${index}" class="text-[10px] font-mono px-2 py-0.5 bg-gray-800 text-gray-400 rounded-lg">--:--</span>
         `;
+        container.appendChild(div);
     });
 
-    const stampBtn = document.getElementById('btn-stamp-line');
-    if (stampBtn) stampBtn.classList.remove('hidden');
+    currentActiveIndex = 0;
+    highlightNextSyncLine();
+    alert("✅ Matn tayyor! Endi musiqani qo'yib, har bir satr vaqtida 'Vaqtni Saqlash' tugmasini bosing.");
+};
 
-    alert(currentLang === 'uz' ? "▶️ Musiqani yoqing va har bir satr aytilganda 'SAQLASH' tugmasini bosing!" : "▶️ Включите музыку и нажимайте 'СОХРАНИТЬ' на каждой строке!");
+function highlightNextSyncLine() {
+    document.querySelectorAll('#sync-container > div').forEach(d => d.classList.remove('border-brand-red', 'bg-brand-red/10'));
+    const activeDiv = document.getElementById(`sync-line-${currentActiveIndex}`);
+    if (activeDiv) {
+        activeDiv.classList.add('border-brand-red', 'bg-brand-red/10');
+        activeDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
-function timestampCurrentLine() {
-    if (window.activeLineIndex >= window.parsedLines.length) {
-        return alert(currentLang === 'uz' ? "Barcha satrlar sinxronlandi!" : "Все строки синхронизированы!");
+// 2. Musixmatch uslubida vaqtni saqlash
+window.timestampCurrentLine = function() {
+    const audio = window.vibeAudioElement;
+    if (!audio) {
+        alert("⚠️ Oldin 1-qadamda MP3 fayl yuklang!");
+        return;
     }
 
-    const curTime = window.uploadedAudio.currentTime;
-    window.parsedLines[window.activeLineIndex].time = curTime;
-
-    const timeSpan = document.getElementById(`sync-time-${window.activeLineIndex}`);
-    if (timeSpan) {
-        timeSpan.innerText = formatTime(curTime);
-        timeSpan.className = 'font-mono text-[10px] text-brand-cyan font-bold';
+    if (currentActiveIndex >= lyricsData.length) {
+        alert("🎉 Barcha satrlar sinxronlandi!");
+        return;
     }
 
-    const lineBox = document.getElementById(`sync-line-${window.activeLineIndex}`);
-    if (lineBox) {
-        lineBox.classList.remove('border-gray-800');
-        lineBox.classList.add('border-brand-cyan');
+    const currentTime = audio.currentTime;
+    lyricsData[currentActiveIndex].time = currentTime;
+
+    const min = Math.floor(currentTime / 60);
+    const sec = Math.floor(currentTime % 60);
+    const formatted = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+    const badge = document.getElementById(`time-badge-${currentActiveIndex}`);
+    if (badge) {
+        badge.innerText = formatted;
+        badge.className = "text-[10px] font-mono px-2 py-0.5 bg-brand-red text-white font-bold rounded-lg";
     }
 
-    window.activeLineIndex++;
-}
-
-function checkSyncedLyricHighlight() {
-    const curTime = window.uploadedAudio.currentTime;
-    const durTime = window.uploadedAudio.duration || 0;
-    
-    const timerElem = document.getElementById('audio-current-time');
-    if (timerElem) {
-        timerElem.innerText = `${formatTime(curTime)} / ${formatTime(durTime)}`;
+    currentActiveIndex++;
+    if (currentActiveIndex < lyricsData.length) {
+        highlightNextSyncLine();
+    } else {
+        document.getElementById('btn-stamp-line').classList.add('hidden');
+        alert("🎬 Ajoyib! Endi 9:16 ekranni bosib, jonli Spotify karaokeni ko'rishingiz mumkin!");
     }
+};
 
-    for (let i = window.parsedLines.length - 1; i >= 0; i--) {
-        if (window.parsedLines[i].time !== null && curTime >= window.parsedLines[i].time) {
-            const activePreview = document.getElementById('preview-active-line');
-            if (activePreview) {
-                activePreview.innerText = window.parsedLines[i].text;
-            }
-            break;
+// 3. Jonli 9:16 ekranda Spotify uslubidagi animatsiya
+window.updateLiveKaraokeDisplay = function(currentTime) {
+    if (lyricsData.length === 0) return;
+
+    // Hozirgi vaqtga mos satrni topish
+    let activeIdx = -1;
+    for (let i = 0; i < lyricsData.length; i++) {
+        if (lyricsData[i].time !== null && currentTime >= lyricsData[i].time) {
+            activeIdx = i;
         }
     }
-}
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
+    if (activeIdx !== -1) {
+        const previewText = document.getElementById('preview-active-line');
+        if (previewText) {
+            // Spotify uslubi: O'tgan qatorlar xira, hozirgi qator yorqin va katta
+            let html = '';
+            
+            // Oldingi satr (Xira)
+            if (activeIdx > 0 && lyricsData[activeIdx - 1]) {
+                html += `<p class="text-xs text-white/30 transition-all duration-300">${lyricsData[activeIdx - 1].text}</p>`;
+            }
+            
+            // Faol satr (Yorqin, Katta, Oq)
+            html += `<p class="text-xl font-extrabold text-white scale-105 transition-all duration-300 drop-shadow-md my-2">${lyricsData[activeIdx].text}</p>`;
+            
+            // Keyingi satr (Xira)
+            if (activeIdx + 1 < lyricsData.length && lyricsData[activeIdx + 1]) {
+                html += `<p class="text-xs text-white/40 transition-all duration-300">${lyricsData[activeIdx + 1].text}</p>`;
+            }
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.uploadedAudio) {
-        window.uploadedAudio.addEventListener('timeupdate', checkSyncedLyricHighlight);
+            previewText.innerHTML = html;
+        }
     }
-});
+};
