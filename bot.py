@@ -306,4 +306,5 @@ def admin_decision_callback(call):
 
 print("Bot 24/7 ishga tushdi...")
 if __name__ == '__main__':
-    bot.infinity_polling()
+    bot.delete_webhook(drop_pending_updates=True)
+    bot.infinity_polling(skip_pending=True)
