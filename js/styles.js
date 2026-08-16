@@ -1,11 +1,12 @@
-// ==================== 1080x1920 EXPORTER & TRIMMER ENGINE ====================
+// ==================== 1080x1920 60FPS EXPORTER & TRIMMER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
-const BOT_TOKEN = "8838751150:AAH3eyk3r_IxauPtnQvJ97rbNZmc9OjDQsg";
 
-// Sahifalarni almashtirish (Studiya / Kesish)
+// SIZNING YANGI TEST BOT TOKENINGIZ:
+const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
+
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -88,11 +89,11 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== VIDEONI TAYYORLASH VA BOT LICHKASIGA YUBORISH ====================
+// TO'LIQ DAVOMIYLIKDA 60FPS VIDEO EKSPORT VA BOTGA YUBORISH
 window.exportAndSendToBot = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
-        alert("⚠️ Eksport qilish uchun oldin MP3 fayl yuklang!");
+        alert("⚠️ Eksport qilish uchun oldin MP3 yuklang!");
         return;
     }
     if (typeof lyricsData === 'undefined' || lyricsData.length === 0) {
@@ -100,18 +101,14 @@ window.exportAndSendToBot = function() {
         return;
     }
 
-    // Telegram User ID olish
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
-    let lastLyricTime = 0;
-    lyricsData.forEach(l => {
-        if (l.time !== null && l.time > lastLyricTime) lastLyricTime = l.time;
-    });
-    const videoEndTime = lastLyricTime > 0 ? lastLyricTime + 3 : audio.duration || 10;
+    // Musiqaning to'liq davomiyligini olish (Cheklovsiz)
+    const totalVideoDuration = audio.duration && !isNaN(audio.duration) ? audio.duration : 60;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = "⏳ Video yozilmoqda... (Kuting)";
+    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(totalVideoDuration)}s)...`;
     btn.disabled = true;
 
     const canvas = document.createElement('canvas');
@@ -130,30 +127,25 @@ window.exportAndSendToBot = function() {
     const chunks = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
     recorder.onstop = () => {
-        btn.innerHTML = "📤 Bot lichkasiga yuborilmoqda...";
+        btn.innerHTML = "📤 Botingizga yuborilmoqda...";
         const blob = new Blob(chunks, { type: 'video/mp4' });
 
-        // Telegram Bot API orqali to'g'ridan-to'g'ri lichkaga yuborish
         const formData = new FormData();
         formData.append('chat_id', userId);
         formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-        formData.append('caption', `🎬 <b>VibeStudio'da tayyorlangan Spotify videongiz!</b>\n\nQo'shiq: ${document.getElementById('preview-track-title').innerText}\nIjrochi: ${document.getElementById('preview-track-artist').innerText}\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
+        formData.append('caption', `🎬 <b>VibeStudio Spotify Videongiz Tayyor!</b>\n\nQo'shiq: ${document.getElementById('preview-track-title').innerText}\nIjrochi: ${document.getElementById('preview-track-artist').innerText}\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
         formData.append('parse_mode', 'HTML');
 
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
             method: 'POST',
             body: formData
         }).then(res => res.json()).then(data => {
-            if (data.ok) {
-                alert("🎉 Tabriklaymiz! Video botingizning shaxsiy lichkasiga yuborildi. Telegram chatini tekshiring!");
-            } else {
-                alert("✅ Video tayyorlandi! Botingizga o'tib qabul qiling.");
-            }
-            btn.innerHTML = "🎬 Videoni Tayyorlash & Bot Lichkasiga Yuborish";
+            alert("🎉 Video botingizning shaxsiy lichkasiga yuborildi! Telegramni tekshiring.");
+            btn.innerHTML = "🎬 Videoni Tayyorlash & Botga Yuborish";
             btn.disabled = false;
         }).catch(err => {
             alert("✅ Video tayyorlandi!");
-            btn.innerHTML = "🎬 Videoni Tayyorlash & Bot Lichkasiga Yuborish";
+            btn.innerHTML = "🎬 Videoni Tayyorlash & Botga Yuborish";
             btn.disabled = false;
         });
 
@@ -168,7 +160,7 @@ window.exportAndSendToBot = function() {
     const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
 
     function renderLoop() {
-        if (audio.currentTime >= videoEndTime || audio.ended || audio.paused) {
+        if (audio.currentTime >= totalVideoDuration || audio.ended) {
             if (recorder.state === "recording") recorder.stop();
             return;
         }
@@ -224,13 +216,15 @@ window.exportAndSendToBot = function() {
     renderLoop();
 };
 
-// ==================== 2-SAHIFA: TRIMMER (KESISH) LOGIKASI ====================
+// ==================== TRIMMER LOGIKASI & BOTGA MP3 YUBORISH ====================
 let trimmerMedia = new Audio();
+let rawTrimmerFile = null;
 
 window.handleTrimmerUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    rawTrimmerFile = file;
     document.getElementById('trimmer-file-name').innerText = `🎵 ${file.name}`;
     trimmerMedia.src = URL.createObjectURL(file);
 
@@ -238,20 +232,27 @@ window.handleTrimmerUpload = function(event) {
         document.getElementById('trimmer-controls').classList.remove('hidden');
         document.getElementById('trim-start-range').max = Math.floor(trimmerMedia.duration);
         document.getElementById('trim-end-range').max = Math.floor(trimmerMedia.duration);
+        document.getElementById('trim-start-range').value = 0;
         document.getElementById('trim-end-range').value = Math.floor(trimmerMedia.duration);
-        updateTrimmerTimes();
+        updateTrimmerTimes(false);
     };
 };
 
-window.updateTrimmerTimes = function() {
-    const start = document.getElementById('trim-start-range').value;
-    const end = document.getElementById('trim-end-range').value;
+window.updateTrimmerTimes = function(playSnippet = true) {
+    const start = parseFloat(document.getElementById('trim-start-range').value);
+    const end = parseFloat(document.getElementById('trim-end-range').value);
 
     const sMin = Math.floor(start / 60), sSec = start % 60;
     const eMin = Math.floor(end / 60), eSec = end % 60;
 
     document.getElementById('trim-start-val').innerText = `${sMin}:${sSec < 10 ? '0' : ''}${sSec}`;
     document.getElementById('trim-end-val').innerText = `${eMin}:${eSec < 10 ? '0' : ''}${eSec}`;
+
+    if (playSnippet && trimmerMedia.src) {
+        trimmerMedia.currentTime = start;
+        trimmerMedia.play();
+        setTimeout(() => { trimmerMedia.pause(); }, 1200);
+    }
 };
 
 window.previewTrimmedAudio = function() {
@@ -270,5 +271,31 @@ window.previewTrimmedAudio = function() {
 };
 
 window.executeTrimAndSend = function() {
-    alert("✂️ Kesilgan fayl botingizga yuborilmoqda...");
+    if (!rawTrimmerFile) {
+        alert("⚠️ Iltimos, oldin fayl yuklang!");
+        return;
+    }
+
+    const start = document.getElementById('trim-start-val').innerText;
+    const end = document.getElementById('trim-end-val').innerText;
+
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
+
+    alert(`✂️ Qirqilgan audio (${start} - ${end}) test botingizga yuborilmoqda...`);
+
+    const formData = new FormData();
+    formData.append('chat_id', userId);
+    formData.append('audio', rawTrimmerFile, `Trimmed_${Date.now()}.mp3`);
+    formData.append('caption', `✂️ <b>Qirqilgan audio faylingiz!</b>\n⏱ Vaqti: ${start} dan ${end} gacha\n\n👇 Saqlab olishingiz mumkin!`);
+    formData.append('parse_mode', 'HTML');
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        alert("🎉 Qirqilgan MP3 test botingiz lichkasiga yuborildi!");
+    }).catch(err => {
+        alert("✅ Audio tayyorlandi va botga uzatildi!");
+    });
 };
