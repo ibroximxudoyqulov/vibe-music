@@ -1,40 +1,30 @@
-// ==================== STRICT ADSGRAM REWARDED ADS ENGINE ====================
+// ==================== ADSGRAM REWARDED ADS ENGINE (BLOCK: 43028) ====================
 let userBalance = parseFloat(localStorage.getItem('vibe_balance') || '0.00');
+const ADSGRAM_BLOCK_ID = "43028"; // Sizning rasmiy Adsgram Blok ID raqamingiz
 
-// Siz partner.adsgram.ai dan olgan Block ID'ingizni shu yerga yozasiz:
-const ADSGRAM_BLOCK_ID = "43028"; 
-
-let AdController = null;
-if (window.Adsgram) {
-    try {
-        AdController = window.Adsgram.init({ blockId: 43028 });
-    } catch (e) {
-        console.log("Adsgram Init Error:", e);
-    }
-}
-
-// Reklama ko'rish tugmasi
 window.watchRewardedAd = function() {
     const btn = document.querySelector('#earn-modal button');
     
-    if (AdController) {
+    // Adsgramni har bosilganda tekshirib ishga tushirish
+    if (window.Adsgram) {
         btn.innerHTML = "⏳ Reklama yuklanmoqda...";
         btn.disabled = true;
 
+        const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+
         AdController.show().then((result) => {
-            // FAQATGINA REKLAMANI TO'LIQ KO'RGANDAGINA PUL YOZILADI
+            // REKLAMA 100% KO'RILDI -> PUL BERISH
             giveRandomReward();
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         }).catch((error) => {
-            // AGAR REKLAMA KO'RILMASA YOKI YOPILSA -> UMUMAN PUL BERILMAYDI!
-            console.error("Adsgram Error:", error);
-            alert("⚠️ Reklama ko'rilmadi yoki internetda xatolik bo'ldi. Hisobingizga pul qo'shilmadi!");
+            console.error("Adsgram xatosi:", error);
+            alert("⚠️ Reklama ko'rilmadi yoki yopildi. Hisobingizga pul qo'shilmadi!");
             btn.innerHTML = "▶️ ПОСМОТРЕТЬ РЕКЛАМУ";
             btn.disabled = false;
         });
     } else {
-        alert("⚠️ Reklama tarmog'i hali ulanmagan. Iltimos, keyinroq urinib ko'ring!");
+        alert("⚠️ Adsgram tarmog'i yuklanmoqda, iltimos 3 soniyadan keyin qayta bosing!");
     }
 };
 
