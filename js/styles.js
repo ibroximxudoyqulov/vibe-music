@@ -89,7 +89,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 60FPS VIDEONI TAYYORLASH VA LICHKAGA YUBORISH ====================
+// ==================== OXIRGI MATN TUGAGAN JOYDA KESUVCHI 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -104,7 +104,14 @@ window.exportAndSendToBot = function() {
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
-    const totalVideoDuration = audio.duration && !isNaN(audio.duration) ? audio.duration : 30;
+    // OXIRGI MATN VAQTINI TOPISH VA SHU JOYDA VIDEONI KESISH!
+    let lastLyricTime = 0;
+    lyricsData.forEach(l => {
+        if (l.time !== null && l.time > lastLyricTime) lastLyricTime = l.time;
+    });
+
+    // Agar matn 20-soniyada tugasa, video 22.5 soniya bo'ladi (157s bo'lib ketmaydi!)
+    const totalVideoDuration = lastLyricTime > 0 ? (lastLyricTime + 2.5) : (audio.duration || 30);
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(totalVideoDuration)}s)...`;
@@ -144,7 +151,6 @@ window.exportAndSendToBot = function() {
             if (data.ok) {
                 alert("🎉 Video botingizning shaxsiy lichkasiga yuborildi! Telegramni oching.");
             } else {
-                // Agar bot lichkasiga bormasa, to'g'ridan-to'g'ri telefoningizga yuklab beradi
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -174,6 +180,7 @@ window.exportAndSendToBot = function() {
     const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
 
     function renderLoop() {
+        // OXIRGI MATN TUGASHI BILAN VIDEONI YOPISH
         if (audio.currentTime >= totalVideoDuration || audio.ended) {
             if (recorder.state === "recording") recorder.stop();
             return;
@@ -230,7 +237,7 @@ window.exportAndSendToBot = function() {
     renderLoop();
 };
 
-// ==================== INSHOT AUDIO TRIMMER & LICHKAGA MP3 YUBORISH ====================
+// ==================== TRIMMER BOSHQARUVI (KO'K VA QIZIL MUSTAQIL ISHLAYDI) ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -272,6 +279,7 @@ window.onTrimHandleChange = function(type) {
     let start = parseFloat(startRange.value);
     let end = parseFloat(endRange.value);
 
+    // Ko'k qizildan o'tib ketmasligi uchun
     if (start >= end - 0.5) {
         if (type === 'start') startRange.value = end - 0.5;
         else endRange.value = start + 0.5;
@@ -279,6 +287,7 @@ window.onTrimHandleChange = function(type) {
 
     updateTrimUI();
 
+    // Barmoq qayerga surilsa o'sha joyini eshittirish
     if (trimmerMedia.src) {
         trimmerMedia.currentTime = (type === 'start') ? parseFloat(startRange.value) : parseFloat(endRange.value);
         trimmerMedia.play();
@@ -289,17 +298,9 @@ window.onTrimHandleChange = function(type) {
 function updateTrimUI() {
     const start = parseFloat(document.getElementById('trim-start-range').value);
     const end = parseFloat(document.getElementById('trim-end-range').value);
-    const total = parseFloat(document.getElementById('trim-start-range').max) || 100;
 
     document.getElementById('trim-start-val').innerText = formatAudioTime(start);
     document.getElementById('trim-end-val').innerText = formatAudioTime(end);
-
-    const highlightBox = document.getElementById('trimmer-highlight-box');
-    const leftPercent = (start / total) * 100;
-    const rightPercent = 100 - ((end / total) * 100);
-
-    highlightBox.style.left = `${leftPercent}%`;
-    highlightBox.style.right = `${rightPercent}%`;
 }
 
 function formatAudioTime(seconds) {
@@ -413,18 +414,18 @@ function bufferToWave(abuffer, len) {
     function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
     function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
 
-    setUint32(0x46464952); // "RIFF"
+    setUint32(0x46464952);
     setUint32(length - 8);
-    setUint32(0x45564157); // "WAVE"
-    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(0x45564157);
+    setUint32(0x20746d66);
     setUint32(16);
-    setUint16(1); // PCM
+    setUint16(1);
     setUint16(numOfChan);
     setUint32(abuffer.sampleRate);
     setUint32(abuffer.sampleRate * 2 * numOfChan);
     setUint16(numOfChan * 2);
     setUint16(16);
-    setUint32(0x61746164); // "data" chunk
+    setUint32(0x61746164);
     setUint32(length - pos - 4);
 
     for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
@@ -439,4 +440,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-        }
+    }
