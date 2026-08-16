@@ -10,7 +10,10 @@ window.watchRewardedAd = function() {
         btn.innerHTML = "⏳ Reklama yuklanmoqda...";
         btn.disabled = true;
 
-        const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+        const AdController = window.Adsgram.init({ 
+    blockId: ADSGRAM_BLOCK_ID,
+    debug: true
+});
 
         AdController.show().then((result) => {
             // REKLAMA 100% KO'RILDI -> PUL BERISH
