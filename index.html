@@ -235,7 +235,7 @@
                 </div>
 
                 <!-- INSHOT YAGONA TO'LQINLI (WAVEFORM) VISUAL TREK -->
-                <div class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2">
+                <div id="inshot-waveform-container" class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2 touch-none">
                     
                     <!-- To'lqinlar foni -->
                     <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3 pointer-events-none">
@@ -251,6 +251,24 @@
                         <span class="w-1.5 bg-purple-500 h-12 rounded-full"></span>
                         <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
                     </div>
+
+                    <!-- InShot Faol Quti (Ikkala Tutqichi Bilan) -->
+                    <div id="inshot-active-track" class="absolute inset-y-0 border-y-2 border-brand-cyan bg-brand-cyan/20 flex justify-between items-center" style="left: 0%; right: 0%;">
+                        <!-- KO'K TUTQICH [◀] (Boshlanishi) -->
+                        <div id="handle-start" class="w-7 h-full bg-brand-cyan flex items-center justify-center text-xs text-black font-black shadow-lg cursor-pointer active:scale-110 transition-transform">
+                            ◀
+                        </div>
+                        <!-- QIZIL TUTQICH [▶] (Tugashi) -->
+                        <div id="handle-end" class="w-7 h-full bg-brand-red flex items-center justify-center text-xs text-white font-black shadow-lg cursor-pointer active:scale-110 transition-transform">
+                            ▶
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between text-[10px] text-gray-400 px-1 font-mono">
+                    <span class="text-brand-cyan font-bold">👈 Ko'kni suring (Boshlanish)</span>
+                    <span class="text-brand-red font-bold">Qizilni suring (Tugash) 👉</span>
+                </div>
 
                     <!-- InShot Tanlangan Qismi (Highlighted Box) -->
                     <div id="inshot-active-track" class="absolute inset-y-0 border-y-2 border-brand-cyan bg-brand-cyan/20 flex justify-between items-center pointer-events-none" style="left: 0%; right: 0%;">
