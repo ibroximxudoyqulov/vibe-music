@@ -1,10 +1,8 @@
-// ==================== 1080x1920 60FPS AUDIO-VIDEO MERGED EXPORTER & INSHOT TRIMMER ====================
+// ==================== 1080x1920 HD VIDEO (WEBAUDIO BUFFER SOUND) & INSHOT TRIMMER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
-
-// TEST BOT TOKENINGIZ:
 const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
 
 window.switchTab = function(tab) {
@@ -89,173 +87,194 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 100% OVOZLI & AVTOMATIK SINXRON 60FPS VIDEO EKSPORT ====================
-window.exportAndSendToBot = function() {
+// ==================== 100% OVOZLI VA ANIQ VAQTLI VIDEO EKSPORT ====================
+window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
         alert("⚠️ Eksport qilish uchun oldin MP3 yuklang!");
         return;
     }
-    if (typeof lyricsData === 'undefined' || lyricsData.length === 0) {
+
+    const lyrics = window.lyricsData || [];
+    if (lyrics.length === 0) {
         alert("⚠️ Qo'shiq matnini kiritib, sinxronlang!");
         return;
     }
 
+    // 1. ANIQ OXIRGI MATN VAQTINI TOPISH
+    const stampedTimes = lyrics.map(l => l.time).filter(t => t !== null && t > 0);
+    if (stampedTimes.length === 0) {
+        alert("⚠️ Kamida bitta satr vaqtini 'Vaqtni Saqlash' orqali belgilang!");
+        return;
+    }
+
+    const maxLyricTime = Math.max(...stampedTimes);
+    // Aniq davomiylik: oxirgi satr vaqti + 2.5 soniya (ortiqcha yozilmaydi!)
+    const exactVideoDuration = maxLyricTime + 2.5;
+
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
-    // OXIRGI MATN VAQTINI TOPISH
-    let lastLyricTime = 0;
-    lyricsData.forEach(l => {
-        if (l.time !== null && l.time > lastLyricTime) lastLyricTime = l.time;
-    });
-    const totalVideoDuration = lastLyricTime > 0 ? (lastLyricTime + 2.5) : (audio.duration || 30);
-
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ Ovozli 60FPS Video yozilmoqda (${Math.ceil(totalVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ Ovozli video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
-    // 1. Canvas Ekran
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1920;
-    const ctx = canvas.getContext('2d');
-    const canvasStream = canvas.captureStream(60);
-
-    // 2. Musiqaning haqiqiy ovozini videoga ulash (AudioContext Stream)
-    let combinedStream;
     try {
+        // 2. Musiqa faylini WebAudio orqali dekod qilish (Ovoz 100% chiqishi uchun)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (!window.vibeAudioSource) {
-            window.vibeAudioSource = audioCtx.createMediaElementSource(audio);
-        }
-        const audioDest = audioCtx.createMediaStreamDestination();
-        window.vibeAudioSource.connect(audioDest);
-        window.vibeAudioSource.connect(audioCtx.destination);
+        const response = await fetch(audio.src);
+        const arrayBuffer = await response.arrayBuffer();
+        const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-        combinedStream = new MediaStream([
+        // Raqamli Audio Source va Stream
+        const bufferSource = audioCtx.createBufferSource();
+        bufferSource.buffer = decodedBuffer;
+
+        const audioDest = audioCtx.createMediaStreamDestination();
+        bufferSource.connect(audioDest);
+        bufferSource.connect(audioCtx.destination); // Ovoz eshitilib turadi
+
+        // 3. Canvas Stream
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1920;
+        const ctx = canvas.getContext('2d');
+        const canvasStream = canvas.captureStream(60);
+
+        // 4. Video va Raqamli Ovozni Birlashtirish
+        const combinedStream = new MediaStream([
             ...canvasStream.getVideoTracks(),
             ...audioDest.stream.getAudioTracks()
         ]);
-    } catch (e) {
-        combinedStream = canvasStream;
-    }
 
-    let recorder;
-    try {
-        recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
-    } catch (e) {
-        recorder = new MediaRecorder(combinedStream);
-    }
-
-    const chunks = [];
-    recorder.ondataavailable = (e) => chunks.push(e.data);
-    recorder.onstop = async () => {
-        btn.innerHTML = "📤 Ovozli video botingiz lichkasiga yuborilmoqda...";
-        const blob = new Blob(chunks, { type: 'video/mp4' });
-
-        const formData = new FormData();
-        formData.append('chat_id', userId);
-        formData.append('video', blob, `Spotify_Lyric_${Date.now()}.mp4`);
-        formData.append('caption', `🎬 <b>VibeStudio Ovozli Spotify Videongiz Tayyor!</b>\n\nQo'shiq: ${document.getElementById('preview-track-title').innerText}\nIjrochi: ${document.getElementById('preview-track-artist').innerText}\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
-        formData.append('parse_mode', 'HTML');
-
+        let recorder;
         try {
-            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if (data.ok) {
-                alert("🎉 Ovozli video botingizning shaxsiy lichkasiga yuborildi! Telegramni oching.");
-            } else {
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
+        } catch (e) {
+            recorder = new MediaRecorder(combinedStream);
+        }
+
+        const chunks = [];
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        recorder.onstop = async () => {
+            btn.innerHTML = "📤 Ovozli video botingizga yuborilmoqda...";
+            const blob = new Blob(chunks, { type: 'video/mp4' });
+
+            const formData = new FormData();
+            formData.append('chat_id', userId);
+            formData.append('video', blob, `Spotify_Lyric_${Date.now()}.mp4`);
+            formData.append('caption', `🎬 <b>VibeStudio Ovozli Spotify Videongiz Tayyor!</b>\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
+            formData.append('parse_mode', 'HTML');
+
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert("🎉 Ovozli video botingiz lichkasiga yetib bordi! Telegramni oching.");
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Spotify_Lyric_${Date.now()}.mp4`;
+                    a.click();
+                    alert("✅ Ovozli video telefoningizga yuklandi!");
+                }
+            } catch (err) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `Spotify_Lyric_${Date.now()}.mp4`;
                 a.click();
-                alert("✅ Ovozli video tayyor bo'ldi va telefoningizga yuklandi!");
+                alert("✅ Video tayyorlandi va yuklandi!");
             }
-        } catch (err) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Spotify_Lyric_${Date.now()}.mp4`;
-            a.click();
-            alert("✅ Video tayyorlandi va yuklandi!");
+
+            btn.innerHTML = "🎬 Ovozli Videoni Tayyorlash & Botga Yuborish";
+            btn.disabled = false;
+        };
+
+        // Yozishni boshlash
+        recorder.start();
+        bufferSource.start(0);
+        const startTime = audioCtx.currentTime;
+
+        const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
+
+        function renderFrame() {
+            const elapsedTime = audioCtx.currentTime - startTime;
+
+            // ANIQ BELGILANGAN VAQTDA DARHOL TO'XTATISH
+            if (elapsedTime >= exactVideoDuration) {
+                if (recorder.state === "recording") {
+                    recorder.stop();
+                    bufferSource.stop();
+                }
+                return;
+            }
+
+            // Fon
+            ctx.fillStyle = "#121212";
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Header
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 40px Montserrat, sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(document.getElementById('preview-track-title').innerText, 100, 180);
+
+            ctx.fillStyle = "#a7a7a7";
+            ctx.font = "30px Montserrat, sans-serif";
+            ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
+
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(100, 270);
+            ctx.lineTo(980, 270);
+            ctx.stroke();
+
+            // Faol satrni topish
+            let activeIdx = 0;
+            lyrics.forEach((l, i) => {
+                if (l.time !== null && elapsedTime >= l.time) activeIdx = i;
+            });
+
+            let startY = 650 - (activeIdx * 140);
+            lyrics.forEach((l, i) => {
+                const y = startY + (i * 140);
+                if (y > 300 && y < 1750) {
+                    if (i === activeIdx) {
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = `bold 50px ${selectedFont}`;
+                        drawWrappedText(ctx, l.text, 100, y, 880, 60);
+                    } else if (i < activeIdx) {
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+                        ctx.font = `bold 38px ${selectedFont}`;
+                        drawWrappedText(ctx, l.text, 100, y, 880, 50);
+                    } else {
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                        ctx.font = `bold 38px ${selectedFont}`;
+                        drawWrappedText(ctx, l.text, 100, y, 880, 50);
+                    }
+                }
+            });
+
+            requestAnimationFrame(renderFrame);
         }
 
+        renderFrame();
+
+    } catch (err) {
+        console.error(err);
+        alert("⚠️ Video tayyorlashda xatolik bo'ldi. MP3 faylni tekshirib qayta urinib ko'ring.");
         btn.innerHTML = "🎬 Ovozli Videoni Tayyorlash & Botga Yuborish";
         btn.disabled = false;
-        audio.pause();
-        audio.currentTime = 0;
-    };
-
-    // MUSIQANI NOLLDAN (0:00 DAN) BOSHLAB TOZA YOZISH
-    recorder.start();
-    audio.currentTime = 0;
-    audio.play();
-
-    const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
-
-    function renderLoop() {
-        if (audio.currentTime >= totalVideoDuration || audio.ended) {
-            if (recorder.state === "recording") recorder.stop();
-            return;
-        }
-
-        ctx.fillStyle = "#121212";
-        ctx.fillRect(0, 0, 1080, 1920);
-
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 40px Montserrat, sans-serif";
-        ctx.textAlign = "left";
-        ctx.fillText(document.getElementById('preview-track-title').innerText, 100, 180);
-
-        ctx.fillStyle = "#a7a7a7";
-        ctx.font = "30px Montserrat, sans-serif";
-        ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
-
-        ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(100, 270);
-        ctx.lineTo(980, 270);
-        ctx.stroke();
-
-        const curTime = audio.currentTime;
-        let activeIdx = 0;
-        lyricsData.forEach((l, i) => {
-            if (l.time !== null && curTime >= l.time) activeIdx = i;
-        });
-
-        let startY = 650 - (activeIdx * 140);
-        lyricsData.forEach((l, i) => {
-            const y = startY + (i * 140);
-            if (y > 300 && y < 1750) {
-                if (i === activeIdx) {
-                    ctx.fillStyle = "#ffffff";
-                    ctx.font = `bold 50px ${selectedFont}`;
-                    drawWrappedText(ctx, l.text, 100, y, 880, 60);
-                } else if (i < activeIdx) {
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-                    ctx.font = `bold 38px ${selectedFont}`;
-                    drawWrappedText(ctx, l.text, 100, y, 880, 50);
-                } else {
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-                    ctx.font = `bold 38px ${selectedFont}`;
-                    drawWrappedText(ctx, l.text, 100, y, 880, 50);
-                }
-            }
-        });
-
-        requestAnimationFrame(renderLoop);
     }
-
-    renderLoop();
 };
 
-// ==================== INSHOT YAGONA WAVEFORM TRIMMER & MP3 LICHKAGA ====================
+// ==================== INSHOT AUDIO TRIMMER ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -319,7 +338,6 @@ function updateInShotTrackUI() {
     document.getElementById('trim-start-val').innerText = formatAudioTime(start);
     document.getElementById('trim-end-val').innerText = formatAudioTime(end);
 
-    // InShot faol qutisini surish
     const track = document.getElementById('inshot-active-track');
     if (track) {
         const leftPercent = (start / total) * 100;
@@ -466,4 +484,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-    }
+            }
