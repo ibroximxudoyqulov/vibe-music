@@ -42,10 +42,12 @@
             <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
         <div class="flex items-center space-x-2.5">
+            <!-- 1-Click Til Tanlash -->
             <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
                 <button onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
                 <button onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
             </div>
+            <!-- Hamyon Balansi -->
             <button onclick="openWalletModal()" class="px-3 py-1.5 bg-brand-input border border-yellow-500/30 rounded-2xl flex items-center space-x-1.5 active:scale-95 transition">
                 <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
                 <span id="user-balance-header" class="text-xs font-bold text-yellow-400">$0.00</span>
@@ -56,7 +58,7 @@
     <!-- ==================== 1-SAHIFA: SPOTIFY KARAOKE STUDIYASI ==================== -->
     <main id="tab-studio" class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
 
-        <!-- 1. STEP: MP3 VA JONLI PLAYER -->
+        <!-- 1. STEP: MP3 VA JONLI SURILADIGAN PLAYER -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-file-audio text-brand-cyan"></i>
@@ -70,8 +72,8 @@
             <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
             
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <input type="text" id="track-artist-input" placeholder="Исполнитель" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
-                <input type="text" id="track-title-input" placeholder="Песня" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-artist-input" placeholder="Исполнитель (Munisa Rizaeva)" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-title-input" placeholder="Песня (Yetmadimi)" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
             </div>
 
             <!-- JONLI BARMOQ BILAN SURILADIGAN PLAYER -->
@@ -191,7 +193,6 @@
                 </div>
             </div>
 
-            <!-- BOTGA TO'LIQ DAVOMIYLIKDA YUBORISH TUGMASI -->
             <button onclick="exportAndSendToBot()" id="btn-export-send" class="w-full py-4 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-2">
                 <i class="fa-brands fa-telegram text-lg"></i>
                 <span>🎬 Videoni Tayyorlash & Bot Lichkasiga Yuborish</span>
@@ -200,7 +201,7 @@
 
     </main>
 
-    <!-- ==================== 2-SAHIFA: INSHOT USLUBIDAGI PROFESSIONAL KESISH ==================== -->
+    <!-- ==================== 2-SAHIFA: MUSIQA QIRQISH STUDIYASI (YANGILANGAN) ==================== -->
     <main id="tab-trimmer" class="hidden flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
         <section class="bg-brand-card p-5 rounded-3xl border border-gray-800 space-y-4 shadow-xl select-none">
             
@@ -219,44 +220,35 @@
             <input type="file" id="trimmer-file-input" accept="audio/*,video/*" class="hidden" onchange="handleTrimmerUpload(event)">
 
             <div id="trimmer-controls" class="hidden space-y-4 pt-2">
-                <div class="flex justify-between items-center bg-brand-input p-3 rounded-2xl border border-gray-800 text-xs">
+                
+                <div class="flex justify-between items-center bg-brand-input p-3.5 rounded-2xl border border-gray-800">
                     <div>
-                        <p class="text-[10px] text-gray-400">Boshlanishi</p>
-                        <p id="trim-start-val" class="font-mono font-bold text-brand-cyan text-sm">0:00.0</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Boshlanishi</p>
+                        <p id="trim-start-val" class="font-mono font-extrabold text-brand-cyan text-base">0:00.0</p>
                     </div>
-                    <button onclick="previewTrimmedAudio()" class="w-10 h-10 bg-gradient-to-r from-brand-cyan to-blue-600 text-black rounded-full flex items-center justify-center text-sm font-bold shadow-lg active:scale-95">
+                    <button onclick="previewTrimmedAudio()" class="w-12 h-12 bg-gradient-to-r from-brand-cyan to-blue-600 text-black rounded-full flex items-center justify-center text-base font-bold shadow-lg active:scale-95">
                         <i id="btn-trim-play-icon" class="fa-solid fa-play"></i>
                     </button>
                     <div class="text-right">
-                        <p class="text-[10px] text-gray-400">Tugashi</p>
-                        <p id="trim-end-val" class="font-mono font-bold text-brand-red text-sm">0:30.0</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Tugashi</p>
+                        <p id="trim-end-val" class="font-mono font-extrabold text-brand-red text-base">0:30.0</p>
                     </div>
                 </div>
 
-                <!-- WAVEFORM VISUAL TREK -->
-                <div class="relative w-full h-20 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2">
-                    <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3">
-                        <span class="w-1 bg-purple-500 h-6 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-12 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-8 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-14 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-10 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-16 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-6 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-12 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-14 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-8 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-16 rounded-full"></span>
-                        <span class="w-1 bg-purple-500 h-10 rounded-full"></span>
-                    </div>
+                <!-- 1. KO'K SLAYDER (BOSHLANISH) -->
+                <div class="space-y-1">
+                    <label class="text-[11px] text-brand-cyan font-bold flex items-center space-x-1">
+                        <span>🔵 1. Musiqa Boshlanishini Surish:</span>
+                    </label>
+                    <input type="range" id="trim-start-range" min="0" max="100" value="0" step="0.1" oninput="onTrimHandleChange('start')" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-cyan">
+                </div>
 
-                    <input type="range" id="trim-start-range" min="0" max="100" value="0" step="0.1" oninput="onTrimHandleChange('start')" class="absolute inset-x-0 w-full h-full opacity-0 z-20 cursor-pointer">
-                    <input type="range" id="trim-end-range" min="0" max="100" value="100" step="0.1" oninput="onTrimHandleChange('end')" class="absolute inset-x-0 w-full h-full opacity-0 z-30 cursor-pointer">
-
-                    <div id="trimmer-highlight-box" class="absolute h-full border-2 border-brand-cyan bg-brand-cyan/20 rounded-xl pointer-events-none flex justify-between items-center px-1" style="left: 0%; right: 0%;">
-                        <span class="w-2.5 h-10 bg-brand-cyan rounded-md flex items-center justify-center text-[8px] text-black font-bold">◀</span>
-                        <span class="w-2.5 h-10 bg-brand-red rounded-md flex items-center justify-center text-[8px] text-white font-bold">▶</span>
-                    </div>
+                <!-- 2. QIZIL SLAYDER (TUGASH) -->
+                <div class="space-y-1">
+                    <label class="text-[11px] text-brand-red font-bold flex items-center space-x-1">
+                        <span>🔴 2. Musiqa Tugashini Surish:</span>
+                    </label>
+                    <input type="range" id="trim-end-range" min="0" max="100" value="100" step="0.1" oninput="onTrimHandleChange('end')" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-red">
                 </div>
 
                 <button onclick="executeRealAudioTrimAndSend()" id="btn-trim-send" class="w-full py-4 bg-gradient-to-r from-brand-cyan via-blue-500 to-purple-600 text-black font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
@@ -353,4 +345,4 @@
     <script src="js/wallet.js"></script>
     <script src="js/ads.js"></script>
 </body>
-                                                                                                  </html>
+</html>
