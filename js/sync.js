@@ -1,5 +1,5 @@
-// ==================== PURE SPOTIFY LYRICS (AUTO-WRAP & WIDE TEXT) ====================
-let lyricsData = [];
+// ==================== SPOTIFY SYNC (GLOBAL LYRICS SCOPE) ====================
+window.lyricsData = []; // Barcha fayllar ko'rishi uchun global xotirada
 let activeLineIndex = -1;
 
 window.updateTrackInfo = function() {
@@ -17,14 +17,14 @@ window.parseLyricsForSync = function() {
     }
 
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    lyricsData = lines.map(line => ({ time: null, text: line }));
+    window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
     const container = document.getElementById('sync-container');
     container.innerHTML = '';
     container.classList.remove('hidden');
     document.getElementById('btn-stamp-line').classList.remove('hidden');
 
-    lyricsData.forEach((item, index) => {
+    window.lyricsData.forEach((item, index) => {
         const div = document.createElement('div');
         div.id = `sync-line-${index}`;
         div.className = "p-2.5 bg-brand-input rounded-xl border border-gray-800 flex justify-between items-center text-xs";
@@ -38,7 +38,7 @@ window.parseLyricsForSync = function() {
     renderSpotifyPreviewList();
     activeLineIndex = 0;
     highlightNextSyncLine();
-    alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr boshlanganda 'Vaqtni Saqlash' tugmasini bosing.");
+    alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr aytilganda 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
 function renderSpotifyPreviewList() {
@@ -48,10 +48,9 @@ function renderSpotifyPreviewList() {
 
     const currentFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
 
-    lyricsData.forEach((item, index) => {
+    window.lyricsData.forEach((item, index) => {
         const p = document.createElement('p');
         p.id = `spotify-line-${index}`;
-        // break-words va whitespace-normal: Uzun matnlar qirqilmaydi, 2-qatorga tushadi!
         p.className = "text-base md:text-lg font-bold text-white/30 transition-all duration-300 leading-snug cursor-pointer transform origin-left break-words whitespace-normal w-full";
         p.style.fontFamily = currentFont;
         p.innerText = item.text;
@@ -80,10 +79,10 @@ window.timestampCurrentLine = function() {
         alert("⚠️ Oldin MP3 fayl tanlang!");
         return;
     }
-    if (activeLineIndex >= lyricsData.length) return;
+    if (activeLineIndex >= window.lyricsData.length) return;
 
     const currentTime = audio.currentTime;
-    lyricsData[activeLineIndex].time = currentTime;
+    window.lyricsData[activeLineIndex].time = currentTime;
 
     const min = Math.floor(currentTime / 60);
     const sec = Math.floor(currentTime % 60);
@@ -94,20 +93,20 @@ window.timestampCurrentLine = function() {
     }
 
     activeLineIndex++;
-    if (activeLineIndex < lyricsData.length) {
+    if (activeLineIndex < window.lyricsData.length) {
         highlightNextSyncLine();
     } else {
         document.getElementById('btn-stamp-line').classList.add('hidden');
-        alert("🎉 Barcha satrlar sinxronlandi! Endi pastga tushib videoni ko'ring!");
+        alert("🎉 Barcha satrlar sinxronlandi! Endi videoni tayyorlashingiz mumkin.");
     }
 };
 
 window.updateLiveKaraokeDisplay = function(currentTime) {
-    if (lyricsData.length === 0) return;
+    if (!window.lyricsData || window.lyricsData.length === 0) return;
 
     let currentIndex = -1;
-    for (let i = 0; i < lyricsData.length; i++) {
-        if (lyricsData[i].time !== null && currentTime >= lyricsData[i].time) {
+    for (let i = 0; i < window.lyricsData.length; i++) {
+        if (window.lyricsData[i].time !== null && currentTime >= window.lyricsData[i].time) {
             currentIndex = i;
         }
     }
@@ -115,12 +114,11 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
     if (currentIndex !== -1) {
         const scrollBox = document.getElementById('spotify-lyrics-scroll');
 
-        lyricsData.forEach((_, idx) => {
+        window.lyricsData.forEach((_, idx) => {
             const el = document.getElementById(`spotify-line-${idx}`);
             if (!el) return;
 
             if (idx === currentIndex) {
-                // Faol satr: Yorqin Oq, Katta va butun eni bilan ko'rinadi
                 el.className = "text-xl md:text-2xl font-extrabold text-white scale-100 transition-all duration-300 leading-snug cursor-pointer transform origin-left drop-shadow-md break-words whitespace-normal w-full";
                 if (scrollBox) {
                     const targetScroll = el.offsetTop - scrollBox.offsetTop - (scrollBox.clientHeight / 2) + (el.clientHeight / 2);
