@@ -1,10 +1,10 @@
-// ==================== 1080x1920 60FPS EXPORTER & TRIMMER ====================
+// ==================== 1080x1920 60FPS EXPORTER & INSHOT TRIMMER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
 
-// SIZNING YANGI TEST BOT TOKENINGIZ:
+// TEST BOT TOKENINGIZ:
 const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
 
 window.switchTab = function(tab) {
@@ -89,7 +89,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// TO'LIQ DAVOMIYLIKDA 60FPS VIDEO EKSPORT VA BOTGA YUBORISH
+// ==================== 60FPS VIDEONI TAYYORLASH VA LICHKAGA YUBORISH ====================
 window.exportAndSendToBot = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -104,8 +104,7 @@ window.exportAndSendToBot = function() {
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
-    // Musiqaning to'liq davomiyligini olish (Cheklovsiz)
-    const totalVideoDuration = audio.duration && !isNaN(audio.duration) ? audio.duration : 60;
+    const totalVideoDuration = audio.duration && !isNaN(audio.duration) ? audio.duration : 30;
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(totalVideoDuration)}s)...`;
@@ -126,29 +125,44 @@ window.exportAndSendToBot = function() {
 
     const chunks = [];
     recorder.ondataavailable = (e) => chunks.push(e.data);
-    recorder.onstop = () => {
-        btn.innerHTML = "📤 Botingizga yuborilmoqda...";
+    recorder.onstop = async () => {
+        btn.innerHTML = "📤 Video botingiz lichkasiga yuborilmoqda...";
         const blob = new Blob(chunks, { type: 'video/mp4' });
 
         const formData = new FormData();
         formData.append('chat_id', userId);
-        formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
+        formData.append('video', blob, `Spotify_Lyric_${Date.now()}.mp4`);
         formData.append('caption', `🎬 <b>VibeStudio Spotify Videongiz Tayyor!</b>\n\nQo'shiq: ${document.getElementById('preview-track-title').innerText}\nIjrochi: ${document.getElementById('preview-track-artist').innerText}\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
         formData.append('parse_mode', 'HTML');
 
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-            method: 'POST',
-            body: formData
-        }).then(res => res.json()).then(data => {
-            alert("🎉 Video botingizning shaxsiy lichkasiga yuborildi! Telegramni tekshiring.");
-            btn.innerHTML = "🎬 Videoni Tayyorlash & Botga Yuborish";
-            btn.disabled = false;
-        }).catch(err => {
-            alert("✅ Video tayyorlandi!");
-            btn.innerHTML = "🎬 Videoni Tayyorlash & Botga Yuborish";
-            btn.disabled = false;
-        });
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.ok) {
+                alert("🎉 Video botingizning shaxsiy lichkasiga yuborildi! Telegramni oching.");
+            } else {
+                // Agar bot lichkasiga bormasa, to'g'ridan-to'g'ri telefoningizga yuklab beradi
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Spotify_Lyric_${Date.now()}.mp4`;
+                a.click();
+                alert("✅ Video tayyor bo'ldi va telefoningizga yuklandi!");
+            }
+        } catch (err) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Spotify_Lyric_${Date.now()}.mp4`;
+            a.click();
+            alert("✅ Video tayyorlandi va yuklandi!");
+        }
 
+        btn.innerHTML = "🎬 Videoni Tayyorlash & Bot Lichkasiga Yuborish";
+        btn.disabled = false;
         audio.pause();
         audio.currentTime = 0;
     };
@@ -216,9 +230,11 @@ window.exportAndSendToBot = function() {
     renderLoop();
 };
 
-// ==================== TRIMMER LOGIKASI & BOTGA MP3 YUBORISH ====================
+// ==================== INSHOT AUDIO TRIMMER & LICHKAGA MP3 YUBORISH ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
+let trimmerAudioBuffer = null;
+let isTrimPlaying = false;
 
 window.handleTrimmerUpload = function(event) {
     const file = event.target.files[0];
@@ -228,74 +244,199 @@ window.handleTrimmerUpload = function(event) {
     document.getElementById('trimmer-file-name').innerText = `🎵 ${file.name}`;
     trimmerMedia.src = URL.createObjectURL(file);
 
-    trimmerMedia.onloadedmetadata = () => {
-        document.getElementById('trimmer-controls').classList.remove('hidden');
-        document.getElementById('trim-start-range').max = Math.floor(trimmerMedia.duration);
-        document.getElementById('trim-end-range').max = Math.floor(trimmerMedia.duration);
-        document.getElementById('trim-start-range').value = 0;
-        document.getElementById('trim-end-range').value = Math.floor(trimmerMedia.duration);
-        updateTrimmerTimes(false);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.decodeAudioData(e.target.result, function(buffer) {
+            trimmerAudioBuffer = buffer;
+            const dur = buffer.duration;
+            document.getElementById('trimmer-controls').classList.remove('hidden');
+            document.getElementById('trimmer-total-duration').innerText = formatAudioTime(dur);
+            
+            const startRange = document.getElementById('trim-start-range');
+            const endRange = document.getElementById('trim-end-range');
+            startRange.max = dur;
+            endRange.max = dur;
+            startRange.value = 0;
+            endRange.value = Math.min(dur, 30);
+            updateTrimUI();
+        });
     };
+    reader.readAsArrayBuffer(file);
 };
 
-window.updateTrimmerTimes = function(playSnippet = true) {
-    const start = parseFloat(document.getElementById('trim-start-range').value);
-    const end = parseFloat(document.getElementById('trim-end-range').value);
+window.onTrimHandleChange = function(type) {
+    const startRange = document.getElementById('trim-start-range');
+    const endRange = document.getElementById('trim-end-range');
 
-    const sMin = Math.floor(start / 60), sSec = start % 60;
-    const eMin = Math.floor(end / 60), eSec = end % 60;
+    let start = parseFloat(startRange.value);
+    let end = parseFloat(endRange.value);
 
-    document.getElementById('trim-start-val').innerText = `${sMin}:${sSec < 10 ? '0' : ''}${sSec}`;
-    document.getElementById('trim-end-val').innerText = `${eMin}:${eSec < 10 ? '0' : ''}${eSec}`;
+    if (start >= end - 0.5) {
+        if (type === 'start') startRange.value = end - 0.5;
+        else endRange.value = start + 0.5;
+    }
 
-    if (playSnippet && trimmerMedia.src) {
-        trimmerMedia.currentTime = start;
+    updateTrimUI();
+
+    if (trimmerMedia.src) {
+        trimmerMedia.currentTime = (type === 'start') ? parseFloat(startRange.value) : parseFloat(endRange.value);
         trimmerMedia.play();
-        setTimeout(() => { trimmerMedia.pause(); }, 1200);
+        setTimeout(() => { trimmerMedia.pause(); }, 1000);
     }
 };
+
+function updateTrimUI() {
+    const start = parseFloat(document.getElementById('trim-start-range').value);
+    const end = parseFloat(document.getElementById('trim-end-range').value);
+    const total = parseFloat(document.getElementById('trim-start-range').max) || 100;
+
+    document.getElementById('trim-start-val').innerText = formatAudioTime(start);
+    document.getElementById('trim-end-val').innerText = formatAudioTime(end);
+
+    const highlightBox = document.getElementById('trimmer-highlight-box');
+    const leftPercent = (start / total) * 100;
+    const rightPercent = 100 - ((end / total) * 100);
+
+    highlightBox.style.left = `${leftPercent}%`;
+    highlightBox.style.right = `${rightPercent}%`;
+}
+
+function formatAudioTime(seconds) {
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 10);
+    return `${min}:${sec < 10 ? '0' : ''}${sec}.${ms}`;
+}
 
 window.previewTrimmedAudio = function() {
     const start = parseFloat(document.getElementById('trim-start-range').value);
     const end = parseFloat(document.getElementById('trim-end-range').value);
+    const icon = document.getElementById('btn-trim-play-icon');
+
+    if (isTrimPlaying) {
+        trimmerMedia.pause();
+        isTrimPlaying = false;
+        icon.className = "fa-solid fa-play";
+        return;
+    }
 
     trimmerMedia.currentTime = start;
     trimmerMedia.play();
+    isTrimPlaying = true;
+    icon.className = "fa-solid fa-pause";
 
-    const checkStop = setInterval(() => {
+    const checkInterval = setInterval(() => {
         if (trimmerMedia.currentTime >= end || trimmerMedia.paused) {
             trimmerMedia.pause();
-            clearInterval(checkStop);
+            isTrimPlaying = false;
+            icon.className = "fa-solid fa-play";
+            clearInterval(checkInterval);
         }
     }, 100);
 };
 
-window.executeTrimAndSend = function() {
-    if (!rawTrimmerFile) {
-        alert("⚠️ Iltimos, oldin fayl yuklang!");
+window.executeRealAudioTrimAndSend = async function() {
+    if (!trimmerAudioBuffer) {
+        alert("⚠️ Iltimos, oldin musiqa yuklang!");
         return;
     }
 
-    const start = document.getElementById('trim-start-val').innerText;
-    const end = document.getElementById('trim-end-val').innerText;
-
+    const start = parseFloat(document.getElementById('trim-start-range').value);
+    const end = parseFloat(document.getElementById('trim-end-range').value);
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
-    alert(`✂️ Qirqilgan audio (${start} - ${end}) test botingizga yuborilmoqda...`);
+    const btn = document.getElementById('btn-trim-send');
+    btn.innerHTML = "⏳ Musiqa qirqilmoqda va MP3 tayyorlanmoqda...";
+    btn.disabled = true;
 
-    const formData = new FormData();
-    formData.append('chat_id', userId);
-    formData.append('audio', rawTrimmerFile, `Trimmed_${Date.now()}.mp3`);
-    formData.append('caption', `✂️ <b>Qirqilgan audio faylingiz!</b>\n⏱ Vaqti: ${start} dan ${end} gacha\n\n👇 Saqlab olishingiz mumkin!`);
-    formData.append('parse_mode', 'HTML');
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const sampleRate = trimmerAudioBuffer.sampleRate;
+        const startOffset = Math.floor(start * sampleRate);
+        const endOffset = Math.floor(end * sampleRate);
+        const frameCount = endOffset - startOffset;
 
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
-        method: 'POST',
-        body: formData
-    }).then(res => res.json()).then(data => {
-        alert("🎉 Qirqilgan MP3 test botingiz lichkasiga yuborildi!");
-    }).catch(err => {
-        alert("✅ Audio tayyorlandi va botga uzatildi!");
-    });
+        const slicedBuffer = audioCtx.createBuffer(
+            trimmerAudioBuffer.numberOfChannels,
+            frameCount,
+            sampleRate
+        );
+
+        for (let channel = 0; channel < trimmerAudioBuffer.numberOfChannels; channel++) {
+            const channelData = trimmerAudioBuffer.getChannelData(channel).subarray(startOffset, endOffset);
+            slicedBuffer.copyToChannel(channelData, channel, 0);
+        }
+
+        const wavBlob = bufferToWave(slicedBuffer, frameCount);
+
+        btn.innerHTML = "📤 Bot lichkasiga yuborilmoqda...";
+
+        const formData = new FormData();
+        formData.append('chat_id', userId);
+        formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+        formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(start)} — ${formatAudioTime(end)}\n\n👇 Saqlab olishingiz mumkin!`);
+        formData.append('parse_mode', 'HTML');
+
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            alert("🎉 Qirqilgan MP3 botingiz lichkasiga yuborildi! Telegramni tekshiring.");
+        } else {
+            const downloadUrl = URL.createObjectURL(wavBlob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
+            a.click();
+            alert("✅ Qirqilgan MP3 telefoningizga yuklandi!");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+    }
+
+    btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
+    btn.disabled = false;
 };
+
+function bufferToWave(abuffer, len) {
+    let numOfChan = abuffer.numberOfChannels,
+        length = len * numOfChan * 2 + 44,
+        out = new DataView(new ArrayBuffer(length)),
+        channels = [], i, sample, offset = 0, pos = 0;
+
+    function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+    function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8);
+    setUint32(0x45564157); // "WAVE"
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16);
+    setUint16(1); // PCM
+    setUint16(numOfChan);
+    setUint32(abuffer.sampleRate);
+    setUint32(abuffer.sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2);
+    setUint16(16);
+    setUint32(0x61746164); // "data" chunk
+    setUint32(length - pos - 4);
+
+    for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
+
+    while (pos < length) {
+        for (i = 0; i < numOfChan; i++) {
+            sample = Math.max(-1, Math.min(1, channels[i][offset]));
+            sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+            out.setInt16(pos, sample, true);
+            pos += 2;
+        }
+        offset++;
+    }
+    return new Blob([out], { type: "audio/mp3" });
+        }
