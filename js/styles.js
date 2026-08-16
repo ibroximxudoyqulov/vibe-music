@@ -1,10 +1,13 @@
-// ==================== 1080x1920 HD VIDEO (WEBAUDIO BUFFER SOUND) & INSHOT TRIMMER ====================
+// ==================== 1080x1920 60FPS OVOZLI VIDEO EKSPORT & INSHOT TOUCH TRIMMER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
+
+// SIZNING TEST BOT TOKENINGIZ:
 const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
 
+// Sahifalarni almashtirish (Studiya / Kesish)
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -87,7 +90,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 100% OVOZLI VA ANIQ VAQTLI VIDEO EKSPORT ====================
+// ==================== 1. 100% OVOZLI VA ANIQ OXIRGI MATNGACHA 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -101,7 +104,7 @@ window.exportAndSendToBot = async function() {
         return;
     }
 
-    // 1. ANIQ OXIRGI MATN VAQTINI TOPISH
+    // OXIRGI BELGILANGAN MATN VAQTINI TOPISH
     const stampedTimes = lyrics.map(l => l.time).filter(t => t !== null && t > 0);
     if (stampedTimes.length === 0) {
         alert("⚠️ Kamida bitta satr vaqtini 'Vaqtni Saqlash' orqali belgilang!");
@@ -109,8 +112,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const maxLyricTime = Math.max(...stampedTimes);
-    // Aniq davomiylik: oxirgi satr vaqti + 2.5 soniya (ortiqcha yozilmaydi!)
-    const exactVideoDuration = maxLyricTime + 2.5;
+    const exactVideoDuration = maxLyricTime + 2.5; // Faqat matn tugaguncha + 2.5s yoziladi!
 
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
@@ -120,28 +122,26 @@ window.exportAndSendToBot = async function() {
     btn.disabled = true;
 
     try {
-        // 2. Musiqa faylini WebAudio orqali dekod qilish (Ovoz 100% chiqishi uchun)
+        // Musiqani WebAudio orqali dekod qilish (Ovoz 100% video ichiga kirishi uchun)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const response = await fetch(audio.src);
         const arrayBuffer = await response.arrayBuffer();
         const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-        // Raqamli Audio Source va Stream
         const bufferSource = audioCtx.createBufferSource();
         bufferSource.buffer = decodedBuffer;
 
         const audioDest = audioCtx.createMediaStreamDestination();
         bufferSource.connect(audioDest);
-        bufferSource.connect(audioCtx.destination); // Ovoz eshitilib turadi
+        bufferSource.connect(audioCtx.destination);
 
-        // 3. Canvas Stream
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
         const canvasStream = canvas.captureStream(60);
 
-        // 4. Video va Raqamli Ovozni Birlashtirish
+        // Video va Stereo Ovozni Birlashtirish
         const combinedStream = new MediaStream([
             ...canvasStream.getVideoTracks(),
             ...audioDest.stream.getAudioTracks()
@@ -195,7 +195,7 @@ window.exportAndSendToBot = async function() {
             btn.disabled = false;
         };
 
-        // Yozishni boshlash
+        // Yozishni 0:00 dan toza boshlash
         recorder.start();
         bufferSource.start(0);
         const startTime = audioCtx.currentTime;
@@ -205,7 +205,7 @@ window.exportAndSendToBot = async function() {
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
 
-            // ANIQ BELGILANGAN VAQTDA DARHOL TO'XTATISH
+            // ANIQ OXIRGI MATN TUGAGANDA TO'XTATISH
             if (elapsedTime >= exactVideoDuration) {
                 if (recorder.state === "recording") {
                     recorder.stop();
@@ -214,11 +214,9 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // Fon
             ctx.fillStyle = "#121212";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 40px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -235,7 +233,6 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(980, 270);
             ctx.stroke();
 
-            // Faol satrni topish
             let activeIdx = 0;
             lyrics.forEach((l, i) => {
                 if (l.time !== null && elapsedTime >= l.time) activeIdx = i;
@@ -268,17 +265,21 @@ window.exportAndSendToBot = async function() {
 
     } catch (err) {
         console.error(err);
-        alert("⚠️ Video tayyorlashda xatolik bo'ldi. MP3 faylni tekshirib qayta urinib ko'ring.");
+        alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
         btn.innerHTML = "🎬 Ovozli Videoni Tayyorlash & Botga Yuborish";
         btn.disabled = false;
     }
 };
 
-// ==================== INSHOT AUDIO TRIMMER ====================
+// ==================== 2. INSHOT SENSORLI (TOUCH) DUAL-HANDLE TRIMMER ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
 let isTrimPlaying = false;
+
+let trimStartTime = 0;
+let trimEndTime = 30;
+let trimmerTotalDur = 100;
 
 window.handleTrimmerUpload = function(event) {
     const file = event.target.files[0];
@@ -293,58 +294,82 @@ window.handleTrimmerUpload = function(event) {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioCtx.decodeAudioData(e.target.result, function(buffer) {
             trimmerAudioBuffer = buffer;
-            const dur = buffer.duration;
+            trimmerTotalDur = buffer.duration;
+            trimStartTime = 0;
+            trimEndTime = Math.min(trimmerTotalDur, 30);
+
             document.getElementById('trimmer-controls').classList.remove('hidden');
-            document.getElementById('trimmer-total-duration').innerText = formatAudioTime(dur);
+            document.getElementById('trimmer-total-duration').innerText = formatAudioTime(trimmerTotalDur);
             
-            const startRange = document.getElementById('trim-start-range');
-            const endRange = document.getElementById('trim-end-range');
-            startRange.max = dur;
-            endRange.max = dur;
-            startRange.value = 0;
-            endRange.value = Math.min(dur, 30);
-            updateInShotTrackUI();
+            updateInShotUI();
+            setupInShotTouchEvents();
         });
     };
     reader.readAsArrayBuffer(file);
 };
 
-window.onTrimHandleChange = function(type) {
-    const startRange = document.getElementById('trim-start-range');
-    const endRange = document.getElementById('trim-end-range');
-
-    let start = parseFloat(startRange.value);
-    let end = parseFloat(endRange.value);
-
-    if (start >= end - 0.5) {
-        if (type === 'start') startRange.value = end - 0.5;
-        else endRange.value = start + 0.5;
-    }
-
-    updateInShotTrackUI();
-
-    if (trimmerMedia.src) {
-        trimmerMedia.currentTime = (type === 'start') ? parseFloat(startRange.value) : parseFloat(endRange.value);
-        trimmerMedia.play();
-        setTimeout(() => { trimmerMedia.pause(); }, 1000);
-    }
-};
-
-function updateInShotTrackUI() {
-    const start = parseFloat(document.getElementById('trim-start-range').value);
-    const end = parseFloat(document.getElementById('trim-end-range').value);
-    const total = parseFloat(document.getElementById('trim-start-range').max) || 100;
-
-    document.getElementById('trim-start-val').innerText = formatAudioTime(start);
-    document.getElementById('trim-end-val').innerText = formatAudioTime(end);
+function updateInShotUI() {
+    document.getElementById('trim-start-val').innerText = formatAudioTime(trimStartTime);
+    document.getElementById('trim-end-val').innerText = formatAudioTime(trimEndTime);
 
     const track = document.getElementById('inshot-active-track');
-    if (track) {
-        const leftPercent = (start / total) * 100;
-        const rightPercent = 100 - ((end / total) * 100);
+    if (track && trimmerTotalDur > 0) {
+        const leftPercent = (trimStartTime / trimmerTotalDur) * 100;
+        const rightPercent = 100 - ((trimEndTime / trimmerTotalDur) * 100);
         track.style.left = `${leftPercent}%`;
         track.style.right = `${rightPercent}%`;
     }
+}
+
+// BARMOG'INGIZ BILAN KO'K VA QIZILNI SURISH (TOUCH DRAG)
+function setupInShotTouchEvents() {
+    const container = document.getElementById('inshot-waveform-container');
+    const handleStart = document.getElementById('handle-start');
+    const handleEnd = document.getElementById('handle-end');
+
+    if (!container || !handleStart || !handleEnd) return;
+
+    let draggingType = null;
+
+    handleStart.ontouchstart = (e) => {
+        e.stopPropagation();
+        draggingType = 'start';
+    };
+
+    handleEnd.ontouchstart = (e) => {
+        e.stopPropagation();
+        draggingType = 'end';
+    };
+
+    container.ontouchmove = (e) => {
+        if (!draggingType) return;
+        const rect = container.getBoundingClientRect();
+        const touchX = e.touches[0].clientX - rect.left;
+        const percent = Math.max(0, Math.min(1, touchX / rect.width));
+        const newTime = percent * trimmerTotalDur;
+
+        if (draggingType === 'start') {
+            trimStartTime = Math.min(newTime, trimEndTime - 0.5);
+            if (trimmerMedia.src) {
+                trimmerMedia.currentTime = trimStartTime;
+                trimmerMedia.play();
+                setTimeout(() => { trimmerMedia.pause(); }, 400);
+            }
+        } else if (draggingType === 'end') {
+            trimEndTime = Math.max(newTime, trimStartTime + 0.5);
+            if (trimmerMedia.src) {
+                trimmerMedia.currentTime = trimEndTime;
+                trimmerMedia.play();
+                setTimeout(() => { trimmerMedia.pause(); }, 400);
+            }
+        }
+
+        updateInShotUI();
+    };
+
+    window.ontouchend = () => {
+        draggingType = null;
+    };
 }
 
 function formatAudioTime(seconds) {
@@ -355,8 +380,6 @@ function formatAudioTime(seconds) {
 }
 
 window.previewTrimmedAudio = function() {
-    const start = parseFloat(document.getElementById('trim-start-range').value);
-    const end = parseFloat(document.getElementById('trim-end-range').value);
     const icon = document.getElementById('btn-trim-play-icon');
 
     if (isTrimPlaying) {
@@ -366,13 +389,13 @@ window.previewTrimmedAudio = function() {
         return;
     }
 
-    trimmerMedia.currentTime = start;
+    trimmerMedia.currentTime = trimStartTime;
     trimmerMedia.play();
     isTrimPlaying = true;
     icon.className = "fa-solid fa-pause";
 
     const checkInterval = setInterval(() => {
-        if (trimmerMedia.currentTime >= end || trimmerMedia.paused) {
+        if (trimmerMedia.currentTime >= trimEndTime || trimmerMedia.paused) {
             trimmerMedia.pause();
             isTrimPlaying = false;
             icon.className = "fa-solid fa-play";
@@ -381,14 +404,13 @@ window.previewTrimmedAudio = function() {
     }, 100);
 };
 
+// BOT LICHKASIGA QIRQILGAN MP3 YUBORISH
 window.executeRealAudioTrimAndSend = async function() {
     if (!trimmerAudioBuffer) {
         alert("⚠️ Iltimos, oldin musiqa yuklang!");
         return;
     }
 
-    const start = parseFloat(document.getElementById('trim-start-range').value);
-    const end = parseFloat(document.getElementById('trim-end-range').value);
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
@@ -399,8 +421,8 @@ window.executeRealAudioTrimAndSend = async function() {
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const sampleRate = trimmerAudioBuffer.sampleRate;
-        const startOffset = Math.floor(start * sampleRate);
-        const endOffset = Math.floor(end * sampleRate);
+        const startOffset = Math.floor(trimStartTime * sampleRate);
+        const endOffset = Math.floor(trimEndTime * sampleRate);
         const frameCount = endOffset - startOffset;
 
         const slicedBuffer = audioCtx.createBuffer(
@@ -421,7 +443,7 @@ window.executeRealAudioTrimAndSend = async function() {
         const formData = new FormData();
         formData.append('chat_id', userId);
         formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
-        formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(start)} — ${formatAudioTime(end)}\n\n👇 Saqlab olishingiz mumkin!`);
+        formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}\n\n👇 Saqlab olishingiz mumkin!`);
         formData.append('parse_mode', 'HTML');
 
         const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
@@ -431,7 +453,7 @@ window.executeRealAudioTrimAndSend = async function() {
         const data = await res.json();
 
         if (data.ok) {
-            alert("🎉 Qirqilgan MP3 botingiz lichkasiga yuborildi! Telegramni tekshiring.");
+            alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
         } else {
             const downloadUrl = URL.createObjectURL(wavBlob);
             const a = document.createElement('a');
@@ -484,4 +506,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-            }
+}
