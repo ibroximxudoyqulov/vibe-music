@@ -29,7 +29,7 @@ def run_health_server():
 threading.Thread(target=run_health_server, daemon=True).start()
 
 # ==================== SOZLAMALAR ====================
-BOT_TOKEN = "8824021433:AAEVv5sJ9f5RocgvZKR9zRzX5DOgBd9FzJA"
+BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M"
 ADMIN_ID = 6526744258  # Sizning Admin ID raqamingiz
 WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=1.0"
 
