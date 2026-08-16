@@ -42,12 +42,10 @@
             <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
         <div class="flex items-center space-x-2.5">
-            <!-- 1-Click Til Tanlash -->
             <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
                 <button onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
                 <button onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
             </div>
-            <!-- Hamyon Balansi -->
             <button onclick="openWalletModal()" class="px-3 py-1.5 bg-brand-input border border-yellow-500/30 rounded-2xl flex items-center space-x-1.5 active:scale-95 transition">
                 <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
                 <span id="user-balance-header" class="text-xs font-bold text-yellow-400">$0.00</span>
@@ -58,7 +56,7 @@
     <!-- ==================== 1-SAHIFA: SPOTIFY KARAOKE STUDIYASI ==================== -->
     <main id="tab-studio" class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
 
-        <!-- 1. STEP: MP3 VA JONLI SURILADIGAN PLAYER -->
+        <!-- 1. STEP: MP3 VA JONLI PLAYER -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-file-audio text-brand-cyan"></i>
@@ -72,11 +70,11 @@
             <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
             
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <input type="text" id="track-artist-input" placeholder="Исполнитель (Munisa Rizaeva)" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
-                <input type="text" id="track-title-input" placeholder="Песня (Yetmadimi)" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-artist-input" placeholder="Исполнитель" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-title-input" placeholder="Песня" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
             </div>
 
-            <!-- JONLI BARMOQ BILAN SURILADIGAN PLAYER -->
+            <!-- JONLI SURILADIGAN PLAYER -->
             <div id="audio-player-box" class="hidden flex-col bg-brand-input p-3.5 rounded-2xl border border-gray-800 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
@@ -155,7 +153,7 @@
             </div>
         </section>
 
-        <!-- 4. STEP: SPOTIFY 9:16 PREVIEW & BOTGA YUBORISH -->
+        <!-- 4. STEP: SPOTIFY 9:16 PREVIEW & OVOZLI 60FPS VIDEO YUBORISH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300">Превью (Spotify 9:16 HD):</h3>
             
@@ -193,22 +191,23 @@
                 </div>
             </div>
 
+            <!-- OVOZLI 60FPS VIDEONI BOTGA YUBORISH -->
             <button onclick="exportAndSendToBot()" id="btn-export-send" class="w-full py-4 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-2">
                 <i class="fa-brands fa-telegram text-lg"></i>
-                <span>🎬 Videoni Tayyorlash & Bot Lichkasiga Yuborish</span>
+                <span>🎬 Ovozli Videoni Tayyorlash & Botga Yuborish</span>
             </button>
         </section>
 
     </main>
 
-    <!-- ==================== 2-SAHIFA: MUSIQA QIRQISH STUDIYASI (YANGILANGAN) ==================== -->
+    <!-- ==================== 2-SAHIFA: INSHOT USLUBIDAGI PROFESSIONAL KESISH ==================== -->
     <main id="tab-trimmer" class="hidden flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
         <section class="bg-brand-card p-5 rounded-3xl border border-gray-800 space-y-4 shadow-xl select-none">
             
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm text-white flex items-center space-x-2">
                     <i class="fa-solid fa-scissors text-brand-red"></i>
-                    <span>✂️ Musiqa Qirqish Studiyasi</span>
+                    <span>✂️ Musiqa Qirqish (InShot Style)</span>
                 </h3>
                 <span id="trimmer-total-duration" class="text-xs font-mono text-gray-400">0:00.0</span>
             </div>
@@ -235,20 +234,45 @@
                     </div>
                 </div>
 
-                <!-- 1. KO'K SLAYDER (BOSHLANISH) -->
-                <div class="space-y-1">
-                    <label class="text-[11px] text-brand-cyan font-bold flex items-center space-x-1">
-                        <span>🔵 1. Musiqa Boshlanishini Surish:</span>
-                    </label>
-                    <input type="range" id="trim-start-range" min="0" max="100" value="0" step="0.1" oninput="onTrimHandleChange('start')" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-cyan">
+                <!-- INSHOT YAGONA TO'LQINLI (WAVEFORM) VISUAL TREK -->
+                <div class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2">
+                    
+                    <!-- To'lqinlar foni -->
+                    <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3 pointer-events-none">
+                        <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-16 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-10 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-14 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-16 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-18 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-12 rounded-full"></span>
+                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
+                    </div>
+
+                    <!-- InShot Tanlangan Qismi (Highlighted Box) -->
+                    <div id="inshot-active-track" class="absolute inset-y-0 border-y-2 border-brand-cyan bg-brand-cyan/20 flex justify-between items-center pointer-events-none" style="left: 0%; right: 0%;">
+                        <!-- Chap Tutqich [<] -->
+                        <div class="w-4 h-full bg-brand-cyan flex items-center justify-center text-[10px] text-black font-extrabold shadow-md">
+                            ◀
+                        </div>
+                        <!-- O'ng Tutqich [>] -->
+                        <div class="w-4 h-full bg-brand-red flex items-center justify-center text-[10px] text-white font-extrabold shadow-md">
+                            ▶
+                        </div>
+                    </div>
+
+                    <!-- Boshlanishini suruvchi shaffof slayder -->
+                    <input type="range" id="trim-start-range" min="0" max="100" value="0" step="0.1" oninput="onTrimHandleChange('start')" class="absolute inset-x-0 w-full h-1/2 top-0 opacity-0 z-20 cursor-pointer">
+                    <!-- Tugashini suruvchi shaffof slayder -->
+                    <input type="range" id="trim-end-range" min="0" max="100" value="100" step="0.1" oninput="onTrimHandleChange('end')" class="absolute inset-x-0 w-full h-1/2 bottom-0 opacity-0 z-30 cursor-pointer">
                 </div>
 
-                <!-- 2. QIZIL SLAYDER (TUGASH) -->
-                <div class="space-y-1">
-                    <label class="text-[11px] text-brand-red font-bold flex items-center space-x-1">
-                        <span>🔴 2. Musiqa Tugashini Surish:</span>
-                    </label>
-                    <input type="range" id="trim-end-range" min="0" max="100" value="100" step="0.1" oninput="onTrimHandleChange('end')" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-red">
+                <div class="flex justify-between text-[10px] text-gray-400 px-1 font-mono">
+                    <span>👆 Yuqori qismini suring (Boshlanish)</span>
+                    <span>Pastki qismini suring (Tugash) 👇</span>
                 </div>
 
                 <button onclick="executeRealAudioTrimAndSend()" id="btn-trim-send" class="w-full py-4 bg-gradient-to-r from-brand-cyan via-blue-500 to-purple-600 text-black font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
@@ -279,7 +303,7 @@
         </button>
     </nav>
 
-    <!-- MODAL 1: ADSGRAM REKLAMA -->
+    <!-- MODALLAR -->
     <div id="earn-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
         <div class="w-full max-w-sm bg-brand-card border border-yellow-500/40 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative">
             <button onclick="closeEarnAdsModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -298,7 +322,6 @@
         </div>
     </div>
 
-    <!-- MODAL 2: HAMYON & SNG KARTALARI -->
     <div id="wallet-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-6">
         <div class="w-full max-w-sm bg-brand-card border border-gray-800 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeWalletModal()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
