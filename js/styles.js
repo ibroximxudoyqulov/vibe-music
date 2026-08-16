@@ -1,16 +1,14 @@
-// ==================== 1080x1920 60FPS SMART EXPORTER ====================
+// ==================== 1080x1920 HD EXPORTER (MULTI-LINE WRAP & DIRECT DOWNLOAD) ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
 
-// 1. Shriftni yangilash
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
-// 2. Fon yuklash
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -25,7 +23,6 @@ window.handleCustomBgUpload = function(event) {
     }
 };
 
-// 3. Vinil va Ekvalayzer
 window.toggleVinylEffect = function() {
     isVinylActive = !isVinylActive;
     const vinylBox = document.getElementById('preview-vinyl-box');
@@ -54,7 +51,28 @@ window.toggleSpectrumEffect = function() {
     }
 };
 
-// 4. SMART 60FPS VIDEO EKSPORT (MATN TUGAGAN JOYDA KESUVCHI)
+// Canvasda uzun matnlarni 2-qatorga bo'lib chizuvchi maxsus funksiya
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let currentY = y;
+
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+            ctx.fillText(line, x, currentY);
+            line = words[n] + ' ';
+            currentY += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, x, currentY);
+    return currentY;
+}
+
+// 60FPS VIDEO EKSPORT VA TELEFONGA YUKLASH
 window.exportHighQualityVideo = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -66,7 +84,6 @@ window.exportHighQualityVideo = function() {
         return;
     }
 
-    // OXIRGI SATRNING VAQTINI HISOBLASH (Qo'shiqni shu yerda kesish uchun)
     let lastLyricTime = 0;
     lyricsData.forEach(l => {
         if (l.time !== null && l.time > lastLyricTime) lastLyricTime = l.time;
@@ -94,17 +111,22 @@ window.exportHighQualityVideo = function() {
         const blob = new Blob(chunks, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
         
-        // Telefonda yuklab olishni majburlash
-        const downloadLink = document.createElement('a');
-        downloadLink.href = url;
-        downloadLink.download = `Spotify_Lyrics_${Date.now()}.mp4`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // Telegram WebView uchun eng ishonchli to'g'ridan-to'g'ri yuklash
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `VibeStudio_${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.open(url, '_blank'); // Agar Telegram bloklasa brauzerda yuklaydi
+        }, 1000);
 
         audio.pause();
         audio.currentTime = 0;
-        alert("🎉 Video muvaffaqiyatli yuklab olindi! Galereyangiz yoki Yuklamalar (Downloads) papkasini tekshiring.");
+        alert("🎉 Video tayyor bo'ldi! Yuklab olish boshlandi.");
     };
 
     recorder.start();
@@ -114,11 +136,8 @@ window.exportHighQualityVideo = function() {
     const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
 
     function renderLoop() {
-        // MATN TUGAGANDA MUSIQANI KESISH VA VIDEONI YOPISH
         if (audio.currentTime >= videoEndTime || audio.ended || audio.paused) {
-            if (recorder.state === "recording") {
-                recorder.stop();
-            }
+            if (recorder.state === "recording") recorder.stop();
             return;
         }
 
@@ -136,7 +155,7 @@ window.exportHighQualityVideo = function() {
         ctx.font = "30px Montserrat, sans-serif";
         ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
 
-        // Chiziq
+        // Ajratuvchi chiziq
         ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -144,29 +163,29 @@ window.exportHighQualityVideo = function() {
         ctx.lineTo(980, 270);
         ctx.stroke();
 
-        // Spotify Matnlari
+        // Spotify Matnlari (Uzun matnlar qirqilmasdan to'liq chiziladi)
         const curTime = audio.currentTime;
         let activeIdx = 0;
         lyricsData.forEach((l, i) => {
             if (l.time !== null && curTime >= l.time) activeIdx = i;
         });
 
-        let startY = 650 - (activeIdx * 120);
+        let startY = 650 - (activeIdx * 140);
         lyricsData.forEach((l, i) => {
-            const y = startY + (i * 120);
-            if (y > 350 && y < 1700) {
+            const y = startY + (i * 140);
+            if (y > 300 && y < 1750) {
                 if (i === activeIdx) {
                     ctx.fillStyle = "#ffffff";
-                    ctx.font = `bold 56px ${selectedFont}`;
-                    ctx.fillText(l.text, 100, y);
+                    ctx.font = `bold 50px ${selectedFont}`;
+                    drawWrappedText(ctx, l.text, 100, y, 880, 60);
                 } else if (i < activeIdx) {
                     ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-                    ctx.font = `bold 42px ${selectedFont}`;
-                    ctx.fillText(l.text, 100, y);
+                    ctx.font = `bold 38px ${selectedFont}`;
+                    drawWrappedText(ctx, l.text, 100, y, 880, 50);
                 } else {
                     ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-                    ctx.font = `bold 42px ${selectedFont}`;
-                    ctx.fillText(l.text, 100, y);
+                    ctx.font = `bold 38px ${selectedFont}`;
+                    drawWrappedText(ctx, l.text, 100, y, 880, 50);
                 }
             }
         });
@@ -178,5 +197,5 @@ window.exportHighQualityVideo = function() {
 };
 
 window.exportStoryImage = function() {
-    alert("🖼 Story rasm formati saqlanmoqda...");
+    alert("🖼 Story PNG formati saqlanmoqda...");
 };
