@@ -3,7 +3,7 @@
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
-const BOT_TOKEN = "8838751150:AAH3eyk3r_IxauPtnQvJ97rbNZmc9OjDQsg";
+const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
 
 // Sahifalarni almashtirish (Studiya / Kesish)
 window.switchTab = function(tab) {
