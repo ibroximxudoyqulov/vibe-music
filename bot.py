@@ -31,7 +31,7 @@ threading.Thread(target=run_health_server, daemon=True).start()
 # ==================== SOZLAMALAR ====================
 BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M"
 ADMIN_ID = 6526744258  # Sizning Admin ID raqamingiz
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=2.0"
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=dev1"
 
 PHONE_PAYMENT = "+992 007071683"
 
