@@ -192,11 +192,21 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS[lang]["select_lang"], reply_markup=markup)
         return
 
-    if text in [TEXTS["uz"]["btn_info"], TEXTS["ru"]["btn_info"]]:
-        bot.send_message(message.chat.id, TEXTS[lang]["info_text"], parse_mode="HTML")
+if text in [TEXTS["uz"]["btn_info"], TEXTS["ru"]["btn_info"]]:
+        total = get_total_users()
+        info_msg = (
+            f"🌟 <b>VibeStudio & VibeMusic</b> — TikTok va Instagram uchun estetik Spotify videolarni va musiqalarni 1 daqiqada tayyorlab beruvchi bepul platforma!\n\n"
+            f"👥 <b>Foydalanuvchilar soni:</b> <code>{total}</code> ta obunachi\n"
+            f"⚡️ <b>Platforma holati:</b> 24/7 Bepul & Faol\n\n"
+            f"👨‍💻 Dasturchi & Admin: @IBROXIM_I6"
+            if lang == 'uz' else
+            f"🌟 <b>VibeStudio & VibeMusic</b> — бесплатная платформа для создания эстетичных Spotify видео для TikTok и Instagram за 1 минуту!\n\n"
+            f"👥 <b>Количество пользователей:</b> <code>{total}</code>\n"
+            f"⚡️ <b>Статус платформы:</b> 24/7 Бесплатно & Активно\n\n"
+            f"👨‍💻 Разработчик: @IBROXIM_I6"
+        )
+        bot.send_message(message.chat.id, info_msg, parse_mode="HTML")
         return
-
-    bot.send_message(message.chat.id, TEXTS[lang]["welcome"], parse_mode="HTML", reply_markup=get_main_menu(lang))
 
 # ==================== 7. AUTO-RECONNECT ====================
 if __name__ == '__main__':
