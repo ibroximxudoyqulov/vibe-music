@@ -1,13 +1,13 @@
-// ==================== 1080x1920 60FPS OVOZLI VIDEO EKSPORT & INSHOT TOUCH TRIMMER ====================
+// ==================== 1080x1920 60FPS OVOZLI VIDEO & INSHOT TOUCH TRIMMER ====================
 
 let isVinylActive = false;
 let isSpectrumActive = false;
 let customBgUrl = null;
 
-// SIZNING TEST BOT TOKENINGIZ:
-const BOT_TOKEN = "8824021433:AAEVv5sJ9f5RocgvZKR9zRzX5DOgBd9FzJA";
+// SIZNING BOT TOKENINGIZ:
+const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
 
-// Sahifalarni almashtirish (Studiya / Kesish)
+// 1. Sahifalarni almashtirish (Studiya / Kesish)
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -27,11 +27,13 @@ window.switchTab = function(tab) {
     }
 };
 
+// 2. Shriftni yangilash
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
+// 3. Shaxsiy fon yuklash (Rasm yoki Video)
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -44,6 +46,7 @@ window.handleCustomBgUpload = function(event) {
     }
 };
 
+// 4. Vinil va Ekvalayzer
 window.toggleVinylEffect = function() {
     isVinylActive = !isVinylActive;
     const vinylBox = document.getElementById('preview-vinyl-box');
@@ -72,6 +75,7 @@ window.toggleSpectrumEffect = function() {
     }
 };
 
+// 5. Canvas matnlarni chiroyli 2-qatorga bo'lib chizish
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
     let line = '';
@@ -90,7 +94,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 1. 100% OVOZLI VA ANIQ OXIRGI MATNGACHA 60FPS VIDEO EKSPORT ====================
+// ==================== 1. 100% OVOZLI VA RANGLI 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -104,7 +108,6 @@ window.exportAndSendToBot = async function() {
         return;
     }
 
-    // OXIRGI BELGILANGAN MATN VAQTINI TOPISH
     const stampedTimes = lyrics.map(l => l.time).filter(t => t !== null && t > 0);
     if (stampedTimes.length === 0) {
         alert("⚠️ Kamida bitta satr vaqtini 'Vaqtni Saqlash' orqali belgilang!");
@@ -112,7 +115,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const maxLyricTime = Math.max(...stampedTimes);
-    const exactVideoDuration = maxLyricTime + 2.5; // Faqat matn tugaguncha + 2.5s yoziladi!
+    const exactVideoDuration = maxLyricTime + 2.5;
 
     const tg = window.Telegram ? window.Telegram.WebApp : null;
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
@@ -122,7 +125,6 @@ window.exportAndSendToBot = async function() {
     btn.disabled = true;
 
     try {
-        // Musiqani WebAudio orqali dekod qilish (Ovoz 100% video ichiga kirishi uchun)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const response = await fetch(audio.src);
         const arrayBuffer = await response.arrayBuffer();
@@ -141,7 +143,6 @@ window.exportAndSendToBot = async function() {
         const ctx = canvas.getContext('2d');
         const canvasStream = canvas.captureStream(60);
 
-        // Video va Stereo Ovozni Birlashtirish
         const combinedStream = new MediaStream([
             ...canvasStream.getVideoTracks(),
             ...audioDest.stream.getAudioTracks()
@@ -195,17 +196,16 @@ window.exportAndSendToBot = async function() {
             btn.disabled = false;
         };
 
-        // Yozishni 0:00 dan toza boshlash
         recorder.start();
         bufferSource.start(0);
         const startTime = audioCtx.currentTime;
 
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
+        const selectedTextColor = window.activeLyricsColor || "#ffffff";
 
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
 
-            // ANIQ OXIRGI MATN TUGAGANDA TO'XTATISH
             if (elapsedTime >= exactVideoDuration) {
                 if (recorder.state === "recording") {
                     recorder.stop();
@@ -243,7 +243,7 @@ window.exportAndSendToBot = async function() {
                 const y = startY + (i * 140);
                 if (y > 300 && y < 1750) {
                     if (i === activeIdx) {
-                        ctx.fillStyle = "#ffffff";
+                        ctx.fillStyle = selectedTextColor;
                         ctx.font = `bold 50px ${selectedFont}`;
                         drawWrappedText(ctx, l.text, 100, y, 880, 60);
                     } else if (i < activeIdx) {
@@ -438,7 +438,7 @@ window.executeRealAudioTrimAndSend = async function() {
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
 
-        btn.innerHTML = "📤 Bot lichkasiga yuborilmoqda...";
+        btn.innerHTML = "📤 Asosiy botingizga yuborilmoqda...";
 
         const formData = new FormData();
         formData.append('chat_id', userId);
@@ -471,6 +471,7 @@ window.executeRealAudioTrimAndSend = async function() {
     btn.disabled = false;
 };
 
+// PCM WAVE BLOB ENCODER
 function bufferToWave(abuffer, len) {
     let numOfChan = abuffer.numberOfChannels,
         length = len * numOfChan * 2 + 44,
@@ -480,18 +481,18 @@ function bufferToWave(abuffer, len) {
     function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
     function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
 
-    setUint32(0x46464952);
+    setUint32(0x46464952); // "RIFF"
     setUint32(length - 8);
-    setUint32(0x45564157);
-    setUint32(0x20746d66);
+    setUint32(0x45564157); // "WAVE"
+    setUint32(0x20746d66); // "fmt " chunk
     setUint32(16);
-    setUint16(1);
+    setUint16(1); // PCM
     setUint16(numOfChan);
     setUint32(abuffer.sampleRate);
     setUint32(abuffer.sampleRate * 2 * numOfChan);
     setUint16(numOfChan * 2);
     setUint16(16);
-    setUint32(0x61746164);
+    setUint32(0x61746164); // "data" chunk
     setUint32(length - pos - 4);
 
     for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
