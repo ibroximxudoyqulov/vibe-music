@@ -34,13 +34,12 @@
 </head>
 <body class="bg-brand-dark text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- HEADER (TOZA VA ESTETIK) -->
+    <!-- HEADER -->
     <header class="p-4 glass sticky top-0 z-30 flex justify-between items-center border-b border-gray-800/60">
         <div class="flex items-center space-x-2">
             <span class="text-brand-red text-xl"><i class="fa-solid fa-compact-disc vinyl-spin"></i></span>
             <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
-        <!-- 1-Click Til Tanlash -->
         <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
             <button onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
             <button onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
@@ -50,7 +49,7 @@
     <!-- ==================== 1-SAHIFA: SPOTIFY KARAOKE STUDIYASI ==================== -->
     <main id="tab-studio" class="flex-1 p-4 pb-24 max-w-md mx-auto w-full space-y-5">
 
-        <!-- 1. STEP: MP3 VA JONLI SURILADIGAN PLAYER -->
+        <!-- 1. STEP: MP3 VA JONLI PLAYER -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-file-audio text-brand-cyan"></i>
@@ -68,7 +67,7 @@
                 <input type="text" id="track-title-input" placeholder="Песня" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
             </div>
 
-            <!-- JONLI BARMOQ BILAN SURILADIGAN PLAYER -->
+            <!-- JONLI SURILADIGAN PLAYER -->
             <div id="audio-player-box" class="hidden flex-col bg-brand-input p-3.5 rounded-2xl border border-gray-800 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
@@ -138,7 +137,6 @@
                     <button id="color-btn-ff2a5f" onclick="setLyricsColor('#ff2a5f')" class="color-preset-btn w-7 h-7 rounded-full bg-[#ff2a5f] active:scale-95 transition"></button>
                     <button id="color-btn-c084fc" onclick="setLyricsColor('#c084fc')" class="color-preset-btn w-7 h-7 rounded-full bg-[#c084fc] active:scale-95 transition"></button>
                     
-                    <!-- Maxsus Rang Tanlash -->
                     <label class="relative w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center cursor-pointer bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
                         <i class="fa-solid fa-eye-dropper text-[10px] text-white drop-shadow"></i>
                         <input type="color" value="#ffffff" onchange="onCustomColorChange(this)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
@@ -146,7 +144,7 @@
                 </div>
             </div>
 
-            <!-- O'z telefonidan fon yuklash (Rasm yoki Video) -->
+            <!-- Fon yuklash -->
             <div>
                 <label class="text-[10px] text-gray-400 block mb-1">Загрузите свой фон с телефона:</label>
                 <label for="custom-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
@@ -288,7 +286,7 @@
         </section>
     </main>
 
-    <!-- BOTTOM NAVIGATION (FAQAT 2 TA ASOSIY BO'LIM: STUDIYA VA KESISH) -->
+    <!-- FAQAT 2 TA ASOSIY BO'LIM: STUDIYA VA KESISH -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-8 py-3 flex justify-around items-center z-40">
         <button onclick="switchTab('studio')" id="nav-btn-studio" class="flex flex-col items-center text-brand-red space-y-1">
             <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
