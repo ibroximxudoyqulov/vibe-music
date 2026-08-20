@@ -173,29 +173,143 @@
         </section>
     </main>
 
-    <!-- ==================== 2-SAHIFA: YANGI WHATSAPP CHAT STUDIYASI ==================== -->
+<!-- ==================== 2-SAHIFA: YANGI WHATSAPP CHAT STUDIYASI ==================== -->
     <main id="tab-whatsapp" class="hidden flex-1 p-4 pb-24 max-w-md mx-auto w-full space-y-5">
         
-        <!-- 1. SOZLAMALAR: SUHBATDOSH MA'LUMOTLARI -->
+        <!-- 1. STEP: WHATSAPP UCHUN MP3 YUKLASH VA DUMALOQ NUQTALI PLAYER -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 class="font-bold text-xs text-white flex items-center space-x-2">
+                <i class="fa-solid fa-file-audio text-emerald-400"></i>
+                <span>1. Musiqa (MP3) Yuklang</span>
+            </h3>
+
+            <label for="wa-audio-file-input" class="w-full py-4 bg-brand-input hover:bg-gray-800 border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer active:scale-95 transition">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-400 mb-1"></i>
+                <span id="wa-audio-file-name" class="text-xs font-semibold text-gray-300">WhatsApp uchun MP3 tanlang</span>
+            </label>
+            <input type="file" id="wa-audio-file-input" accept="audio/*,video/*" class="hidden" onchange="handleWaAudioUpload(event)">
+
+            <!-- DUMALOQ NUQTALI JONLI WHATSAPP PLAYER -->
+            <div id="wa-audio-player-box" class="hidden flex-col bg-brand-input p-3.5 rounded-2xl border border-gray-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <button onclick="toggleWaAudioPlay()" class="w-11 h-11 bg-emerald-500 text-black rounded-full flex items-center justify-center text-sm font-bold shadow-lg active:scale-95">
+                        <i id="btn-wa-audio-icon" class="fa-solid fa-play"></i>
+                    </button>
+                    <div class="text-right">
+                        <p id="wa-audio-current-time" class="font-mono text-xs text-emerald-400 font-bold">0:00 / 0:00</p>
+                    </div>
+                </div>
+                <!-- Slayder: Dumaloq nuqta orqali musiqani erkin surish -->
+                <input type="range" id="wa-audio-seek-slider" min="0" max="100" value="0" step="0.1" oninput="onWaAudioSeek(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-400">
+            </div>
+        </section>
+
+        <!-- 2. STEP: 2 TA PROFIL (SUHBATDOSH VA MENING RASMIM) -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-white flex items-center space-x-2">
                 <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i>
-                <span>1. Suhbatdosh Profili</span>
+                <span>2. Ikkala Tomon Profillari</span>
             </h3>
 
-            <div class="flex items-center space-x-3">
-                <label for="wa-avatar-input" class="w-14 h-14 rounded-full bg-gray-800 border-2 border-emerald-500/50 flex items-center justify-center cursor-pointer overflow-hidden flex-shrink-0 relative">
-                    <i id="wa-avatar-placeholder" class="fa-solid fa-user text-gray-400 text-lg"></i>
-                    <img id="wa-preview-avatar" class="hidden w-full h-full object-cover">
+            <!-- 1-Profil: Suhbatdosh -->
+            <div class="flex items-center space-x-3 p-2 bg-brand-input rounded-2xl border border-gray-800">
+                <label for="wa-partner-avatar-input" class="w-12 h-12 rounded-full bg-gray-800 border-2 border-emerald-500/50 flex items-center justify-center cursor-pointer overflow-hidden flex-shrink-0 relative">
+                    <i id="wa-partner-placeholder" class="fa-solid fa-user text-gray-400 text-sm"></i>
+                    <img id="wa-partner-avatar-img" class="hidden w-full h-full object-cover">
                 </label>
-                <input type="file" id="wa-avatar-input" accept="image/*" class="hidden" onchange="handleWaAvatarUpload(event)">
+                <input type="file" id="wa-partner-avatar-input" accept="image/*" class="hidden" onchange="handleWaPartnerAvatar(event)">
                 
-                <div class="flex-1 space-y-1.5">
-                    <input type="text" id="wa-contact-name-input" placeholder="Suhbatdosh ismi (Jonim 🖤)" value="Jonim 🖤" oninput="updateWaContactInfo()" class="w-full p-2 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
-                    <input type="text" id="wa-contact-status-input" placeholder="Status (online)" value="online" oninput="updateWaContactInfo()" class="w-full p-2 bg-brand-input border border-gray-800 rounded-xl text-xs text-gray-300 focus:outline-none">
+                <div class="flex-1 space-y-1">
+                    <input type="text" id="wa-contact-name-input" placeholder="Suhbatdosh ismi" value="Jonim 🖤" oninput="updateWaContactInfo()" class="w-full p-1.5 bg-gray-900 border border-gray-700 rounded-xl text-xs text-white focus:outline-none">
+                    <input type="text" id="wa-contact-status-input" placeholder="Status" value="online" oninput="updateWaContactInfo()" class="w-full p-1.5 bg-gray-900 border border-gray-700 rounded-xl text-[10px] text-emerald-400 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- 2-Profil: Mening Rasmi -->
+            <div class="flex items-center space-x-3 p-2 bg-brand-input rounded-2xl border border-gray-800">
+                <label for="wa-my-avatar-input" class="w-12 h-12 rounded-full bg-gray-800 border-2 border-cyan-500/50 flex items-center justify-center cursor-pointer overflow-hidden flex-shrink-0 relative">
+                    <i id="wa-my-placeholder" class="fa-solid fa-user-check text-gray-400 text-sm"></i>
+                    <img id="wa-my-avatar-img" class="hidden w-full h-full object-cover">
+                </label>
+                <input type="file" id="wa-my-avatar-input" accept="image/*" class="hidden" onchange="handleWaMyAvatar(event)">
+                <div class="flex-1 text-xs text-gray-300">
+                    <p class="font-bold text-white">O'zingizning Profil Rasmingiz</p>
+                    <p class="text-[10px] text-gray-400">Rasm yuklash uchun doirani bosing</p>
                 </div>
             </div>
         </section>
+
+        <!-- 3. STEP: DIALOG MATNI VA 1-TUGMALI ALMASHTIRISH -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 class="font-bold text-xs text-white flex items-center space-x-2">
+                <i class="fa-solid fa-comments text-brand-cyan"></i>
+                <span>3. Dialog Matni & Kim Aytishi</span>
+            </h3>
+
+            <textarea id="raw-wa-lyrics-input" rows="4" placeholder="Dialog matnini qatorma-qator kiriting..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-emerald-500"></textarea>
+            
+            <button onclick="parseWaLyricsForSync()" class="w-full py-2.5 bg-brand-input hover:bg-gray-800 border border-gray-700 font-bold text-xs rounded-xl active:scale-95 transition">
+                Satrlarni tayyorlash
+            </button>
+
+            <div id="wa-sync-container" class="hidden space-y-2 max-h-48 overflow-y-auto hide-scrollbar p-1"></div>
+
+            <button id="btn-wa-stamp-line" onclick="timestampWaCurrentLine()" class="hidden w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-extrabold text-xs rounded-2xl shadow-lg active:scale-95 transition animate-pulse">
+                ⏱ DIALOG VAQTINI SAQLASH
+            </button>
+        </section>
+
+        <!-- 4. STEP: JONLI WHATSAPP 9:16 PREVIEW & BOTGA YUBORISH -->
+        <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
+            <h3 class="font-bold text-xs text-gray-300">Превью (WhatsApp Chat 9:16 HD):</h3>
+
+            <div id="wa-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-[#0b141a] border border-gray-700 flex flex-col justify-between shadow-2xl select-none">
+                
+                <!-- WhatsApp Header -->
+                <div class="bg-[#1f2c34] p-3 flex items-center justify-between text-white z-10 shadow-md">
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid fa-arrow-left text-xs text-gray-300"></i>
+                        <div class="w-9 h-9 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center border border-gray-600">
+                            <img id="wa-header-avatar" class="w-full h-full object-cover hidden">
+                            <i id="wa-header-placeholder" class="fa-solid fa-user text-xs text-gray-400"></i>
+                        </div>
+                        <div>
+                            <p id="wa-preview-name" class="text-xs font-bold leading-tight">Jonim 🖤</p>
+                            <p id="wa-preview-status" class="text-[9px] text-emerald-400">online</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4 text-gray-300 text-xs pr-1">
+                        <i class="fa-solid fa-video"></i>
+                        <i class="fa-solid fa-phone"></i>
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </div>
+                </div>
+
+                <!-- Xabarlar Oqimi -->
+                <div id="wa-live-messages-box" class="flex-1 overflow-y-auto hide-scrollbar p-3 space-y-2 z-10">
+                    <p class="text-center text-[10px] text-gray-500 my-auto py-12">Dialog vaqtlarini saqlang, xabarlar shu yerda paydo bo'ladi...</p>
+                </div>
+
+                <!-- Footer Input -->
+                <div class="p-2.5 bg-[#1f2c34] flex items-center space-x-2 z-10">
+                    <i class="fa-regular fa-face-smile text-gray-400 text-sm"></i>
+                    <div class="flex-1 bg-[#2a3942] rounded-full px-3 py-1.5 text-[10px] text-gray-400">
+                        Сообщение
+                    </div>
+                    <i class="fa-solid fa-paperclip text-gray-400 text-xs"></i>
+                    <div class="w-7 h-7 bg-[#00a884] rounded-full flex items-center justify-center text-white text-xs">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVOZLI WHATSAPP VIDEONI BOTGA YUBORISH -->
+            <button onclick="exportWaAndSendToBot()" id="btn-wa-export-send" class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-black font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>🎬 Ovozli WhatsApp Videoni Botga Yuborish</span>
+            </button>
+        </section>
+    </main>
 
         <!-- 2. DIALOG MATNI VA 1-TUGMALI ALMASHTIRISH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
