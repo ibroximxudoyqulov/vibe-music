@@ -11,7 +11,7 @@ from telebot.types import (
     ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 )
 
-# ==================== 1. RENDER 24/7 HEALTH-CHECK SERVER ====================
+# ==================== 1. RENDER 24/7 HEALTH-CHECK ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -30,19 +30,18 @@ def run_health_server():
 
 threading.Thread(target=run_health_server, daemon=True).start()
 
-# ==================== 2. SOZLAMALAR VA KALITLAR ====================
+# ==================== 2. SOZLAMALAR ====================
 BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M"
-ADMIN_ID = 6526744258  # Sizning shaxsiy Admin ID raqamingiz
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=free_clean_v10"
+ADMIN_ID = 6526744258
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=final_free"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=20)
-user_states = {}
 
-# ==================== 3. SQLITE DATABASE (WAL TEZKOR REJIM) ====================
+# ==================== 3. SQLITE DATABASE ====================
 def init_db():
     conn = sqlite3.connect("users.db", check_same_thread=False)
     cursor = conn.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL;")  # Katta auditoriya uchun tezkor rejim
+    cursor.execute("PRAGMA journal_mode=WAL;")
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -91,42 +90,34 @@ def get_total_users():
     conn.close()
     return count
 
-# ==================== 4. LUG'AT (O'ZBEKCHA / RUSSKIY) ====================
+# ==================== 4. LUG'AT ====================
 TEXTS = {
     "uz": {
-        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Barcha xizmatlar (Spotify video yasash, musiqani qirqish, 70+ shriftlar) <b>100% BEPUL va CHEKSIZ!</b>\n\nQuyidagi menyudan kerakli bo'limni tanlang:",
-        "btn_studio": "🎤 Spotify Video Yasash",
-        "btn_trimmer": "✂️ Musiqa Qirqish Studiyasi",
+        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Barcha xizmatlar (Spotify video yasash, musiqani qirqish, 70+ shriftlar) <b>100% BEPUL va CHEKSIZ!</b>\n\n👇 Ilovani ishga tushirish uchun pastdagi tugmani bosing:",
+        "btn_open_app": "🎨 VibeStudio Ilovasi",
         "btn_lang": "🌐 Tilni O'zgartirish",
         "btn_info": "ℹ️ Bot Haqida",
-        "open_app_btn": "🎨 VibeStudio Ilovasini Ochish",
-        "info_text": "🌟 <b>VibeStudio & VibeMusic</b> — bu TikTok va Instagram uchun estetik Spotify videolarni va musiqalarni 1 daqiqada tayyorlab beruvchi bepul platforma!\n\n👨‍💻 Dasturchi & Admin: @IBROXIM_I6",
-        "select_lang": "Tilni tanlang / Выберите язык:",
-        "unknown": "⚠️ Noma'lum buyruq! Iltimos, pastdagi menyu tugmalaridan foydalaning."
+        "info_text": "🌟 <b>VibeStudio & VibeMusic</b> — TikTok va Instagram uchun estetik Spotify videolarni va musiqalarni 1 daqiqada tayyorlab beruvchi bepul platforma!\n\n👨‍💻 Dasturchi & Admin: @IBROXIM_I6",
+        "select_lang": "Tilni tanlang / Выберите язык:"
     },
     "ru": {
-        "welcome": "Здравствуйте! Добро пожаловать в <b>VibeStudio</b>. 🎧✨\n\n🎬 Все функции (создание Spotify видео, нарезка аудио, 70+ шрифтов) <b>100% БЕСПЛАТНЫ и БЕЗ ОГРАНИЧЕНИЙ!</b>\n\nВыберите нужный раздел из меню ниже:",
-        "btn_studio": "🎤 Создать Spotify Видео",
-        "btn_trimmer": "✂️ Студия Нарезки Аудио",
+        "welcome": "Здравствуйте! Добро пожаловать в <b>VibeStudio</b>. 🎧✨\n\n🎬 Все функции (создание Spotify видео, нарезка аудио, 70+ шрифтов) <b>100% БЕСПЛАТНЫ и БЕЗ ОГРАНИЧЕНИЙ!</b>\n\n👇 Для запуска приложения нажмите кнопку ниже:",
+        "btn_open_app": "🎨 Приложение VibeStudio",
         "btn_lang": "🌐 Сменить Язык",
         "btn_info": "ℹ️ О Боте",
-        "open_app_btn": "🎨 Открыть VibeStudio",
         "info_text": "🌟 <b>VibeStudio & VibeMusic</b> — бесплатная платформа для создания эстетичных Spotify видео для TikTok и Instagram за 1 минуту!\n\n👨‍💻 Разработчик: @IBROXIM_I6",
-        "select_lang": "Tilni tanlang / Выберите язык:",
-        "unknown": "⚠️ Неизвестная команда! Пожалуйста, используйте кнопки меню."
+        "select_lang": "Tilni tanlang / Выберите язык:"
     }
 }
 
-# ==================== 5. ASOSIY MENYU TUGMALARI ====================
+# ==================== 5. ASOSIY MENYU ====================
 def get_main_menu(lang):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row(KeyboardButton(TEXTS[lang]["btn_studio"]))
-    markup.row(KeyboardButton(TEXTS[lang]["btn_trimmer"]))
+    markup.row(KeyboardButton(TEXTS[lang]["btn_open_app"], web_app=WebAppInfo(url=WEBAPP_URL)))
     markup.row(KeyboardButton(TEXTS[lang]["btn_lang"]), KeyboardButton(TEXTS[lang]["btn_info"]))
     return markup
 
-# ==================== 6. HANDLERS (BUYRUQLAR) ====================
-
+# ==================== 6. HANDLERS ====================
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     user_id = message.from_user.id
@@ -134,7 +125,6 @@ def start_handler(message):
     
     if not user:
         save_user(user_id, message.from_user.username or "user", "uz")
-        # 1-marta kirganida til tanlash
         markup = InlineKeyboardMarkup()
         markup.add(
             InlineKeyboardButton("🇺🇿 O'zbekcha", callback_data="lang_uz"),
@@ -143,25 +133,15 @@ def start_handler(message):
         bot.send_message(message.chat.id, "Tilni tanlang / Выберите язык:", reply_markup=markup)
     else:
         lang = user[2] or 'uz'
-        # Asosiy xabar va Mini App tugmasi
-        inline_btn = InlineKeyboardMarkup()
-        inline_btn.add(InlineKeyboardButton(text=TEXTS[lang]["open_app_btn"], web_app=WebAppInfo(url=WEBAPP_URL)))
         bot.send_message(message.chat.id, TEXTS[lang]["welcome"], parse_mode="HTML", reply_markup=get_main_menu(lang))
-        bot.send_message(message.chat.id, "👇 Ilovani to'liq ekranda ochish uchun bosing:", reply_markup=inline_btn)
 
-# TILNI O'ZGARTIRISH (INLINE CALLBACK)
 @bot.callback_query_handler(func=lambda call: call.data.startswith('lang_'))
 def lang_callback(call):
     lang = call.data.split('_')[1]
     set_lang(call.from_user.id, lang)
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    
-    inline_btn = InlineKeyboardMarkup()
-    inline_btn.add(InlineKeyboardButton(text=TEXTS[lang]["open_app_btn"], web_app=WebAppInfo(url=WEBAPP_URL)))
     bot.send_message(call.message.chat.id, TEXTS[lang]["welcome"], parse_mode="HTML", reply_markup=get_main_menu(lang))
-    bot.send_message(call.message.chat.id, "👇 Ilovani to'liq ekranda ochish uchun bosing:", reply_markup=inline_btn)
 
-# ADMIN STATISTIKA BUYRUG'I (/stats)
 @bot.message_handler(commands=['stats'])
 def stats_handler(message):
     if message.from_user.id != ADMIN_ID:
@@ -169,7 +149,6 @@ def stats_handler(message):
     total = get_total_users()
     bot.send_message(message.chat.id, f"📊 <b>VibeStudio Statistikasi:</b>\n\n👥 Jami foydalanuvchilar: <b>{total} ta</b>\n⚡️ Server holati: <b>24/7 Faol (Live)</b>", parse_mode="HTML")
 
-# ADMIN BROADCAST BUYRUG'I (/broadcast)
 @bot.message_handler(commands=['broadcast'])
 def broadcast_handler(message):
     if message.from_user.id != ADMIN_ID:
@@ -195,7 +174,6 @@ def broadcast_handler(message):
             pass
     bot.send_message(message.chat.id, f"✅ Xabar <b>{sent} ta</b> foydalanuvchiga yuborildi!", parse_mode="HTML")
 
-# TEKSTLI BUYRUQLAR BOSHGRUVI
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
     user_id = message.from_user.id
@@ -203,7 +181,6 @@ def message_handler(message):
     lang = user[2] if user else 'uz'
     text = message.text
 
-    # TILNI O'ZGARTIRISH
     if text in [TEXTS["uz"]["btn_lang"], TEXTS["ru"]["btn_lang"]]:
         markup = InlineKeyboardMarkup()
         markup.add(
@@ -213,20 +190,11 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS[lang]["select_lang"], reply_markup=markup)
         return
 
-    # BOT HAQIDA
     if text in [TEXTS["uz"]["btn_info"], TEXTS["ru"]["btn_info"]]:
         bot.send_message(message.chat.id, TEXTS[lang]["info_text"], parse_mode="HTML")
         return
 
-    # STUDIYA YOKI KESISH TUGMASI (MINI APP OCHISH)
-    if text in [TEXTS["uz"]["btn_studio"], TEXTS["ru"]["btn_studio"], TEXTS["uz"]["btn_trimmer"], TEXTS["ru"]["btn_trimmer"]]:
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text=TEXTS[lang]["open_app_btn"], web_app=WebAppInfo(url=WEBAPP_URL)))
-        bot.send_message(message.chat.id, f"🎬 <b>VibeStudio'ni ishga tushirish:</b>\nQuyidagi tugmani bosing va cheksiz foydalaning:", parse_mode="HTML", reply_markup=markup)
-        return
-
-    # NOMA'LUM BUYRUQ
-    bot.send_message(message.chat.id, TEXTS[lang]["unknown"])
+    bot.send_message(message.chat.id, TEXTS[lang]["welcome"], parse_mode="HTML", reply_markup=get_main_menu(lang))
 
 # ==================== 7. AUTO-RECONNECT 24/7 POLLING ====================
 if __name__ == '__main__':
