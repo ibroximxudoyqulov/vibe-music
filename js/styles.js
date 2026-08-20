@@ -5,7 +5,7 @@ let isSpectrumActive = false;
 let customBgUrl = null;
 
 // SIZNING BOT TOKENINGIZ:
-const BOT_TOKEN = "8996809088:AAHpjXuUsA2LkLW0szvg4AZb8Fa0scv1p2M";
+const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
 // 1. Sahifalarni almashtirish (Studiya / Kesish)
 window.switchTab = function(tab) {
