@@ -508,3 +508,32 @@ function bufferToWave(abuffer, len) {
     }
     return new Blob([out], { type: "audio/mp3" });
 }
+// SHAXSIY TTF / OTF SHRIFT YUKLASH FUNKSIYASI
+window.handleCustomFontUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fontName = "CustomFont_" + Date.now();
+    const fontUrl = URL.createObjectURL(file);
+
+    const newStyle = document.createElement('style');
+    newStyle.appendChild(document.createTextNode(`
+        @font-face {
+            font-family: '${fontName}';
+            src: url('${fontUrl}');
+        }
+    `));
+    document.head.appendChild(newStyle);
+
+    // Tanlagichga qo'shish va aktiv qilish
+    const select = document.getElementById('font-family-select');
+    if (select) {
+        const opt = document.createElement('option');
+        opt.value = `'${fontName}', sans-serif`;
+        opt.innerText = `🌟 Shaxsiy: ${file.name.replace(/\.[^/.]+$/, "")}`;
+        opt.selected = true;
+        select.prepend(opt);
+        window.updatePreviewFont(opt.value);
+    }
+    alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi va matnga qo'llandi!");
+};
