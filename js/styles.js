@@ -10,19 +10,28 @@ const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 // 1. Sahifalarni almashtirish (Studiya / Kesish)
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
+    const whatsapp = document.getElementById('tab-whatsapp');
     const trimmer = document.getElementById('tab-trimmer');
     const btnStudio = document.getElementById('nav-btn-studio');
+    const btnWa = document.getElementById('nav-btn-whatsapp');
     const btnTrimmer = document.getElementById('nav-btn-trimmer');
+
+    studio.classList.add('hidden');
+    whatsapp.classList.add('hidden');
+    trimmer.classList.add('hidden');
+
+    btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
+    btnWa.className = "flex flex-col items-center text-gray-400 space-y-1";
+    btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
 
     if (tab === 'studio') {
         studio.classList.remove('hidden');
-        trimmer.classList.add('hidden');
         btnStudio.className = "flex flex-col items-center text-brand-red space-y-1";
-        btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
-    } else {
-        studio.classList.add('hidden');
+    } else if (tab === 'whatsapp') {
+        whatsapp.classList.remove('hidden');
+        btnWa.className = "flex flex-col items-center text-emerald-400 space-y-1";
+    } else if (tab === 'trimmer') {
         trimmer.classList.remove('hidden');
-        btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
         btnTrimmer.className = "flex flex-col items-center text-brand-cyan space-y-1";
     }
 };
