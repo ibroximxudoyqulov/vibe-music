@@ -11,7 +11,7 @@ window.waPartnerAvatarUrl = null;
 window.waMyAvatarUrl = null;
 let waActiveIndex = -1;
 
-const BOT_TOKEN = "8824021433:AAEVv5sJ9f5RocgvZKR9zRzX5D0gBd9FzJA";
+const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
 // 1. WhatsApp uchun MP3 yuklash va Pleyerni ochish
 window.handleWaAudioUpload = function(event) {
