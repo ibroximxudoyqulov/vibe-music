@@ -81,12 +81,13 @@ def set_lang(user_id, lang):
     conn.commit()
     conn.close()
 
-# JAMI FOYDALANUVCHILAR SONINI OLISH
+# JAMI UNIKAL ODAMLAR SONINI SANASH
 def get_total_users():
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM users")
-    count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(DISTINCT user_id) FROM users")
+    row = cursor.fetchone()
+    count = row[0] if row else 0
     conn.close()
     return count
 
