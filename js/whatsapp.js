@@ -1,4 +1,4 @@
-// ==================== 1:1 EXACT WHATSAPP 60FPS CHAT ENGINE ====================
+// ==================== 1:1 RETINA HD 60FPS WHATSAPP CHAT ENGINE ====================
 
 window.waAudioElement = new Audio();
 let isWaPlaying = false;
@@ -15,7 +15,7 @@ let waActiveIndex = -1;
 // SIZNING BOT TOKENINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
-// 1. MP3 Yuklash
+// 1. MP3 Faylni Yuklash
 window.handleWaAudioUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -36,7 +36,6 @@ window.handleWaAudioUpload = function(event) {
     document.getElementById('wa-audio-player-box').classList.add('flex');
 };
 
-// Play / Pause
 window.toggleWaAudioPlay = function() {
     const audio = window.waAudioElement;
     if (!audio.src) {
@@ -51,7 +50,7 @@ window.toggleWaAudioPlay = function() {
         if (icon) icon.className = "fa-solid fa-play";
     } else {
         audio.play();
-        isPlaying = true;
+        isWaPlaying = true;
         if (icon) icon.className = "fa-solid fa-pause";
     }
 };
@@ -93,14 +92,13 @@ window.waAudioElement.ontimeupdate = function() {
     }
 };
 
-// 2. Avatarlarni yuklash
+// 2. Profil Rasmini Yuklash
 window.handleWaPartnerAvatar = function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     window.waPartnerAvatarUrl = URL.createObjectURL(file);
     
-    // Videoga chizish uchun Image ob'yekti
     const imgObj = new Image();
     imgObj.src = window.waPartnerAvatarUrl;
     window.waPartnerAvatarImgObj = imgObj;
@@ -139,7 +137,7 @@ window.updateWaContactInfo = function() {
     document.getElementById('wa-preview-status').innerText = window.waStatus;
 };
 
-// 3. Matnni tayyorlash va 1-Tugmali Kim aytishini belgilash
+// 3. Dialog Matnini Tayyorlash
 window.parseWaLyricsForSync = function() {
     const raw = document.getElementById('raw-wa-lyrics-input').value.trim();
     if (!raw) {
@@ -204,7 +202,6 @@ function highlightNextWaSyncLine() {
     }
 }
 
-// 4. Vaqtni saqlash
 window.timestampWaCurrentLine = function() {
     const audio = window.waAudioElement;
     if (!audio || !audio.src) {
@@ -232,7 +229,7 @@ window.timestampWaCurrentLine = function() {
     }
 };
 
-// 5. Jonli Preview (Animatsiyali 3 ta Nuqta Bilan)
+// 4. Jonli Preview (Animatsiyali 3 ta Nuqta Bilan)
 window.updateLiveWaChatDisplay = function(currentTime) {
     if (!window.waLyricsData || window.waLyricsData.length === 0) return;
 
@@ -250,9 +247,9 @@ window.updateLiveWaChatDisplay = function(currentTime) {
             if (isMe) {
                 html += `
                     <div class="flex justify-end items-end space-x-1.5 my-2 animate-fade-in">
-                        <div class="bg-[#005c4b] text-white text-xs p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-md flex items-end space-x-2">
-                            <span class="leading-relaxed font-medium break-words">${msg.text}</span>
-                            <span class="text-[9px] text-white/70 font-mono flex items-center space-x-0.5 flex-shrink-0">
+                        <div class="bg-[#005c4b] text-[#e9edef] text-xs p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-md flex items-end space-x-2">
+                            <span class="leading-relaxed font-normal break-words">${msg.text}</span>
+                            <span class="text-[9px] text-[#8696a0] font-mono flex items-center space-x-0.5 flex-shrink-0">
                                 <span>${timeFormatted}</span>
                                 <span class="text-[#53bdeb]">✓✓</span>
                             </span>
@@ -262,9 +259,9 @@ window.updateLiveWaChatDisplay = function(currentTime) {
             } else {
                 html += `
                     <div class="flex justify-start items-end space-x-1.5 my-2 animate-fade-in">
-                        <div class="bg-[#1f2c34] text-white text-xs p-3 rounded-2xl rounded-tl-none max-w-[80%] shadow-md flex items-end space-x-2">
-                            <span class="leading-relaxed font-medium break-words">${msg.text}</span>
-                            <span class="text-[9px] text-gray-400 font-mono flex-shrink-0">${timeFormatted}</span>
+                        <div class="bg-[#202c33] text-[#e9edef] text-xs p-3 rounded-2xl rounded-tl-none max-w-[80%] shadow-md flex items-end space-x-2">
+                            <span class="leading-relaxed font-normal break-words">${msg.text}</span>
+                            <span class="text-[9px] text-[#8696a0] font-mono flex-shrink-0">${timeFormatted}</span>
                         </div>
                     </div>
                 `;
@@ -274,30 +271,18 @@ window.updateLiveWaChatDisplay = function(currentTime) {
         }
     });
 
-    // PECHATAYET (3 TA NUQTA) ANIMATSIYASI
-    if (nextMsg && nextMsg.time - currentTime <= 2.0) {
+    // Jonli "yozmoqda..." animatsiyasi
+    if (nextMsg && nextMsg.time - currentTime <= 1.8) {
         const isNextMe = nextMsg.sender === 'me';
-        if (isNextMe) {
-            html += `
-                <div class="flex justify-end my-1.5 animate-pulse">
-                    <div class="bg-[#005c4b]/80 text-white text-xs px-3 py-2 rounded-2xl rounded-tr-none flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></span>
-                        <span class="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style="animation-delay:0.2s"></span>
-                        <span class="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style="animation-delay:0.4s"></span>
-                    </div>
+        html += `
+            <div class="flex ${isNextMe ? 'justify-end' : 'justify-start'} my-1.5 animate-pulse">
+                <div class="${isNextMe ? 'bg-[#005c4b]' : 'bg-[#202c33]'} px-3.5 py-2.5 rounded-2xl ${isNextMe ? 'rounded-tr-none' : 'rounded-tl-none'} flex items-center space-x-1 shadow-md">
+                    <span class="w-1.5 h-1.5 bg-[#8696a0] rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-[#8696a0] rounded-full animate-bounce" style="animation-delay:0.2s"></span>
+                    <span class="w-1.5 h-1.5 bg-[#8696a0] rounded-full animate-bounce" style="animation-delay:0.4s"></span>
                 </div>
-            `;
-        } else {
-            html += `
-                <div class="flex justify-start my-1.5 animate-pulse">
-                    <div class="bg-[#1f2c34]/80 text-white text-xs px-3 py-2 rounded-2xl rounded-tl-none flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"></span>
-                        <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style="animation-delay:0.2s"></span>
-                        <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style="animation-delay:0.4s"></span>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
     }
 
     chatBox.innerHTML = html;
@@ -310,8 +295,8 @@ function formatMessageClock(sec) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-// Canvasda yumaloq to'rtburchak chizish (WhatsApp pufakchalari uchun)
-function drawWhatsAppBubble(ctx, x, y, width, height, radius, color) {
+// 5. Canvas Dumchali (Tail) Haqiqiy WhatsApp Pufakchasini Chizish
+function drawRealWhatsAppBubble(ctx, x, y, width, height, radius, color, isMe) {
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -325,9 +310,23 @@ function drawWhatsAppBubble(ctx, x, y, width, height, radius, color) {
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
     ctx.fill();
+
+    // Haqiqiy WhatsApp Dumchasi (Tail)
+    ctx.beginPath();
+    if (isMe) {
+        ctx.moveTo(x + width - 5, y);
+        ctx.lineTo(x + width + 15, y);
+        ctx.lineTo(x + width, y + 20);
+    } else {
+        ctx.moveTo(x + 5, y);
+        ctx.lineTo(x - 15, y);
+        ctx.lineTo(x, y + 20);
+    }
+    ctx.closePath();
+    ctx.fill();
 }
 
-// ==================== 6. HAQIQIY 1:1 WHATSAPP 60FPS VIDEO EKSPORT ====================
+// ==================== 6. ULTRA-HD 60FPS 1:1 WHATSAPP VIDEO EKSPORT ====================
 window.exportWaAndSendToBot = async function() {
     const audio = window.waAudioElement;
     if (!audio || !audio.src) {
@@ -354,10 +353,11 @@ window.exportWaAndSendToBot = async function() {
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
     const btn = document.getElementById('btn-wa-export-send');
-    btn.innerHTML = `⏳ 1:1 WhatsApp Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Ultra-HD Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
+        // 1. Audio Buffer Dekod qilish
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const response = await fetch(audio.src);
         const arrayBuffer = await response.arrayBuffer();
@@ -370,23 +370,48 @@ window.exportWaAndSendToBot = async function() {
         bufferSource.connect(audioDest);
         bufferSource.connect(audioCtx.destination);
 
+        // 2. 1080x1920 Full HD Retina Canvas
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
-        const canvasStream = canvas.captureStream(60);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const canvasStream = canvas.captureStream(60); // Haqiqiy 60 FPS
 
         const combinedStream = new MediaStream([
             ...canvasStream.getVideoTracks(),
             ...audioDest.stream.getAudioTracks()
         ]);
 
+        // 12 Mbps Yuqori Tiniqlik
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
+
+        // 3. Matnlarni QOTMASLIGI UCHUN oldindan hisoblab olish (Pre-calculation)
+        ctx.font = "38px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        const precomputed = lyrics.map(msg => {
+            const words = msg.text.split(' ');
+            let lines = [], cur = '';
+            for (let w = 0; w < words.length; w++) {
+                let test = cur + words[w] + ' ';
+                if (ctx.measureText(test).width > 620 && w > 0) {
+                    lines.push(cur);
+                    cur = words[w] + ' ';
+                } else {
+                    cur = test;
+                }
+            }
+            lines.push(cur);
+            const bWidth = Math.min(760, Math.max(280, Math.max(...lines.map(l => ctx.measureText(l).width)) + 80));
+            const bHeight = lines.length * 52 + 50;
+            return { ...msg, lines, bWidth, bHeight };
+        });
 
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
@@ -448,139 +473,144 @@ window.exportWaAndSendToBot = async function() {
             ctx.fillStyle = "#0b141a";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // 2. WhatsApp Header Bar (#1f2c34)
-            ctx.fillStyle = "#1f2c34";
-            ctx.fillRect(0, 0, 1080, 220);
+            // 2. Xabarlarni chizish va Silliq Scroll
+            let totalHeight = 0;
+            precomputed.forEach(m => {
+                if (m.time !== null && elapsedTime >= m.time) {
+                    totalHeight += m.bHeight + 25;
+                }
+            });
 
-            // Qaytish belgisi
-            ctx.fillStyle = "#8696a0";
-            ctx.font = "bold 46px sans-serif";
-            ctx.fillText("←", 40, 130);
-
-            // Profil Rasmi (Aylana)
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(160, 110, 50, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.clip();
-            if (window.waPartnerAvatarImgObj) {
-                ctx.drawImage(window.waPartnerAvatarImgObj, 110, 60, 100, 100);
-            } else {
-                ctx.fillStyle = "#6b7280";
-                ctx.fillRect(110, 60, 100, 100);
+            // Agar xabarlar ekranga sig'may qolsa, kamera silliq yuqoriga suriladi
+            let startY = 260;
+            const maxVisibleY = 1680;
+            if (startY + totalHeight > maxVisibleY) {
+                startY -= (startY + totalHeight - maxVisibleY);
             }
-            ctx.restore();
 
-            // Ism va Status
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 44px sans-serif";
-            ctx.textAlign = "left";
-            ctx.fillText(window.waContactName, 235, 105);
-
-            ctx.fillStyle = "#25d366";
-            ctx.font = "30px sans-serif";
-            ctx.fillText(window.waStatus, 235, 155);
-
-            // Header Ikonkalari (Video, Tel, Nuqtalar)
-            ctx.fillStyle = "#8696a0";
-            ctx.font = "38px sans-serif";
-            ctx.fillText("📹    📞    ⋮", 800, 125);
-
-            // 3. Xabarlarni chizish (Multi-line Wrap bilan)
-            let currentY = 280;
+            let curY = startY;
             let nextMsg = null;
 
-            lyrics.forEach((msg) => {
+            precomputed.forEach((msg) => {
                 if (msg.time !== null && elapsedTime >= msg.time) {
                     const isMe = msg.sender === 'me';
                     const timeFormatted = formatMessageClock(msg.time);
-                    
-                    // So'zlarni 2-qatorga bo'lish
-                    ctx.font = "36px sans-serif";
-                    const words = msg.text.split(' ');
-                    let lines = [];
-                    let curLine = '';
-                    for (let w = 0; w < words.length; w++) {
-                        let testL = curLine + words[w] + ' ';
-                        if (ctx.measureText(testL).width > 600 && w > 0) {
-                            lines.push(curLine);
-                            curLine = words[w] + ' ';
-                        } else {
-                            curLine = testL;
-                        }
-                    }
-                    lines.push(curLine);
+                    const bX = isMe ? (1080 - msg.bWidth - 45) : 45;
+                    const bColor = isMe ? "#005c4b" : "#202c33";
 
-                    const bubbleHeight = (lines.length * 48) + 60;
+                    // Pufakcha
+                    drawRealWhatsAppBubble(ctx, bX, curY, msg.bWidth, msg.bHeight, 20, bColor, isMe);
 
+                    // Matn
+                    ctx.fillStyle = "#e9edef";
+                    ctx.font = "38px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+                    ctx.textAlign = "left";
+                    msg.lines.forEach((line, li) => {
+                        ctx.fillText(line, bX + 25, curY + 46 + (li * 52));
+                    });
+
+                    // Soat va Moviy Qushchalar
+                    ctx.font = "24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
                     if (isMe) {
-                        // Yashil Pufakcha (O'ngda)
-                        drawWhatsAppBubble(ctx, 330, currentY, 700, bubbleHeight, 24, "#005c4b");
-                        ctx.fillStyle = "#ffffff";
-                        lines.forEach((l, li) => {
-                            ctx.fillText(l, 360, currentY + 50 + (li * 48));
-                        });
-                        // Vaqt va Moviy Qushchalar
-                        ctx.fillStyle = "rgba(255,255,255,0.7)";
-                        ctx.font = "26px sans-serif";
-                        ctx.fillText(timeFormatted, 900, currentY + bubbleHeight - 15);
-                        ctx.fillStyle = "#53bdeb";
-                        ctx.fillText("✓✓", 975, currentY + bubbleHeight - 15);
-                    } else {
-                        // Qora Pufakcha (Chapda)
-                        drawWhatsAppBubble(ctx, 50, currentY, 700, bubbleHeight, 24, "#1f2c34");
-                        ctx.fillStyle = "#ffffff";
-                        lines.forEach((l, li) => {
-                            ctx.fillText(l, 80, currentY + 50 + (li * 48));
-                        });
                         ctx.fillStyle = "#8696a0";
-                        ctx.font = "26px sans-serif";
-                        ctx.fillText(timeFormatted, 660, currentY + bubbleHeight - 15);
+                        ctx.fillText(timeFormatted, bX + msg.bWidth - 105, curY + msg.bHeight - 12);
+                        ctx.fillStyle = "#53bdeb";
+                        ctx.fillText("✓✓", bX + msg.bWidth - 42, curY + msg.bHeight - 12);
+                    } else {
+                        ctx.fillStyle = "#8696a0";
+                        ctx.fillText(timeFormatted, bX + msg.bWidth - 75, curY + msg.bHeight - 12);
                     }
 
-                    currentY += bubbleHeight + 25;
+                    curY += msg.bHeight + 25;
                 } else if (msg.time !== null && elapsedTime < msg.time && !nextMsg) {
                     nextMsg = msg;
                 }
             });
 
-            // 4. JONLI 3 TA NUQTA (PECHATAYET •••) CHIZISH
-            if (nextMsg && nextMsg.time - elapsedTime <= 1.8) {
+            // 3. JONLI 3 TA NUQTA (PECHATAYET •••) CHIZISH
+            let isTyping = false;
+            if (nextMsg && (nextMsg.time - elapsedTime <= 1.6)) {
+                isTyping = !nextMsg.sender || nextMsg.sender === 'partner';
                 const isNextMe = nextMsg.sender === 'me';
-                const dotY = currentY;
-                const dotColor = isNextMe ? "#005c4b" : "#1f2c34";
-                const dotX = isNextMe ? 850 : 50;
+                const dotX = isNextMe ? 860 : 45;
+                const dotColor = isNextMe ? "#005c4b" : "#202c33";
 
-                drawWhatsAppBubble(ctx, dotX, dotY, 180, 80, 24, dotColor);
-                
-                // Sakrovchi 3 ta nuqta
-                const bounce = Math.sin(elapsedTime * 8) * 8;
-                ctx.fillStyle = "#ffffff";
+                drawRealWhatsAppBubble(ctx, dotX, curY, 170, 75, 20, dotColor, isNextMe);
+
+                // Sakrovchi oq nuqtalar
+                const bounce = Math.sin(elapsedTime * 9) * 6;
+                ctx.fillStyle = "#8696a0";
                 ctx.beginPath();
-                ctx.arc(dotX + 50, dotY + 40 + bounce, 8, 0, Math.PI * 2);
-                ctx.arc(dotX + 90, dotY + 40 - bounce, 8, 0, Math.PI * 2);
-                ctx.arc(dotX + 130, dotY + 40 + bounce, 8, 0, Math.PI * 2);
+                ctx.arc(dotX + 45, curY + 38 + bounce, 7, 0, Math.PI * 2);
+                ctx.arc(dotX + 85, curY + 38 - bounce, 7, 0, Math.PI * 2);
+                ctx.arc(dotX + 125, curY + 38 + bounce, 7, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // 5. WhatsApp Footer Input Bar (#1f2c34)
-            ctx.fillStyle = "#1f2c34";
-            ctx.fillRect(0, 1770, 1080, 150);
+            // 4. WhatsApp Header Bar (#202c33) - Xabarlar ustida turadi
+            ctx.fillStyle = "#202c33";
+            ctx.fillRect(0, 0, 1080, 210);
+            ctx.strokeStyle = "#2a3942";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 210, 1080, 1);
 
-            // Input qutisi
-            drawWhatsAppBubble(ctx, 30, 1795, 870, 100, 50, "#2a3942");
+            // Qaytish ←
+            ctx.fillStyle = "#8696a0";
+            ctx.font = "bold 44px sans-serif";
+            ctx.fillText("←", 40, 125);
+
+            // Profil Rasmi
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(155, 105, 48, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            if (window.waPartnerAvatarImgObj) {
+                ctx.drawImage(window.waPartnerAvatarImgObj, 107, 57, 96, 96);
+            } else {
+                ctx.fillStyle = "#6b7280";
+                ctx.fillRect(107, 57, 96, 96);
+            }
+            ctx.restore();
+
+            // Ism
+            ctx.fillStyle = "#e9edef";
+            ctx.font = "bold 42px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(window.waContactName, 230, 100);
+
+            // Status (Agar yozayotgan bo'lsa "yozmoqda..." bo'ladi!)
+            if (isTyping) {
+                ctx.fillStyle = "#25d366";
+                ctx.font = "28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+                ctx.fillText("yozmoqda...", 230, 148);
+            } else {
+                ctx.fillStyle = "#8696a0";
+                ctx.font = "28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+                ctx.fillText(window.waStatus, 230, 148);
+            }
+
+            // O'ngdagi Ikonkalar (Video, Tel, Nuqtalar)
+            ctx.fillStyle = "#8696a0";
+            ctx.font = "38px sans-serif";
+            ctx.fillText("📹    📞    ⋮", 800, 120);
+
+            // 5. WhatsApp Footer Input Bar (#202c33)
+            ctx.fillStyle = "#202c33";
+            ctx.fillRect(0, 1750, 1080, 170);
+
+            drawRealWhatsAppBubble(ctx, 30, 1775, 870, 105, 50, "#2a3942", false);
             ctx.fillStyle = "#8696a0";
             ctx.font = "36px sans-serif";
-            ctx.fillText("😊  Сообщение                📎", 60, 1860);
+            ctx.fillText("😊  Сообщение                📎", 65, 1842);
 
-            // Yashil Mikrofon Doirasi
             ctx.fillStyle = "#00a884";
             ctx.beginPath();
-            ctx.arc(980, 1845, 50, 0, Math.PI * 2);
+            ctx.arc(975, 1827, 48, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = "#ffffff";
             ctx.font = "40px sans-serif";
-            ctx.fillText("🎤", 960, 1860);
+            ctx.fillText("🎤", 955, 1842);
 
             requestAnimationFrame(renderFrame);
         }
