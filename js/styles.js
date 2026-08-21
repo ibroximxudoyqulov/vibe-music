@@ -1,48 +1,47 @@
-// ==================== 1080x1920 60FPS OVOZLI VIDEO & INSHOT TOUCH TRIMMER ====================
+// ==================== CYBERGLOW PARTICLES & KINETIC 60FPS EXPORTER ====================
 
 let isVinylActive = false;
-let isSpectrumActive = false;
+let isParticlesActive = true; // Yulduzchalar yoqilgan
 let customBgUrl = null;
-
-// SIZNING BOT TOKENINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
-// 1. Sahifalarni almashtirish (Studiya / Kesish)
-window.switchTab = function(tab) {
-    const studio = document.getElementById('tab-studio');
-    const whatsapp = document.getElementById('tab-whatsapp');
-    const trimmer = document.getElementById('tab-trimmer');
-    const btnStudio = document.getElementById('nav-btn-studio');
-    const btnWa = document.getElementById('nav-btn-whatsapp');
-    const btnTrimmer = document.getElementById('nav-btn-trimmer');
+// Uchuvchi zarrachalar massivi
+const particles = [];
+for (let i = 0; i < 45; i++) {
+    particles.push({
+        x: Math.random() * 1080,
+        y: Math.random() * 1920,
+        radius: Math.random() * 3 + 1,
+        speedY: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.7 + 0.3
+    });
+}
 
-    studio.classList.add('hidden');
-    whatsapp.classList.add('hidden');
-    trimmer.classList.add('hidden');
-
-    btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
-    btnWa.className = "flex flex-col items-center text-gray-400 space-y-1";
-    btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
-
-    if (tab === 'studio') {
-        studio.classList.remove('hidden');
-        btnStudio.className = "flex flex-col items-center text-brand-red space-y-1";
-    } else if (tab === 'whatsapp') {
-        whatsapp.classList.remove('hidden');
-        btnWa.className = "flex flex-col items-center text-emerald-400 space-y-1";
-    } else if (tab === 'trimmer') {
-        trimmer.classList.remove('hidden');
-        btnTrimmer.className = "flex flex-col items-center text-brand-cyan space-y-1";
-    }
-};
-
-// 2. Shriftni yangilash
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
-// 3. Shaxsiy fon yuklash (Rasm yoki Video)
+window.handleCustomFontUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const fontName = "CustomFont_" + Date.now();
+    const fontUrl = URL.createObjectURL(file);
+    const newStyle = document.createElement('style');
+    newStyle.appendChild(document.createTextNode(`@font-face { font-family: '${fontName}'; src: url('${fontUrl}'); }`));
+    document.head.appendChild(newStyle);
+    const select = document.getElementById('font-family-select');
+    if (select) {
+        const opt = document.createElement('option');
+        opt.value = `'${fontName}', sans-serif`;
+        opt.innerText = `🌟 Shaxsiy: ${file.name.replace(/\.[^/.]+$/, "")}`;
+        opt.selected = true;
+        select.prepend(opt);
+        window.updatePreviewFont(opt.value);
+    }
+    alert("🎉 Shaxsiy shrift yuklandi va qo'llandi!");
+};
+
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -55,7 +54,6 @@ window.handleCustomBgUpload = function(event) {
     }
 };
 
-// 4. Vinil va Ekvalayzer
 window.toggleVinylEffect = function() {
     isVinylActive = !isVinylActive;
     const vinylBox = document.getElementById('preview-vinyl-box');
@@ -69,22 +67,16 @@ window.toggleVinylEffect = function() {
     }
 };
 
-window.toggleSpectrumEffect = function() {
-    isSpectrumActive = !isSpectrumActive;
-    const spectrumBox = document.getElementById('preview-spectrum-box');
-    const btn = document.getElementById('btn-spectrum');
-    if (isSpectrumActive) {
-        spectrumBox.classList.remove('hidden');
-        spectrumBox.classList.add('flex');
+window.toggleParticlesEffect = function() {
+    isParticlesActive = !isParticlesActive;
+    const btn = document.getElementById('btn-particles');
+    if (isParticlesActive) {
         btn.classList.add('border-brand-cyan', 'text-brand-cyan');
     } else {
-        spectrumBox.classList.add('hidden');
-        spectrumBox.classList.remove('flex');
         btn.classList.remove('border-brand-cyan', 'text-brand-cyan');
     }
 };
 
-// 5. Canvas matnlarni chiroyli 2-qatorga bo'lib chizish
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
     let line = '';
@@ -103,7 +95,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 1. 100% OVOZLI VA RANGLI 60FPS VIDEO EKSPORT ====================
+// ==================== 1. 100% STEREO OVOZLI & CYBERGLOW 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -130,7 +122,7 @@ window.exportAndSendToBot = async function() {
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ Ovozli video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Trend Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -150,6 +142,9 @@ window.exportAndSendToBot = async function() {
         canvas.width = 1080;
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
         const canvasStream = canvas.captureStream(60);
 
         const combinedStream = new MediaStream([
@@ -159,7 +154,7 @@ window.exportAndSendToBot = async function() {
 
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
@@ -167,13 +162,13 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Ovozli video botingizga yuborilmoqda...";
+            btn.innerHTML = "📤 Video botingizga yuborilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
 
             const formData = new FormData();
             formData.append('chat_id', userId);
-            formData.append('video', blob, `Spotify_Lyric_${Date.now()}.mp4`);
-            formData.append('caption', `🎬 <b>VibeStudio Ovozli Spotify Videongiz Tayyor!</b>\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Videoni ustiga bosib 'Galereyaga saqlash' qilishingiz mumkin!`);
+            formData.append('video', blob, `CyberGlow_Video_${Date.now()}.mp4`);
+            formData.append('caption', `✨ <b>VibeStudio 60FPS Trend Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
             formData.append('parse_mode', 'HTML');
 
             try {
@@ -183,25 +178,25 @@ window.exportAndSendToBot = async function() {
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    alert("🎉 Ovozli video botingiz lichkasiga yetib bordi! Telegramni oching.");
+                    alert("🎉 60FPS Trend video botingiz lichkasiga yetib bordi! Telegramni oching.");
                 } else {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Spotify_Lyric_${Date.now()}.mp4`;
+                    a.download = `CyberGlow_Video_${Date.now()}.mp4`;
                     a.click();
-                    alert("✅ Ovozli video telefoningizga yuklandi!");
+                    alert("✅ Video telefoningizga yuklandi!");
                 }
             } catch (err) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Spotify_Lyric_${Date.now()}.mp4`;
+                a.download = `CyberGlow_Video_${Date.now()}.mp4`;
                 a.click();
                 alert("✅ Video tayyorlandi va yuklandi!");
             }
 
-            btn.innerHTML = "🎬 Ovozli Videoni Tayyorlash & Botga Yuborish";
+            btn.innerHTML = "🎬 60FPS Trend Videoni Botga Yuborish";
             btn.disabled = false;
         };
 
@@ -210,7 +205,7 @@ window.exportAndSendToBot = async function() {
         const startTime = audioCtx.currentTime;
 
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
-        const selectedTextColor = window.activeLyricsColor || "#ffffff";
+        const selectedGlowColor = window.activeLyricsColor || "#00f2fe";
 
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
@@ -223,46 +218,70 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            ctx.fillStyle = "#121212";
+            // 1. Qorong'u Estetik Fon (#09090d)
+            ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
+            // 2. Uchuvchi Yulduzchalar (Particles) Chizish
+            if (isParticlesActive) {
+                particles.forEach(p => {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y -= p.speedY;
+                    if (p.y < 0) {
+                        p.y = 1920;
+                        p.x = Math.random() * 1080;
+                    }
+                });
+            }
+
+            // 3. Header Bar
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 40px Montserrat, sans-serif";
+            ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
-            ctx.fillText(document.getElementById('preview-track-title').innerText, 100, 180);
+            ctx.fillText(document.getElementById('preview-track-title').innerText, 90, 150);
 
-            ctx.fillStyle = "#a7a7a7";
+            ctx.fillStyle = "#8696a0";
             ctx.font = "30px Montserrat, sans-serif";
-            ctx.fillText(document.getElementById('preview-track-artist').innerText, 100, 230);
+            ctx.fillText(document.getElementById('preview-track-artist').innerText, 90, 200);
 
-            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(100, 270);
-            ctx.lineTo(980, 270);
+            ctx.moveTo(90, 240);
+            ctx.lineTo(990, 240);
             ctx.stroke();
 
+            // 4. Kinetik Neon Matnlar
             let activeIdx = 0;
             lyrics.forEach((l, i) => {
                 if (l.time !== null && elapsedTime >= l.time) activeIdx = i;
             });
 
-            let startY = 650 - (activeIdx * 140);
+            let startY = 620 - (activeIdx * 140);
             lyrics.forEach((l, i) => {
                 const y = startY + (i * 140);
-                if (y > 300 && y < 1750) {
+                if (y > 280 && y < 1750) {
                     if (i === activeIdx) {
-                        ctx.fillStyle = selectedTextColor;
-                        ctx.font = `bold 50px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 100, y, 880, 60);
+                        // FAOL MATN: Neon Porlash (Glow) Effekti Bilan
+                        ctx.save();
+                        ctx.shadowColor = selectedGlowColor;
+                        ctx.shadowBlur = 25;
+                        ctx.fillStyle = selectedGlowColor;
+                        ctx.font = `bold 52px ${selectedFont}`;
+                        drawWrappedText(ctx, l.text, 90, y, 900, 62);
+                        ctx.restore();
                     } else if (i < activeIdx) {
                         ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
                         ctx.font = `bold 38px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 100, y, 880, 50);
+                        drawWrappedText(ctx, l.text, 90, y, 900, 50);
                     } else {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
                         ctx.font = `bold 38px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 100, y, 880, 50);
+                        drawWrappedText(ctx, l.text, 90, y, 900, 50);
                     }
                 }
             });
@@ -275,17 +294,16 @@ window.exportAndSendToBot = async function() {
     } catch (err) {
         console.error(err);
         alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
-        btn.innerHTML = "🎬 Ovozli Videoni Tayyorlash & Botga Yuborish";
+        btn.innerHTML = "🎬 60FPS Trend Videoni Botga Yuborish";
         btn.disabled = false;
     }
 };
 
-// ==================== 2. INSHOT SENSORLI (TOUCH) DUAL-HANDLE TRIMMER ====================
+// ==================== 2. INSHOT TOUCH TRIMMER ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
 let isTrimPlaying = false;
-
 let trimStartTime = 0;
 let trimEndTime = 30;
 let trimmerTotalDur = 100;
@@ -293,7 +311,6 @@ let trimmerTotalDur = 100;
 window.handleTrimmerUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     rawTrimmerFile = file;
     document.getElementById('trimmer-file-name').innerText = `🎵 ${file.name}`;
     trimmerMedia.src = URL.createObjectURL(file);
@@ -306,10 +323,8 @@ window.handleTrimmerUpload = function(event) {
             trimmerTotalDur = buffer.duration;
             trimStartTime = 0;
             trimEndTime = Math.min(trimmerTotalDur, 30);
-
             document.getElementById('trimmer-controls').classList.remove('hidden');
             document.getElementById('trimmer-total-duration').innerText = formatAudioTime(trimmerTotalDur);
-            
             updateInShotUI();
             setupInShotTouchEvents();
         });
@@ -320,7 +335,6 @@ window.handleTrimmerUpload = function(event) {
 function updateInShotUI() {
     document.getElementById('trim-start-val').innerText = formatAudioTime(trimStartTime);
     document.getElementById('trim-end-val').innerText = formatAudioTime(trimEndTime);
-
     const track = document.getElementById('inshot-active-track');
     if (track && trimmerTotalDur > 0) {
         const leftPercent = (trimStartTime / trimmerTotalDur) * 100;
@@ -330,25 +344,15 @@ function updateInShotUI() {
     }
 }
 
-// BARMOG'INGIZ BILAN KO'K VA QIZILNI SURISH (TOUCH DRAG)
 function setupInShotTouchEvents() {
     const container = document.getElementById('inshot-waveform-container');
     const handleStart = document.getElementById('handle-start');
     const handleEnd = document.getElementById('handle-end');
-
     if (!container || !handleStart || !handleEnd) return;
 
     let draggingType = null;
-
-    handleStart.ontouchstart = (e) => {
-        e.stopPropagation();
-        draggingType = 'start';
-    };
-
-    handleEnd.ontouchstart = (e) => {
-        e.stopPropagation();
-        draggingType = 'end';
-    };
+    handleStart.ontouchstart = (e) => { e.stopPropagation(); draggingType = 'start'; };
+    handleEnd.ontouchstart = (e) => { e.stopPropagation(); draggingType = 'end'; };
 
     container.ontouchmove = (e) => {
         if (!draggingType) return;
@@ -372,13 +376,10 @@ function setupInShotTouchEvents() {
                 setTimeout(() => { trimmerMedia.pause(); }, 400);
             }
         }
-
         updateInShotUI();
     };
 
-    window.ontouchend = () => {
-        draggingType = null;
-    };
+    window.ontouchend = () => { draggingType = null; };
 }
 
 function formatAudioTime(seconds) {
@@ -390,14 +391,12 @@ function formatAudioTime(seconds) {
 
 window.previewTrimmedAudio = function() {
     const icon = document.getElementById('btn-trim-play-icon');
-
     if (isTrimPlaying) {
         trimmerMedia.pause();
         isTrimPlaying = false;
         icon.className = "fa-solid fa-play";
         return;
     }
-
     trimmerMedia.currentTime = trimStartTime;
     trimmerMedia.play();
     isTrimPlaying = true;
@@ -413,7 +412,6 @@ window.previewTrimmedAudio = function() {
     }, 100);
 };
 
-// BOT LICHKASIGA QIRQILGAN MP3 YUBORISH
 window.executeRealAudioTrimAndSend = async function() {
     if (!trimmerAudioBuffer) {
         alert("⚠️ Iltimos, oldin musiqa yuklang!");
@@ -480,7 +478,6 @@ window.executeRealAudioTrimAndSend = async function() {
     btn.disabled = false;
 };
 
-// PCM WAVE BLOB ENCODER
 function bufferToWave(abuffer, len) {
     let numOfChan = abuffer.numberOfChannels,
         length = len * numOfChan * 2 + 44,
@@ -490,18 +487,10 @@ function bufferToWave(abuffer, len) {
     function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
     function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
 
-    setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8);
-    setUint32(0x45564157); // "WAVE"
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16);
-    setUint16(1); // PCM
-    setUint16(numOfChan);
-    setUint32(abuffer.sampleRate);
-    setUint32(abuffer.sampleRate * 2 * numOfChan);
-    setUint16(numOfChan * 2);
-    setUint16(16);
-    setUint32(0x61746164); // "data" chunk
+    setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+    setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+    setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
     setUint32(length - pos - 4);
 
     for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
@@ -516,33 +505,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-}
-// SHAXSIY TTF / OTF SHRIFT YUKLASH FUNKSIYASI
-window.handleCustomFontUpload = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const fontName = "CustomFont_" + Date.now();
-    const fontUrl = URL.createObjectURL(file);
-
-    const newStyle = document.createElement('style');
-    newStyle.appendChild(document.createTextNode(`
-        @font-face {
-            font-family: '${fontName}';
-            src: url('${fontUrl}');
-        }
-    `));
-    document.head.appendChild(newStyle);
-
-    // Tanlagichga qo'shish va aktiv qilish
-    const select = document.getElementById('font-family-select');
-    if (select) {
-        const opt = document.createElement('option');
-        opt.value = `'${fontName}', sans-serif`;
-        opt.innerText = `🌟 Shaxsiy: ${file.name.replace(/\.[^/.]+$/, "")}`;
-        opt.selected = true;
-        select.prepend(opt);
-        window.updatePreviewFont(opt.value);
     }
-    alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi va matnga qo'llandi!");
-};
