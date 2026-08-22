@@ -193,23 +193,24 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS[lang]["select_lang"], reply_markup=markup)
         return
 
-# BOT HAQIDA TUGMASI BOSILGANDA (JONLI UNIKAL STATISTIKA)
+# BOT HAQIDA (STATISTIKA FAQAT ADMINGA KO'RINADI)
     if text in [TEXTS["uz"]["btn_info"], TEXTS["ru"]["btn_info"]]:
-        total = get_total_users()
+        admin_stat = ""
+        if user_id == ADMIN_ID:
+            total = get_total_users()
+            admin_stat = f"\n\n📊 <b>Admin Statistikasi:</b>\n👥 Jami unikal obunachilar: <code>{total}</code> ta\n⚡️ Server: 24/7 Faol (Live)"
+
         info_msg = (
-            f"🌟 <b>VibeStudio & VibeMusic</b> — TikTok va Instagram uchun estetik Spotify & WhatsApp videolarni 1 daqiqada tayyorlab beruvchi bepul platforma!\n\n"
-            f"👥 <b>Foydalanuvchilar soni:</b> <code>{total}</code> ta unikal obunachi\n"
-            f"⚡️ <b>Platforma holati:</b> 24/7 Bepul & Faol\n\n"
-            f"👨‍💻 Dasturchi & Admin: @IBROXIM_I6"
+            f"🌟 <b>VibeStudio & VibeMusic</b> — TikTok va Instagram uchun estetik Spotify videolari, Audio Vizualizator va musiqalarni 1 daqiqada tayyorlab beruvchi bepul platforma!\n\n"
+            f"⚡️ Barcha xizmatlar 100% Bepul va Cheksiz!\n"
+            f"👨‍💻 Dasturchi & Admin: @IBROXIM_I6{admin_stat}"
             if lang == 'uz' else
-            f"🌟 <b>VibeStudio & VibeMusic</b> — бесплатная платформа для создания эстетичных Spotify & WhatsApp видео для TikTok и Instagram за 1 минуту!\n\n"
-            f"👥 <b>Количество пользователей:</b> <code>{total}</code>\n"
-            f"⚡️ <b>Статус платформы:</b> 24/7 Бесплатно & Активно\n\n"
-            f"👨‍💻 Разработчик: @IBROXIM_I6"
+            f"🌟 <b>VibeStudio & VibeMusic</b> — бесплатная платформа для создания эстетичных Spotify видео, Аудио Визуализаторов и нарезки музыки!\n\n"
+            f"⚡️ Все функции 100% Бесплатны!\n"
+            f"👨‍💻 Разработчик: @IBROXIM_I6{admin_stat}"
         )
         bot.send_message(message.chat.id, info_msg, parse_mode="HTML")
         return
-
 # ==================== 7. AUTO-RECONNECT ====================
 if __name__ == '__main__':
     try:
