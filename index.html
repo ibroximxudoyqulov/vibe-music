@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - Kinetic 3D Music Video Studio</title>
+    <title>VibeStudio - Spotify, Bass Visualizer & Audio Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { red: '#ff2a5f', cyan: '#00f2fe', dark: '#09090d', card: '#13131c', input: '#1c1c28', yellow: '#face15', neon: '#1db954' }
+                        brand: { red: '#ff2a5f', cyan: '#00f2fe', dark: '#09090d', card: '#13131c', input: '#1c1c28', yellow: '#face15' }
                     }
                 }
             }
@@ -46,7 +46,7 @@
         </div>
     </header>
 
-    <!-- ==================== 1-SAHIFA: KINETIC TREND STUDIYASI ==================== -->
+    <!-- ==================== 1-SAHIFA: SPOTIFY KINETIC STUDIYASI ==================== -->
     <main id="tab-studio" class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
 
         <!-- 1. STEP: MP3 VA JONLI PLAYER -->
@@ -81,7 +81,7 @@
             </div>
         </section>
 
-        <!-- 2. STEP: MATN VA SINXRONLASH -->
+        <!-- 2. STEP: MATN VA QO'LDA SINXRONLASH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-align-left text-brand-red"></i>
@@ -101,11 +101,11 @@
             </button>
         </section>
 
-        <!-- 3. STEP: EFFEKTLAR, RANGLAR, SHRIFTLAR VA FON -->
+        <!-- 3. STEP: SHRIFTLAR, RANG PALITRASI, FON VA EFFEKTLAR -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
-                <i class="fa-solid fa-wand-magic-sparkles text-yellow-400"></i>
-                <span>3. Trend Effektlar, Ranglar va Shriftlar</span>
+                <i class="fa-solid fa-palette text-yellow-400"></i>
+                <span>3. Shriftlar, Ranglar va Fon</span>
             </h3>
 
             <!-- 70+ Shriftlar va Shaxsiy Shrift Yuklash -->
@@ -155,27 +155,25 @@
                 <input type="file" id="custom-bg-input" accept="image/*,video/*" class="hidden" onchange="handleCustomBgUpload(event)">
             </div>
 
-            <!-- 4 TA SUPER EFFEKTLAR TUGMASI -->
             <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <button onclick="toggleParticlesEffect()" id="btn-particles" class="p-2.5 bg-brand-input border border-brand-cyan text-brand-cyan rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>✨ Uchuvchi Yulduzlar</span>
-                </button>
                 <button onclick="toggleVinylEffect()" id="btn-vinyl" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
                     <i class="fa-solid fa-compact-disc"></i>
                     <span>💿 3D Vinil Disk</span>
                 </button>
+                <button onclick="toggleParticlesEffect()" id="btn-particles" class="p-2.5 bg-brand-input border border-brand-cyan text-brand-cyan rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>✨ Yulduzlar</span>
+                </button>
             </div>
         </section>
 
-        <!-- 4. STEP: PREVIEW & 60FPS TREND VIDEO YUBORISH -->
+        <!-- 4. STEP: PREVIEW & 60FPS VIDEO YUBORISH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
-            <h3 class="font-bold text-xs text-gray-300">Превью (CyberGlow 9:16 HD):</h3>
+            <h3 class="font-bold text-xs text-gray-300">Превью (Spotify 9:16 HD):</h3>
             
             <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-[#09090d] border border-gray-700 flex flex-col justify-between p-5 shadow-2xl select-none">
                 <div id="custom-bg-layer" class="absolute inset-0 bg-cover bg-center z-0 opacity-35"></div>
 
-                <!-- Header -->
                 <div class="flex items-center space-x-3 text-white/90 border-b border-white/10 pb-3 z-10">
                     <div class="text-left flex-1">
                         <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Yetmadimi</p>
@@ -186,18 +184,15 @@
                     </div>
                 </div>
 
-                <!-- Kinetik Matnlar Ro'yxati -->
                 <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-5 text-left relative z-10">
                     <p class="text-sm font-bold text-white/40">Matnni yuklang va sinxronlang...</p>
                 </div>
 
                 <div class="flex justify-between items-center text-gray-400 pt-3 border-t border-white/10 text-xs z-10">
                     <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio CyberGlow</span>
-                    <i class="fa-solid fa-sparkles text-brand-cyan"></i>
                 </div>
             </div>
 
-            <!-- TREND VIDEONI BOT LICHKASIGA YUBORISH -->
             <button onclick="exportAndSendToBot()" id="btn-export-send" class="w-full py-4 bg-gradient-to-r from-brand-red via-purple-600 to-brand-cyan text-white font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
                 <i class="fa-brands fa-telegram text-lg"></i>
                 <span>🎬 60FPS Trend Videoni Botga Yuborish</span>
@@ -255,7 +250,7 @@
             <div>
                 <label class="text-[10px] text-gray-400 block mb-1">Shaxsiy Mashina/Fon Rasmini Yuklang:</label>
                 <label for="vis-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
-                    <span id="vis-bg-name" class="text-xs text-gray-300 truncate">🖼 Rasm tanlash (Masalan: BMW/Rolls-Royce)</span>
+                    <span id="vis-bg-name" class="text-xs text-gray-300 truncate">🖼 Rasm tanlash (Masalan: Rolls-Royce/BMW)</span>
                     <i class="fa-solid fa-image text-brand-cyan"></i>
                 </label>
                 <input type="file" id="vis-bg-input" accept="image/*" class="hidden" onchange="handleVisBgUpload(event)">
@@ -268,6 +263,8 @@
             </button>
         </section>
     </main>
+
+    <!-- ==================== 3-SAHIFA: INSHOT KESISH STUDIYASI ==================== -->
     <main id="tab-trimmer" class="hidden flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
         <section class="bg-brand-card p-5 rounded-3xl border border-gray-800 space-y-4 shadow-xl select-none">
             <div class="flex justify-between items-center">
@@ -334,39 +331,49 @@
         </section>
     </main>
 
-    <!-- 2 TA ASOSIY TUGMA (STUDIYA VA KESISH) -->
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-8 py-3 flex justify-around items-center z-40">
+    <!-- 3 TA ASOSIY TUGMA (STUDIYA, VIZUAL, KESISH) -->
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-6 py-2.5 flex justify-around items-center z-40">
         <button onclick="switchTab('studio')" id="nav-btn-studio" class="flex flex-col items-center text-brand-red space-y-1">
-            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
-            <span class="text-xs font-bold">Студия</span>
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            <span class="text-[10px] font-bold">Студия</span>
         </button>
         <button onclick="switchTab('visualizer')" id="nav-btn-visualizer" class="flex flex-col items-center text-gray-400 space-y-1">
             <i class="fa-solid fa-bolt text-lg"></i>
             <span class="text-[10px] font-bold">Vizual</span>
         </button>
         <button onclick="switchTab('trimmer')" id="nav-btn-trimmer" class="flex flex-col items-center text-gray-400 space-y-1">
-            <i class="fa-solid fa-scissors text-xl"></i>
-            <span class="text-xs font-bold">Kesish</span>
+            <i class="fa-solid fa-scissors text-lg"></i>
+            <span class="text-[10px] font-bold">Kesish</span>
         </button>
     </nav>
 
-    <!-- 100% ISHONCHLI SAHIFA ALMASHTIRGICH -->
+    <!-- 100% ISHONCHLI SAHIFA ALMASHTIRGICH (HECH QACHON BO'SH QOLMAYDI) -->
     <script>
         function switchTab(tabName) {
             const studio = document.getElementById('tab-studio');
+            const vis = document.getElementById('tab-visualizer');
             const trimmer = document.getElementById('tab-trimmer');
+
             const btnStudio = document.getElementById('nav-btn-studio');
+            const btnVis = document.getElementById('nav-btn-visualizer');
             const btnTrimmer = document.getElementById('nav-btn-trimmer');
 
             if (studio) { studio.classList.add('hidden'); studio.style.display = 'none'; }
+            if (vis) { vis.classList.add('hidden'); vis.style.display = 'none'; }
             if (trimmer) { trimmer.classList.add('hidden'); trimmer.style.display = 'none'; }
+
             if (btnStudio) btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
+            if (btnVis) btnVis.className = "flex flex-col items-center text-gray-400 space-y-1";
             if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
 
             if (tabName === 'studio' && studio) {
                 studio.classList.remove('hidden');
                 studio.style.display = 'block';
                 if (btnStudio) btnStudio.className = "flex flex-col items-center text-brand-red space-y-1";
+            } else if (tabName === 'visualizer' && vis) {
+                vis.classList.remove('hidden');
+                vis.style.display = 'block';
+                if (btnVis) btnVis.className = "flex flex-col items-center text-brand-cyan space-y-1";
             } else if (tabName === 'trimmer' && trimmer) {
                 trimmer.classList.remove('hidden');
                 trimmer.style.display = 'block';
@@ -378,11 +385,11 @@
     </script>
 
     <!-- MIKRO-SKRIPTLAR -->
-    <script src="js/visualizer.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/colors.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/sync.js"></script>
+    <script src="js/visualizer.js"></script>
     <script src="js/styles.js"></script>
 </body>
 </html>
