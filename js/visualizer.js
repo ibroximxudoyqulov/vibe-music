@@ -1,15 +1,13 @@
-// ==================== 1:1 CYBERHUD 3D BASS REACTOR ENGINE (1080x1920 60FPS) ====================
+// ==================== 6-PRESET CYBERHUD 60FPS BASS REACTOR ENGINE ====================
 
 window.visAudioElement = new Audio();
 let isVisPlaying = false;
-let selectedVisPreset = 'cyber'; // 'cyber', 'headphones', 'flame'
-let visCustomBgUrl = null;
-let visCustomBgImgObj = null;
+let selectedVisPreset = 'cyber'; // 'cyber', 'headphones', 'flame', 'car', 'cosmic', 'diamond'
 
-// SIZNING ASOSIY BOT TOKENINGIZ:
+// SIZNING BOT TOKENINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
-// 1. MP3 Faylni Yuklash
+// 1. MP3 Yuklash
 window.handleVisAudioUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -71,22 +69,16 @@ window.selectVisPreset = function(preset) {
     selectedVisPreset = preset;
     document.querySelectorAll('.vis-preset-btn').forEach(btn => {
         btn.classList.remove('border-brand-cyan', 'bg-brand-cyan/20', 'scale-105');
+        btn.classList.add('border-gray-700');
     });
     const activeBtn = document.getElementById(`vis-btn-${preset}`);
-    if (activeBtn) activeBtn.classList.add('border-brand-cyan', 'bg-brand-cyan/20', 'scale-105');
+    if (activeBtn) {
+        activeBtn.classList.add('border-brand-cyan', 'bg-brand-cyan/20', 'scale-105');
+        activeBtn.classList.remove('border-gray-700');
+    }
 };
 
-window.handleVisBgUpload = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    visCustomBgUrl = URL.createObjectURL(file);
-    const imgObj = new Image();
-    imgObj.src = visCustomBgUrl;
-    visCustomBgImgObj = imgObj;
-    document.getElementById('vis-bg-name').innerText = `🖼 ${file.name}`;
-};
-
-// ==================== 60FPS ULTRA-HD CYBER REACTOR VIDEO EKSPORT ====================
+// ==================== 60FPS FULL HD VIDEO EKSPORT ====================
 window.exportVisVideoAndSend = async function() {
     const audio = window.visAudioElement;
     if (!audio || !audio.src) {
@@ -99,7 +91,7 @@ window.exportVisVideoAndSend = async function() {
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
     const btn = document.getElementById('btn-vis-export');
-    btn.innerHTML = `⏳ 60FPS CyberHUD Video yozilmoqda (${Math.ceil(duration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(duration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -120,7 +112,6 @@ window.exportVisVideoAndSend = async function() {
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
 
         const canvasStream = canvas.captureStream(60);
         const combinedStream = new MediaStream([
@@ -143,8 +134,8 @@ window.exportVisVideoAndSend = async function() {
 
             const formData = new FormData();
             formData.append('chat_id', userId);
-            formData.append('video', blob, `CyberHUD_Visualizer_${Date.now()}.mp4`);
-            formData.append('caption', `⚡️ <b>VibeStudio 60FPS CyberHUD Basli Videongiz Tayyor!</b>\n⏱ Davomiyligi: ${Math.ceil(duration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
+            formData.append('video', blob, `CyberHUD_${Date.now()}.mp4`);
+            formData.append('caption', `⚡️ <b>VibeStudio 60FPS CyberHUD Videongiz Tayyor!</b>\n⏱ Davomiyligi: ${Math.ceil(duration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
             formData.append('parse_mode', 'HTML');
 
             try {
@@ -154,12 +145,12 @@ window.exportVisVideoAndSend = async function() {
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    alert("🎉 CyberHUD video botingiz lichkasiga yetib bordi! Telegramni oching.");
+                    alert("🎉 Video botingiz lichkasiga yetib bordi! Telegramni oching.");
                 } else {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `CyberHUD_Visualizer_${Date.now()}.mp4`;
+                    a.download = `CyberHUD_${Date.now()}.mp4`;
                     a.click();
                     alert("✅ Video telefoningizga yuklandi!");
                 }
@@ -167,12 +158,12 @@ window.exportVisVideoAndSend = async function() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `CyberHUD_Visualizer_${Date.now()}.mp4`;
+                a.download = `CyberHUD_${Date.now()}.mp4`;
                 a.click();
                 alert("✅ Video tayyorlandi!");
             }
 
-            btn.innerHTML = "🎬 60FPS Basli Videoni Botga Yuborish";
+            btn.innerHTML = "🎬 60FPS CyberHUD Videoni Botga Yuborish";
             btn.disabled = false;
         };
 
@@ -180,9 +171,9 @@ window.exportVisVideoAndSend = async function() {
         bufferSource.start(0);
         const startTime = audioCtx.currentTime;
 
-        // Kosmik Zarrachalar (Particles)
+        // Kosmik Zarrachalar
         const stars = [];
-        for (let i = 0; i < 70; i++) {
+        for (let i = 0; i < 65; i++) {
             stars.push({
                 x: Math.random() * 1080,
                 y: Math.random() * 1920,
@@ -202,7 +193,7 @@ window.exportVisVideoAndSend = async function() {
                 return;
             }
 
-            // 1. Dinamik Bas Tebranishlari (Frequency Sim)
+            // Bas Tebranishlari
             const bassKick = Math.abs(Math.sin(elapsed * 7)) * 55;
             const subBass = Math.abs(Math.sin(elapsed * 14)) * 40;
             const beatShake = (bassKick > 45) ? (Math.random() * 6 - 3) : 0;
@@ -210,21 +201,15 @@ window.exportVisVideoAndSend = async function() {
             const centerX = 540 + beatShake;
             const centerY = 960 + beatShake;
 
-            // 2. Qorong'u Kosmik Fon
-            if (visCustomBgImgObj) {
-                ctx.drawImage(visCustomBgImgObj, 0, 0, 1080, 1920);
-                ctx.fillStyle = "rgba(11, 14, 26, 0.65)";
-                ctx.fillRect(0, 0, 1080, 1920);
-            } else {
-                const bgGrad = ctx.createRadialGradient(centerX, centerY, 100, centerX, centerY, 900);
-                bgGrad.addColorStop(0, "#15102a");
-                bgGrad.addColorStop(0.6, "#090912");
-                bgGrad.addColorStop(1, "#030305");
-                ctx.fillStyle = bgGrad;
-                ctx.fillRect(0, 0, 1080, 1920);
-            }
+            // 1. Qorong'u Kosmik Gradient Fon
+            const bgGrad = ctx.createRadialGradient(centerX, centerY, 80, centerX, centerY, 950);
+            bgGrad.addColorStop(0, "#130f28");
+            bgGrad.addColorStop(0.5, "#080811");
+            bgGrad.addColorStop(1, "#030305");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1080, 1920);
 
-            // 3. Uchuvchi Yulduzchalar va Zarrachalar
+            // 2. Uchuvchi Yulduzchalar
             stars.forEach(s => {
                 ctx.fillStyle = s.color;
                 ctx.beginPath();
@@ -234,8 +219,8 @@ window.exportVisVideoAndSend = async function() {
                 if (s.y < 0) s.y = 1920;
             });
 
-            // 4. SHOCKWAVE (Kengayuvchi Neon Zarba To'lqini)
-            if (bassKick > 35) {
+            // 3. SHOCKWAVE (Kengayuvchi Neon Zarba To'lqini)
+            if (bassKick > 38) {
                 const shockRadius = 240 + (bassKick * 4.5);
                 ctx.save();
                 ctx.strokeStyle = `rgba(0, 242, 254, ${(60 - bassKick) / 60})`;
@@ -246,31 +231,76 @@ window.exportVisVideoAndSend = async function() {
                 ctx.restore();
             }
 
-            // 5. HUD TEXNO-HALQALARI (Qarama-qarshi Aylanuvchi Doiralar)
+            // 4. PRESETLARNI CHIZISH (6 TA FORMAT)
             ctx.save();
             ctx.translate(centerX, centerY);
 
-            // 1-Halqa (Soat yo'nalishida aylanadi)
-            ctx.rotate(elapsed * 1.5);
-            ctx.strokeStyle = "rgba(0, 242, 254, 0.4)";
-            ctx.lineWidth = 3;
-            ctx.setLineDash([18, 12, 6, 12]);
-            ctx.beginPath();
-            ctx.arc(0, 0, 220 + bassKick * 0.4, 0, Math.PI * 2);
-            ctx.stroke();
+            if (selectedVisPreset === 'cyber') {
+                // PRESET 1: REAKTOR
+                ctx.rotate(elapsed * 1.5);
+                ctx.strokeStyle = "rgba(0, 242, 254, 0.4)";
+                ctx.lineWidth = 4;
+                ctx.setLineDash([18, 12]);
+                ctx.beginPath();
+                ctx.arc(0, 0, 220 + bassKick * 0.4, 0, Math.PI * 2);
+                ctx.stroke();
 
-            // 2-Halqa (Teskari aylanadi)
-            ctx.rotate(-elapsed * 3);
-            ctx.strokeStyle = "rgba(255, 42, 95, 0.5)";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([30, 20]);
-            ctx.beginPath();
-            ctx.arc(0, 0, 250 + bassKick * 0.6, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
+                ctx.rotate(-elapsed * 3);
+                ctx.strokeStyle = "rgba(255, 42, 95, 0.5)";
+                ctx.lineWidth = 3;
+                ctx.setLineDash([30, 20]);
+                ctx.beginPath();
+                ctx.arc(0, 0, 260 + bassKick * 0.6, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+            } else if (selectedVisPreset === 'headphones') {
+                // PRESET 2: NAUSHNIK
+                ctx.strokeStyle = "#ff2a5f";
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.arc(0, 0, 230 + bassKick, 0, Math.PI * 2);
+                ctx.stroke();
+
+            } else if (selectedVisPreset === 'flame') {
+                // PRESET 3: NEON HALQA
+                ctx.strokeStyle = "#face15";
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                ctx.arc(0, 0, 210 + subBass, 0, Math.PI * 2);
+                ctx.stroke();
+
+            } else if (selectedVisPreset === 'car') {
+                // PRESET 4: NIGHT DRIVE HUD
+                ctx.strokeStyle = "#00f2fe";
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(0, -160 - bassKick);
+                ctx.lineTo(160 + bassKick, 0);
+                ctx.lineTo(0, 160 + bassKick);
+                ctx.lineTo(-160 - bassKick, 0);
+                ctx.closePath();
+                ctx.stroke();
+
+            } else if (selectedVisPreset === 'cosmic') {
+                // PRESET 5: KOSMIK PORTAL
+                ctx.rotate(elapsed * 2);
+                for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                    ctx.strokeStyle = "#c084fc";
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(Math.cos(a) * 120, Math.sin(a) * 120, 60 + bassKick, 60 + bassKick);
+                }
+
+            } else {
+                // PRESET 6: DIAMOND WAVE
+                ctx.rotate(-elapsed * 1.5);
+                ctx.strokeStyle = "#38bdf8";
+                ctx.lineWidth = 8;
+                ctx.strokeRect(-120 - bassKick * 0.5, -120 - bassKick * 0.5, 240 + bassKick, 240 + bassKick);
+            }
             ctx.restore();
 
-            // 6. RADIAL NEON EKVALAYZER USTUNLARI (Doira Atrofida)
+            // 5. RADIAL NEON EKVALAYZER USTUNLARI
             ctx.save();
             ctx.translate(centerX, centerY);
             const barsCount = 64;
@@ -299,32 +329,29 @@ window.exportVisVideoAndSend = async function() {
             }
             ctx.restore();
 
-            // 7. MARKAZIY GOLOGRAMMA GLIF / NOTA (Neon Porlash Bilan)
+            // 6. MARKAZIY PORLOVCHI GLIF
             ctx.save();
             ctx.shadowColor = (bassKick > 40) ? "#ff2a5f" : "#00f2fe";
             ctx.shadowBlur = 45;
-
-            // Markaziy Katta Porlovchi Nota
             ctx.fillStyle = "#ffffff";
-            ctx.font = `bold ${100 + bassKick * 0.5}px sans-serif`;
+            ctx.font = `bold ${90 + bassKick * 0.4}px sans-serif`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText("🎵", centerX, centerY);
-
+            
+            const glyphs = { cyber: "🎵", headphones: "🎧", flame: "🔥", car: "⚡️", cosmic: "🌌", diamond: "💎" };
+            ctx.fillText(glyphs[selectedVisPreset] || "🎵", centerX, centerY);
             ctx.restore();
 
-            // 8. PASTKI OYNA SIMMETRIYALI GORIZONTAL BAS TO'LQINI
+            // 7. PASTKI OYNA SIMMETRIYALI BAS TO'LQINI
             ctx.save();
             const bottomY = 1600;
             for (let i = -24; i <= 24; i++) {
                 const h = Math.abs(Math.sin(elapsed * 9 + i * 0.25)) * (80 + subBass);
                 const x = centerX + (i * 20);
-                
                 const barGrad = ctx.createLinearGradient(x, bottomY - h, x, bottomY + h);
                 barGrad.addColorStop(0, "#ff2a5f");
                 barGrad.addColorStop(0.5, "#00f2fe");
                 barGrad.addColorStop(1, "#ff2a5f");
-
                 ctx.fillStyle = barGrad;
                 ctx.fillRect(x, bottomY - h, 14, h * 2);
             }
@@ -338,7 +365,7 @@ window.exportVisVideoAndSend = async function() {
     } catch (e) {
         console.error(e);
         alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
-        btn.innerHTML = "🎬 60FPS Basli Videoni Botga Yuborish";
+        btn.innerHTML = "🎬 60FPS CyberHUD Videoni Botga Yuborish";
         btn.disabled = false;
     }
 };
