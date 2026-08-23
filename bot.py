@@ -449,7 +449,7 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS[lang]["dl_prompt"], parse_mode="HTML")
         return
 
-    # HAVOLA KELGANDA AVTOMATIK YUKLASH (INSTA / TIKTOK / PIN / SNAP)
+# HAVOLA KELGANDA AVTOMATIK YUKLASH
     if re.search(r'(https?://\S+)', text):
         if not check_sponsor_subscription(user_id):
             sponsor = get_setting('sponsor_channel', '')
@@ -458,20 +458,25 @@ def message_handler(message):
             bot.send_message(message.chat.id, TEXTS[lang]["sponsor_alert"], reply_markup=markup)
             return
 
-        bot.send_message(message.chat.id, TEXTS[lang]["dl_processing"])
+        wait_msg = bot.send_message(message.chat.id, TEXTS[lang]["dl_processing"])
         media = download_social_media(text)
         
         if media and media.get("url"):
             try:
-                bot.send_video(message.chat.id, media["url"], caption="🎬 <b>VibeStudio Downloader orqali yuklandi!</b>\n@ms_mus1c_bot", parse_mode="HTML")
+                # Video faylni yuklab olib, to'g'ridan-to'g'ri Telegramga uzatish (Bloklanmasligi uchun)
+                vid_data = requests.get(media["url"], timeout=25).content
+                bot.send_video(
+                    message.chat.id, 
+                    vid_data, 
+                    caption=f"🎬 <b>{media.get('title', 'Video')[:50]}</b>\n\n📥 @ms_mus1c_bot orqali yuklandi!", 
+                    parse_mode="HTML"
+                )
+                bot.delete_message(message.chat.id, wait_msg.message_id)
             except Exception:
-                bot.send_message(message.chat.id, f"📥 Yuklab olish havolasi:\n{media['url']}")
+                bot.send_video(message.chat.id, media["url"], caption="🎬 @ms_mus1c_bot")
         else:
             bot.send_message(message.chat.id, TEXTS[lang]["dl_error"])
         return
-
-    bot.send_message(message.chat.id, TEXTS[lang]["welcome"], parse_mode="HTML", reply_markup=get_main_menu(lang))
-
 # ==================== 11. AUTO-RECONNECT 24/7 ====================
 if __name__ == '__main__':
     try:
