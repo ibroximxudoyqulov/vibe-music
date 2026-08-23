@@ -192,22 +192,30 @@ def get_main_menu(lang):
     markup.row(KeyboardButton(TEXTS[lang]["btn_lang"]), KeyboardButton(TEXTS[lang]["btn_info"]))
     return markup
 
-# ==================== 5. UNIVERSAL DOWNLOADER DVIGATELI ====================
+# ==================== 5. UNIVERSAL DOWNLOADER (TIKTOK / INSTA / PIN) ====================
 def download_social_media(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
     try:
-        # TikWM / Open API orqali yuklash
+        # 1. TIKTOK (TikWM POST usuli - Qisqa vt.tiktok.com havolalarni 100% ochadi)
         if "tiktok.com" in url:
-            api_res = requests.get(f"https://www.tikwm.com/api/?url={url}").json()
-            if api_res.get("code") == 0:
-                return {"type": "video", "url": api_res["data"]["play"], "title": api_res["data"].get("title", "TikTok Video")}
+            res = requests.post("https://www.tikwm.com/api/", data={"url": url, "hd": 1}, headers=headers, timeout=12).json()
+            if res.get("code") == 0 and res.get("data"):
+                video_url = res["data"].get("play") or res["data"].get("hdplay") or res["data"].get("wmplay")
+                title = res["data"].get("title", "TikTok Video")
+                return {"type": "video", "url": video_url, "title": title}
         
-        # Cobalt API Universal (Instagram, Pinterest, TikTok fallback)
-        headers = {"Accept": "application/json", "Content-Type": "application/json"}
-        payload = {"url": url, "vQuality": "1080"}
-        cobalt_res = requests.post("https://api.cobalt.tools/api/json", json=payload, headers=headers, timeout=12)
-        data = cobalt_res.json()
-        if data.get("url"):
-            return {"type": "video", "url": data["url"], "title": "Media"}
+        # 2. INSTAGRAM / PINTEREST / SNAPCHAT (Cobalt API)
+        cobalt_res = requests.post(
+            "https://api.cobalt.tools/api/json",
+            json={"url": url, "vQuality": "720"},
+            headers={"Accept": "application/json", "Content-Type": "application/json", "User-Agent": headers['User-Agent']},
+            timeout=12
+        ).json()
+        if cobalt_res.get("url"):
+            return {"type": "video", "url": cobalt_res["url"], "title": "Social Video"}
+
     except Exception as e:
         print(f"[Downloader Error] {e}")
     return None
