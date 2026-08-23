@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - Spotify Lyric Video & Audio Studio</title>
+    <title>VibeStudio - Spotify Lyric Studio, AI Writer & Stem Separator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -34,26 +34,27 @@
 </head>
 <body class="bg-brand-dark text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- HEADER -->
+    <!-- HEADER (3 TA TILDA SOF) -->
     <header class="p-4 glass sticky top-0 z-30 flex justify-between items-center border-b border-gray-800/60">
         <div class="flex items-center space-x-2">
             <span class="text-brand-red text-xl"><i class="fa-solid fa-compact-disc vinyl-spin"></i></span>
             <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">VibeStudio</span>
         </div>
         <div class="flex bg-brand-input p-1 rounded-2xl border border-gray-800 space-x-1">
-            <button onclick="setLanguage('uz')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
-            <button onclick="setLanguage('ru')" class="px-2.5 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
+            <button onclick="setLanguage('uz')" class="px-2 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇺🇿 UZ</button>
+            <button onclick="setLanguage('ru')" class="px-2 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇷🇺 RU</button>
+            <button onclick="setLanguage('en')" class="px-2 py-1 text-xs font-bold rounded-xl active:scale-95 transition">🇬🇧 EN</button>
         </div>
     </header>
 
-    <!-- ==================== 1-SAHIFA: SPOTIFY STUDIYASI ==================== -->
+    <!-- ==================== 1-SAHIFA: SPOTIFY / APPLE MUSIC STUDIYASI ==================== -->
     <main id="tab-studio" class="flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
 
-        <!-- 1. STEP: MP3 VA JONLI PLAYER -->
+        <!-- 1. STEP: MP3 YUKLASH VA JONLI PLAYER -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-file-audio text-brand-cyan"></i>
-                <span>1. MP3 Faylni Tanlang</span>
+                <span>1. Fon Musiqasini Tanlang</span>
             </h3>
             
             <label for="audio-file-input" class="w-full py-4 bg-brand-input hover:bg-gray-800 border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer active:scale-95 transition">
@@ -63,11 +64,11 @@
             <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
             
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <input type="text" id="track-artist-input" placeholder="Ijrochi" value="Munisa Rizaeva" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
-                <input type="text" id="track-title-input" placeholder="Qo'shiq" value="Yetmadimi" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-artist-input" placeholder="Ijrochi" value="Khalif" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-title-input" placeholder="Qo'shiq" value="Мальвина" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
             </div>
 
-            <!-- JONLI BARMOQ BILAN SURILADIGAN PLAYER -->
+            <!-- JONLI SURILADIGAN PLAYER -->
             <div id="audio-player-box" class="hidden flex-col bg-brand-input p-3.5 rounded-2xl border border-gray-800 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
@@ -81,14 +82,21 @@
             </div>
         </section>
 
-        <!-- 2. STEP: MATN VA SINXRONLASH -->
+        <!-- 2. STEP: MATN, 🤖 AI MATN YOZUVCHISI VA OVOZ YOZISH MIKROFONI -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
-            <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
-                <i class="fa-solid fa-align-left text-brand-red"></i>
-                <span>2. Matn va Sinxronlash</span>
-            </h3>
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
+                    <i class="fa-solid fa-align-left text-brand-red"></i>
+                    <span>2. Matn & AI Yordamchi</span>
+                </h3>
+                <!-- AI MATN TUGMASI -->
+                <button onclick="openAiLyricsFlow()" class="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-brand-red text-white font-extrabold text-[11px] rounded-xl shadow-lg active:scale-95 transition flex items-center space-x-1.5 animate-pulse">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>🤖 AI Matn</span>
+                </button>
+            </div>
 
-            <textarea id="raw-lyrics-input" rows="4" placeholder="Qo'shiq matnini qatorma-qator kiriting..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
+            <textarea id="raw-lyrics-input" rows="4" placeholder="Qo'shiq matnini kiriting yoki yuqoridagi 🤖 AI Matn tugmasini bosing..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
             
             <button onclick="parseLyricsForSync()" class="w-full py-2.5 bg-brand-input hover:bg-gray-800 border border-gray-700 font-bold text-xs rounded-xl active:scale-95 transition">
                 Satrlarni tayyorlash
@@ -99,16 +107,34 @@
             <button id="btn-stamp-line" onclick="timestampCurrentLine()" class="hidden w-full py-3.5 bg-gradient-to-r from-brand-red to-purple-600 text-white font-bold text-xs rounded-2xl shadow-lg active:scale-95 transition animate-pulse">
                 ⏱ VAQTNI SAQLASH
             </button>
+
+            <!-- STUDIYA MIKROFONI ORQALI OVOZ YOZISH -->
+            <div class="pt-2 border-t border-gray-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] text-gray-300 font-bold flex items-center space-x-1.5">
+                        <i class="fa-solid fa-microphone text-brand-cyan"></i>
+                        <span>Xonandalik: O'z Ovozingizni Yozing</span>
+                    </span>
+                    <button id="btn-voice-record" onclick="toggleVoiceRecording()" class="px-3 py-1.5 bg-gray-800 hover:bg-red-600 text-white font-bold text-xs rounded-xl active:scale-95 transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-circle text-red-500 text-[10px]"></i>
+                        <span>Yozish</span>
+                    </button>
+                </div>
+                <p id="voice-record-status" class="text-[10px] text-gray-400 font-mono">Naushnik taqib, fon musiqasida kuylang</p>
+                <div id="recorded-voice-box" class="hidden pt-1">
+                    <audio id="recorded-voice-preview" controls class="w-full h-8"></audio>
+                </div>
+            </div>
         </section>
 
-        <!-- 3. STEP: 70+ SHRIFTLAR, RANG PALITRASI, SHAXSIY FON, VINIL VA BAS EKVALAYZER -->
+        <!-- 3. STEP: 70+ SHRIFTLAR, RANG PALITRASI VA FON -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-palette text-yellow-400"></i>
                 <span>3. Shriftlar, Ranglar va Fon</span>
             </h3>
 
-            <!-- 70+ Shriftlar va Shaxsiy Shrift Yuklash -->
+            <!-- Shriftlar -->
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="text-[10px] text-gray-400">Shriftni tanlang:</label>
@@ -154,55 +180,52 @@
                 </label>
                 <input type="file" id="custom-bg-input" accept="image/*,video/*" class="hidden" onchange="handleCustomBgUpload(event)">
             </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <button onclick="toggleVinylEffect()" id="btn-vinyl" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
-                    <i class="fa-solid fa-compact-disc"></i>
-                    <span>💿 3D Vinil Disk</span>
-                </button>
-                <button onclick="toggleParticlesEffect()" id="btn-particles" class="p-2.5 bg-brand-input border border-brand-cyan text-brand-cyan rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>✨ Yulduzlar</span>
-                </button>
-            </div>
         </section>
 
-        <!-- 4. STEP: PREVIEW & 60FPS VIDEO YUBORISH -->
+        <!-- 4. STEP: APPLE MUSIC "MALVINA" PREVIEW & VIDEO YUBORISH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
-            <h3 class="font-bold text-xs text-gray-300">Превью (Spotify 9:16 HD):</h3>
+            <h3 class="font-bold text-xs text-gray-300">Превью (Apple Music Kinetic 9:16):</h3>
             
             <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-[#09090d] border border-gray-700 flex flex-col justify-between p-5 shadow-2xl select-none">
                 <div id="custom-bg-layer" class="absolute inset-0 bg-cover bg-center z-0 opacity-35"></div>
 
                 <div class="flex items-center space-x-3 text-white/90 border-b border-white/10 pb-3 z-10">
                     <div class="text-left flex-1">
-                        <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Yetmadimi</p>
-                        <p id="preview-track-artist" class="text-[11px] text-gray-400">Munisa Rizaeva</p>
+                        <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Мальвина</p>
+                        <p id="preview-track-artist" class="text-[11px] text-gray-400">KhaliF</p>
                     </div>
-                    <div id="preview-vinyl-box" class="hidden">
-                        <i class="fa-solid fa-compact-disc text-2xl text-white/90 vinyl-spin"></i>
-                    </div>
+                    <i class="fa-solid fa-star text-sm text-yellow-400"></i>
                 </div>
 
-                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-5 text-left relative z-10">
+                <!-- KINETIK YUQORIGA YO'QOLUVCHI MATNLAR -->
+                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-6 text-left relative z-10">
                     <p class="text-sm font-bold text-white/40">Matnni yuklang va sinxronlang...</p>
                 </div>
 
                 <div class="flex justify-between items-center text-gray-400 pt-3 border-t border-white/10 text-xs z-10">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio CyberGlow</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio Kinetic</span>
                 </div>
             </div>
 
-            <button onclick="exportAndSendToBot()" id="btn-export-send" class="w-full py-4 bg-gradient-to-r from-brand-red via-purple-600 to-brand-cyan text-white font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
-                <i class="fa-brands fa-telegram text-lg"></i>
-                <span>🎬 60FPS Trend Videoni Botga Yuborish</span>
-            </button>
+            <!-- TUGMALAR: VIDEO YUBORISH VA TIKTOK PROMO -->
+            <div class="space-y-2 pt-1">
+                <button onclick="exportAndSendToBot()" id="btn-export-send" class="w-full py-4 bg-gradient-to-r from-brand-red via-purple-600 to-brand-cyan text-white font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-telegram text-lg"></i>
+                    <span>🎬 60FPS Ovozli Videoni Botga Yuborish</span>
+                </button>
+                <button onclick="orderTikTokPromotion()" class="w-full py-3 bg-brand-input border border-yellow-500/40 hover:bg-yellow-500/10 text-yellow-400 font-bold text-xs rounded-2xl active:scale-95 transition flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-tiktok text-sm"></i>
+                    <span>⭐ TikTok @ms.music_uz da Reklama Qilish</span>
+                </button>
+            </div>
         </section>
 
     </main>
 
-    <!-- ==================== 2-SAHIFA: INSHOT KESISH STUDIYASI ==================== -->
+    <!-- ==================== 2-SAHIFA: KESISH & AI OVOZ/MINUS AJRATUVCHI ==================== -->
     <main id="tab-trimmer" class="hidden flex-1 p-4 pb-28 max-w-md mx-auto w-full space-y-5">
+        
+        <!-- INSHOT KESISH -->
         <section class="bg-brand-card p-5 rounded-3xl border border-gray-800 space-y-4 shadow-xl select-none">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm text-white flex items-center space-x-2">
@@ -233,31 +256,11 @@
                     </div>
                 </div>
 
-                <!-- TOZA INSHOT TO'LQINLI TREK -->
                 <div id="inshot-waveform-container" class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2 touch-none">
-                    <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3 pointer-events-none">
-                        <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-16 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-10 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-14 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-16 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-18 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-12 rounded-full"></span>
-                        <span class="w-1.5 bg-purple-500 h-20 rounded-full"></span>
-                    </div>
-
                     <div id="inshot-active-track" class="absolute inset-y-0 border-y-2 border-brand-cyan bg-brand-cyan/20 flex justify-between items-center" style="left: 0%; right: 0%;">
-                        <div id="handle-start" class="w-7 h-full bg-brand-cyan flex items-center justify-center text-xs text-black font-black shadow-lg cursor-pointer active:scale-110 transition-transform">◀</div>
-                        <div id="handle-end" class="w-7 h-full bg-brand-red flex items-center justify-center text-xs text-white font-black shadow-lg cursor-pointer active:scale-110 transition-transform">▶</div>
+                        <div id="handle-start" class="w-7 h-full bg-brand-cyan flex items-center justify-center text-xs text-black font-black shadow-lg cursor-pointer">◀</div>
+                        <div id="handle-end" class="w-7 h-full bg-brand-red flex items-center justify-center text-xs text-white font-black shadow-lg cursor-pointer">▶</div>
                     </div>
-                </div>
-
-                <div class="flex justify-between text-[10px] text-gray-400 px-1 font-mono">
-                    <span class="text-brand-cyan font-bold">👈 Ko'kni suring (Boshlanish)</span>
-                    <span class="text-brand-red font-bold">Qizilni suring (Tugash) 👉</span>
                 </div>
 
                 <button onclick="executeRealAudioTrimAndSend()" id="btn-trim-send" class="w-full py-4 bg-gradient-to-r from-brand-cyan via-blue-500 to-purple-600 text-black font-extrabold text-xs rounded-2xl shadow-xl active:scale-95 transition flex items-center justify-center space-x-2">
@@ -266,7 +269,86 @@
                 </button>
             </div>
         </section>
+
+        <!-- AI OVOZ & MINUS AJRATUVCHI (STEM SEPARATOR) -->
+        <section class="bg-brand-card p-5 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
+            <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                <i class="fa-solid fa-layer-group text-purple-400"></i>
+                <span>🎙 AI Ovoz & Minusni Ajratish (Stems)</span>
+            </h3>
+
+            <label for="stem-file-input" class="w-full py-4 bg-brand-input hover:bg-gray-800 border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer active:scale-95 transition">
+                <i class="fa-solid fa-music text-2xl text-purple-400 mb-1"></i>
+                <span id="stem-file-name" class="text-xs font-semibold text-gray-300">Qo'shiqni tanlang (MP3)</span>
+            </label>
+            <input type="file" id="stem-file-input" accept="audio/*" class="hidden" onchange="handleStemAudioUpload(event)">
+
+            <div id="stem-process-box" class="hidden space-y-3 pt-2">
+                <button onclick="processStemSeparation()" id="btn-start-stem" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-extrabold text-xs rounded-xl shadow-lg active:scale-95 transition">
+                    ⚡️ AI Bilan Ovoz va Musiqani Ajratish
+                </button>
+
+                <div id="stem-results-container" class="hidden space-y-3 pt-2">
+                    <!-- 1-Karta: Vocal -->
+                    <div class="p-3 bg-brand-input rounded-2xl border border-pink-500/40 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-pink-400">🎙 Xonanda Ovozi (Acapella)</span>
+                            <button onclick="sendStemToBot('vocal')" class="px-3 py-1 bg-pink-600 text-white font-bold text-[10px] rounded-lg active:scale-95">📤 Botga Olish</button>
+                        </div>
+                        <audio id="vocal-audio-preview" controls class="w-full h-8"></audio>
+                    </div>
+
+                    <!-- 2-Karta: Minus -->
+                    <div class="p-3 bg-brand-input rounded-2xl border border-cyan-500/40 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-cyan-400">🎹 Toza Musiqa (Minus / Karaoke)</span>
+                            <button onclick="sendStemToBot('music')" class="px-3 py-1 bg-cyan-600 text-black font-bold text-[10px] rounded-lg active:scale-95">📤 Botga Olish</button>
+                        </div>
+                        <audio id="music-audio-preview" controls class="w-full h-8"></audio>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <!-- ==================== AI MATN MODAL OYNASI (ICHKI NAVIGATSIYA) ==================== -->
+    <div id="ai-lyrics-modal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col justify-center items-center p-4 select-none">
+        <div class="w-full max-w-sm bg-brand-card border border-purple-500/50 p-5 rounded-3xl space-y-4 shadow-2xl relative">
+            <button onclick="closeAiLyricsFlow()" class="absolute right-4 top-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <!-- 1-Qadam: Til Tanlash -->
+            <div id="ai-step-lang" class="space-y-3 text-center">
+                <h4 class="font-bold text-sm text-white">1. Matn Tilini Tanlang:</h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectAiLang('uz')" class="p-3 bg-brand-input hover:border-brand-cyan border border-gray-800 rounded-2xl font-bold text-xs">🇺🇿 UZ</button>
+                    <button onclick="selectAiLang('ru')" class="p-3 bg-brand-input hover:border-brand-cyan border border-gray-800 rounded-2xl font-bold text-xs">🇷🇺 RU</button>
+                    <button onclick="selectAiLang('en')" class="p-3 bg-brand-input hover:border-brand-cyan border border-gray-800 rounded-2xl font-bold text-xs">🇬🇧 EN</button>
+                </div>
+            </div>
+
+            <!-- 2-Qadam: 6 ta Kategoriya -->
+            <div id="ai-step-category" class="hidden space-y-3 text-center">
+                <h4 class="font-bold text-sm text-white">2. Mavzuni Tanlang:</h4>
+                <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                    <button onclick="selectAiCategory('love')" class="p-3 bg-brand-input hover:border-pink-500 border border-gray-800 rounded-2xl">💔 Sevgi</button>
+                    <button onclick="selectAiCategory('motivation')" class="p-3 bg-brand-input hover:border-yellow-500 border border-gray-800 rounded-2xl">👑 Motivatsiya</button>
+                    <button onclick="selectAiCategory('heart')" class="p-3 bg-brand-input hover:border-cyan-500 border border-gray-800 rounded-2xl">🖤 Qalb</button>
+                    <button onclick="selectAiCategory('family')" class="p-3 bg-brand-input hover:border-red-500 border border-gray-800 rounded-2xl">🌸 Oila</button>
+                    <button onclick="selectAiCategory('phonk')" class="p-3 bg-brand-input hover:border-purple-500 border border-gray-800 rounded-2xl">🏎 Phonk</button>
+                    <button onclick="selectAiCategory('friends')" class="p-3 bg-brand-input hover:border-emerald-500 border border-gray-800 rounded-2xl">🤝 Do'stlik</button>
+                </div>
+            </div>
+
+            <!-- 3-Qadam: Natija va Studiyaga Joylash -->
+            <div id="ai-step-result" class="hidden space-y-3">
+                <h4 class="font-bold text-sm text-white text-center">🎉 AI Qo'shiq Matni Tayyor!</h4>
+                <textarea id="ai-result-textarea" rows="5" class="w-full p-3 bg-brand-input border border-gray-700 rounded-2xl text-xs text-white focus:outline-none"></textarea>
+                <button onclick="applyAiLyricsToStudio()" class="w-full py-3.5 bg-gradient-to-r from-brand-cyan to-blue-600 text-black font-extrabold text-xs rounded-xl shadow-lg active:scale-95 transition">
+                    ✨ Studiyaga Joylash
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- 2 TA ASOSIY TUGMA (STUDIYA VA KESISH) -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-8 py-3 flex justify-around items-center z-40">
@@ -276,7 +358,7 @@
         </button>
         <button onclick="switchTab('trimmer')" id="nav-btn-trimmer" class="flex flex-col items-center text-gray-400 space-y-1">
             <i class="fa-solid fa-scissors text-xl"></i>
-            <span class="text-xs font-bold">Kesish</span>
+            <span class="text-xs font-bold">Kesish & AI</span>
         </button>
     </nav>
 
@@ -285,13 +367,11 @@
         function switchTab(tabName) {
             const studio = document.getElementById('tab-studio');
             const trimmer = document.getElementById('tab-trimmer');
-
             const btnStudio = document.getElementById('nav-btn-studio');
             const btnTrimmer = document.getElementById('nav-btn-trimmer');
 
             if (studio) { studio.classList.add('hidden'); studio.style.display = 'none'; }
             if (trimmer) { trimmer.classList.add('hidden'); trimmer.style.display = 'none'; }
-
             if (btnStudio) btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
             if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
 
@@ -314,6 +394,8 @@
     <script src="js/colors.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/sync.js"></script>
+    <script src="js/aimusic.js"></script>
+    <script src="js/stems.js"></script>
     <script src="js/styles.js"></script>
 </body>
 </html>
