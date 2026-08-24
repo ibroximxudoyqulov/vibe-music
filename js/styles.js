@@ -255,35 +255,31 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. Kinetik Neon Matnlar
+            // 4. SPOTIFYDAN 10X SIFATLI ULKAN VA TINIQ MATNLAR (FADE-OUT)
             let activeIdx = 0;
             lyrics.forEach((l, i) => {
                 if (l.time !== null && elapsedTime >= l.time) activeIdx = i;
             });
 
-            let startY = 620 - (activeIdx * 140);
             lyrics.forEach((l, i) => {
-                const y = startY + (i * 140);
-                if (y > 280 && y < 1750) {
-                    if (i === activeIdx) {
-                        // FAOL MATN: Neon Porlash (Glow) Effekti Bilan
-                        ctx.save();
-                        ctx.shadowColor = selectedGlowColor;
-                        ctx.shadowBlur = 25;
-                        ctx.fillStyle = selectedGlowColor;
-                        ctx.font = `bold 52px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 90, y, 900, 62);
-                        ctx.restore();
-                    } else if (i < activeIdx) {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-                        ctx.font = `bold 38px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 90, y, 900, 50);
-                    } else {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
-                        ctx.font = `bold 38px ${selectedFont}`;
-                        drawWrappedText(ctx, l.text, 90, y, 900, 50);
-                    }
+                if (i === activeIdx) {
+                    // AYTILAYOTGAN SATR: ULKAN (62px), OPPQOQ VA KO'ZGA YAQQOL TASHLANADI
+                    ctx.save();
+                    ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
+                    ctx.shadowBlur = 25;
+                    ctx.fillStyle = selectedGlowColor;
+                    ctx.font = `900 62px ${selectedFont}`;
+                    ctx.textAlign = "left";
+                    drawWrappedText(ctx, l.text, 90, 850, 900, 75);
+                    ctx.restore();
+                } else if (i === activeIdx + 1) {
+                    // KELAYOTGAN KEYINGI SATR: PASTDA XIRA VA KICHIKROQ (NAVAT KUTADI)
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
+                    ctx.font = `bold 42px ${selectedFont}`;
+                    ctx.textAlign = "left";
+                    drawWrappedText(ctx, l.text, 90, 1080, 900, 58);
                 }
+                // O'TIB KETGAN SATRLAR EKRANDAN BUTUNLAY YO'QOLADI!
             });
 
             requestAnimationFrame(renderFrame);
