@@ -537,9 +537,11 @@ def message_handler(message):
     if text in [TEXTS["uz"]["btn_downloader"], TEXTS["ru"]["btn_downloader"], TEXTS["en"]["btn_downloader"]]:
         bot.send_message(message.chat.id, TEXTS[lang]["dl_prompt"], parse_mode="HTML")
         return
-
-    # HAVOLA KELGANDA AVTOMATIK YUKLASH (INSTA / TIKTOK / PIN / SNAP)
-    if re.search(r'(https?://\S+)', text):
+# HAVOLANI MATN ICHIDAN TOZA AJRATIB OLISH VA TOZALASH
+    url_match = re.search(r'(https?://[^\s]+)', text)
+    if url_match:
+        clean_url = url_match.group(1).split('?')[0] if "tiktok.com" in url_match.group(1) else url_match.group(1)
+        
         if not check_sponsor_subscription(user_id):
             sponsor = get_setting('sponsor_channel', '')
             markup = InlineKeyboardMarkup()
@@ -548,11 +550,17 @@ def message_handler(message):
             return
 
         wait_msg = bot.send_message(message.chat.id, TEXTS[lang]["dl_processing"])
-        media = download_social_media(text)
+        media = download_social_media(clean_url)
+        
         if media and media.get("url"):
             try:
                 vid_data = requests.get(media["url"], timeout=25).content
-                bot.send_video(message.chat.id, vid_data, caption=f"🎬 <b>{media.get('title', 'Video')[:50]}</b>\n\n📥 @ms_mus1c_bot orqali yuklandi!", parse_mode="HTML")
+                bot.send_video(
+                    message.chat.id, 
+                    vid_data, 
+                    caption=f"🎬 <b>{media.get('title', 'Video')[:50]}</b>\n\n📥 @ms_mus1c_bot orqali yuklandi!", 
+                    parse_mode="HTML"
+                )
                 bot.delete_message(message.chat.id, wait_msg.message_id)
             except Exception:
                 bot.send_video(message.chat.id, media["url"], caption="🎬 @ms_mus1c_bot")
