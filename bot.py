@@ -37,7 +37,7 @@ threading.Thread(target=run_health_server, daemon=True).start()
 BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o"
 ADMIN_ID = 6526744258  # Sizning Admin ID raqamingiz
 SECRET_CHANNEL_ID = -1004428420836  # Buyurtmalar va Arxiv Maxfiy Kanali
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=master_v1"
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=pro_clean_v100"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=25)
 user_states = {}
