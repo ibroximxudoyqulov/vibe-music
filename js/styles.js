@@ -1,11 +1,11 @@
-// ==================== 1080x1920 60FPS RENDER BRIDGE EXPORTER & TRIMMER ====================
+// ==================== DIRECT TELEGRAM BOT DELIVERY EXPORTER & TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// RENDER SERVER KO'PRIGI MANZILI:
-const RENDER_BRIDGE_URL = "https://vibe-music-iays.onrender.com";
+// RENDER SERVERINGIZNING ANIQ MANZILI:
+const RENDER_SERVER_URL = "https://vibe-music-iays.onrender.com";
 
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
@@ -107,7 +107,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, Math.round(x), currentY);
 }
 
-// ==================== 1. 60FPS VIDEO EKSPORT VA RENDER KO'PRIGIGA UZATISH ====================
+// ==================== 1. VIDEONI TO'G'RIDAN-TO'G'RI BOTINGIZ CHATIGA YUBORISH ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -163,7 +163,7 @@ window.exportAndSendToBot = async function() {
 
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 5000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 6000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
@@ -171,30 +171,29 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Kanalga uzatilmoqda...";
+            btn.innerHTML = "📤 Botingiz chatiga yuborilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
-            const videoUrl = URL.createObjectURL(blob);
 
-            // 1. RENDER SERVER KO'PRIGIGA YUBORISH (CORS BLOKLANMAYDI!)
-            fetch(`${RENDER_BRIDGE_URL}/upload_video`, {
+            // RENDER SERVERI ORQALI TO'G'RIDAN-TO'G'RI BOT CHATINGIZGA TASHHORISH!
+            fetch(`${RENDER_SERVER_URL}/upload_video`, {
                 method: 'POST',
                 body: blob
             }).then(res => {
-                alert("🎉 Video Render orqali to'g'ridan-to'g'ri Kanalingizga yuklandi!");
+                alert("🎉 Video to'g'ridan-to'g'ri botingiz chatiga yetib bordi! Telegram chatini oching.");
+                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+                btn.disabled = false;
             }).catch(err => {
-                console.log("[Bridge Error]", err);
+                // Agar internet uzilsa telefoniga ham saqlaydi
+                const videoUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = videoUrl;
+                a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+                btn.disabled = false;
             });
-
-            // 2. TELEFON GALEREYASIGA SAQLASH
-            const a = document.createElement('a');
-            a.href = videoUrl;
-            a.download = `VibeStudio_Video_${Date.now()}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
-            btn.disabled = false;
         };
 
         recorder.start();
@@ -215,6 +214,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
+            // Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -235,6 +235,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
+            // Kinetik Matnlar (0:00 dan boshlab 58px)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -273,7 +274,7 @@ window.exportAndSendToBot = async function() {
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER (RENDER BRIDGE) ====================
+// ==================== 2. INSHOT TOUCH TRIMMER (BOT CHATIGA TASHHORISH) ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -393,7 +394,7 @@ window.executeRealAudioTrimAndSend = async function() {
     }
 
     const btn = document.getElementById('btn-trim-send');
-    btn.innerHTML = "⏳ Qirqilmoqda va Kanalga uzatilmoqda...";
+    btn.innerHTML = "⏳ Qirqilmoqda va Botga yuborilmoqda...";
     btn.disabled = true;
 
     try {
@@ -416,29 +417,32 @@ window.executeRealAudioTrimAndSend = async function() {
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
 
-        // RENDER BRIDGE ORQALI KANALGA YUBORISH
-        fetch(`${RENDER_BRIDGE_URL}/upload_audio`, {
+        // RENDER BRIDGE ORQALI TO'G'RIDAN-TO'G'RI BOT CHATIGA TASHHORISH!
+        fetch(`${RENDER_SERVER_URL}/upload_audio`, {
             method: 'POST',
             body: wavBlob
+        }).then(res => {
+            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegram chatini oching.");
+            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
+            btn.disabled = false;
+        }).catch(err => {
+            const downloadUrl = URL.createObjectURL(wavBlob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
+            btn.disabled = false;
         });
 
-        // TELEFONGA SAQLASH
-        const downloadUrl = URL.createObjectURL(wavBlob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        alert("🎉 Qirqilgan MP3 kanalingizga uzatildi va telefoningizga yuklandi!");
     } catch (e) {
         console.error(e);
-        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+        alert("⚠️ Xatolik yuz berdi.");
+        btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
+        btn.disabled = false;
     }
-
-    btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-    btn.disabled = false;
 };
 
 function bufferToWave(abuffer, len) {
@@ -468,4 +472,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-}
+                    }
