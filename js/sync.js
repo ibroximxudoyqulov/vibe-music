@@ -1,4 +1,4 @@
-// ==================== 100% SMART & ACCURATE SYNC ENGINE ====================
+// ==================== 100% SMART DYNAMIC MULTI-LINE KINETIC ENGINE ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
@@ -11,7 +11,7 @@ window.updateTrackInfo = function() {
     document.getElementById('preview-track-title').innerText = title;
 };
 
-// 1. CHEKSIZ SATRLARNI TAYYORLASH
+// 1. CHEKSIZ VA UZUN SATRLARNI TAYYORLASH
 window.parseLyricsForSync = function() {
     const raw = document.getElementById('raw-lyrics-input').value.trim();
     if (!raw) {
@@ -19,7 +19,7 @@ window.parseLyricsForSync = function() {
         return;
     }
 
-    // Cheksiz satrlarni bo'laklash
+    // Faqat haqiqiy Enter (\n) bo'yicha bo'laklash (Uzun satrlar bitta butun satr bo'ladi!)
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
@@ -36,8 +36,8 @@ window.parseLyricsForSync = function() {
         div.id = `sync-line-${index}`;
         div.className = "p-2.5 bg-brand-input rounded-xl border border-gray-800 flex justify-between items-center text-xs";
         div.innerHTML = `
-            <span class="text-gray-300 flex-1 break-words pr-2">${index + 1}. ${item.text}</span>
-            <span id="time-badge-${index}" class="text-[10px] font-mono px-2 py-0.5 bg-gray-800 text-gray-400 rounded-lg">--:--</span>
+            <span class="text-gray-300 flex-1 truncate pr-2">${index + 1}. ${item.text}</span>
+            <span id="time-badge-${index}" class="text-[10px] font-mono px-2 py-0.5 bg-gray-800 text-gray-400 rounded-lg flex-shrink-0">--:--</span>
         `;
         container.appendChild(div);
     });
@@ -54,17 +54,19 @@ function initCinemaSlots() {
     
     const currentFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
     const selectedColor = window.activeLyricsColor || "#ffffff";
+    const firstText = window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang...";
+    const secondText = window.lyricsData[1] ? window.lyricsData[1].text : "";
 
     box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-2 my-auto select-none";
     box.innerHTML = `
-        <!-- 1-SLOT: FAOL SATR -->
-        <p id="cinema-slot-active" class="text-2xl md:text-3xl font-black transition-all duration-500 ease-out leading-tight my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
-            ${window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang..."}
+        <!-- 1-SLOT: FAOL SATR (2-3 QATORGA MOSLASHUVCHAN) -->
+        <p id="cinema-slot-active" class="text-xl md:text-2xl font-black transition-all duration-500 ease-out leading-snug my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words whitespace-normal w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
+            ${firstText}
         </p>
 
         <!-- 2-SLOT: KEYINGI SATR -->
-        <p id="cinema-slot-next" class="text-lg md:text-xl font-bold text-white/30 transition-all duration-500 ease-out leading-snug my-2 break-words w-full" style="font-family: ${currentFont};">
-            ${window.lyricsData[1] ? window.lyricsData[1].text : ""}
+        <p id="cinema-slot-next" class="text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-snug my-2 break-words whitespace-normal w-full" style="font-family: ${currentFont};">
+            ${secondText}
         </p>
     `;
     currentRenderedIdx = 0;
@@ -80,7 +82,7 @@ function highlightNextSyncLine() {
     }
 }
 
-// 2. VAQTNI ANIQ SAQLASH
+// 2. VAQTNI SAQLASH
 window.timestampCurrentLine = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -107,15 +109,14 @@ window.timestampCurrentLine = function() {
         highlightNextSyncLine();
     } else {
         stampBtn.classList.add('hidden');
-        alert("🎉 Barcha satrlar aniq sinxronlandi! Endi videoni tayyorlang.");
+        alert("🎉 Barcha satrlar sinxronlandi! Endi videoni tayyorlang.");
     }
 };
 
-// 3. AQLLI VA BAROBAR YURUVCHI ALMASHINISH (OFF-BY-ONE XATOSI YO'Q!)
+// 3. JONLI SILLIQ VA DYNAMIC MOSLASHUVCHI ALMASHINISH
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
-    // Musiqa vaqtiga qarab aynan qaysi satr aytilayotganini aniq topish
     let targetIdx = 0;
     for (let i = 0; i < window.lyricsData.length; i++) {
         if (window.lyricsData[i].time !== null && currentTime >= window.lyricsData[i].time) {
@@ -130,17 +131,4 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
     if (targetIdx !== currentRenderedIdx) {
         currentRenderedIdx = targetIdx;
 
-        // 1-satr silliq yo'qoladi, 2-satr o'rniga keladi
-        slotActive.style.transform = "translateY(-15px)";
-        slotActive.style.opacity = "0";
-
-        setTimeout(() => {
-            slotActive.innerText = window.lyricsData[targetIdx] ? window.lyricsData[targetIdx].text : "";
-            slotActive.style.color = window.activeLyricsColor || "#ffffff";
-            slotActive.style.transform = "translateY(0)";
-            slotActive.style.opacity = "1";
-
-            slotNext.innerText = window.lyricsData[targetIdx + 1] ? window.lyricsData[targetIdx + 1].text : "";
-        }, 120);
-    }
-};
+        slotActive.
