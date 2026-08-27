@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - 60FPS Kinetic Lyric Video & Audio Studio</title>
+    <title>VibeStudio - 60FPS Spotify Lyric Video & Audio Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -64,11 +64,11 @@
             <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
             
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <input type="text" id="track-artist-input" placeholder="Ijrochi" value="Jaloliddin Ahmadaliev" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
-                <input type="text" id="track-title-input" placeholder="Qo'shiq" value="Sog'indim" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-artist-input" placeholder="Ijrochi" value="Sevinch Mo'minova" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
+                <input type="text" id="track-title-input" placeholder="Qo'shiq" value="Yolg'onchi yor" oninput="updateTrackInfo()" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl text-xs text-white focus:outline-none">
             </div>
 
-            <!-- JONLI SURILADIGAN PLAYER -->
+            <!-- JONLI BARMOQ BILAN SURILADIGAN PLAYER -->
             <div id="audio-player-box" class="hidden flex-col bg-brand-input p-3.5 rounded-2xl border border-gray-800 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <button onclick="toggleAudioPlay()" class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-95">
@@ -82,14 +82,14 @@
             </div>
         </section>
 
-        <!-- 2. STEP: MATN VA SINXRONLASH -->
+        <!-- 2. STEP: MATN VA SINXRONLASH (CHEKSIZ QATORLAR) -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-align-left text-brand-red"></i>
-                <span>2. Matn va Sinxronlash</span>
+                <span>2. Matn va Sinxronlash (Cheksiz Satrlar)</span>
             </h3>
 
-            <textarea id="raw-lyrics-input" rows="4" placeholder="Qo'shiq matnini qatorma-qator kiriting..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
+            <textarea id="raw-lyrics-input" rows="5" placeholder="Qo'shiq matnini kiriting (xohlagancha uzun va cheksiz satrlar)..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
             
             <button onclick="parseLyricsForSync()" class="w-full py-2.5 bg-brand-input hover:bg-gray-800 border border-gray-700 font-bold text-xs rounded-xl active:scale-95 transition">
                 Satrlarni tayyorlash
@@ -119,7 +119,7 @@
                     <input type="file" id="custom-font-input" accept=".ttf,.otf,.woff" class="hidden" onchange="handleCustomFontUpload(event)">
                 </div>
                 <select id="font-family-select" onchange="updatePreviewFont(this.value)" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs focus:outline-none text-white">
-                    <option value="'Montserrat', sans-serif">Montserrat Bold (Spotify Default)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat Bold (Spotify Style)</option>
                     <option value="'Playfair Display', serif">Playfair Display (Vintage Serif)</option>
                     <option value="'Caveat', cursive">Caveat (Aesthetic Handwriting)</option>
                     <option value="'Lobster', cursive">Lobster (Retro Cyrillic)</option>
@@ -130,7 +130,7 @@
 
             <!-- MATN RANGINI TANLASH (COLOR PALETTE) -->
             <div>
-                <label class="text-[10px] text-gray-400 block mb-2">🎨 Matn porlash (Glow) rangini tanlang:</label>
+                <label class="text-[10px] text-gray-400 block mb-2">🎨 Faol matn rangini tanlang:</label>
                 <div class="flex items-center justify-between space-x-2 bg-brand-input p-2.5 rounded-2xl border border-gray-800">
                     <button id="color-btn-ffffff" onclick="setLyricsColor('#ffffff')" class="color-preset-btn w-7 h-7 rounded-full bg-white ring-4 ring-white scale-110 active:scale-95 transition"></button>
                     <button id="color-btn-1db954" onclick="setLyricsColor('#1db954')" class="color-preset-btn w-7 h-7 rounded-full bg-[#1db954] active:scale-95 transition"></button>
@@ -146,9 +146,9 @@
                 </div>
             </div>
 
-            <!-- Shaxsiy Fon Yuklash -->
+            <!-- Shaxsiy Fon Yuklash (Ixtiyoriy) -->
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">Shaxsiy rasm yoki video fon:</label>
+                <label class="text-[10px] text-gray-400 block mb-1">Shaxsiy rasm yoki video fon (Ixtiyoriy):</label>
                 <label for="custom-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
                     <span id="custom-bg-name" class="text-xs text-gray-300 truncate">🖼 Rasm yoki video tanlang...</span>
                     <i class="fa-solid fa-image text-brand-cyan"></i>
@@ -177,20 +177,21 @@
 
                 <div class="flex items-center space-x-3 text-white/90 border-b border-white/10 pb-3 z-10">
                     <div class="text-left flex-1">
-                        <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Sog'indim</p>
-                        <p id="preview-track-artist" class="text-[11px] text-gray-400">Jaloliddin Ahmadaliev</p>
+                        <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Yolg'onchi yor</p>
+                        <p id="preview-track-artist" class="text-[11px] text-gray-400">Sevinch Mo'minova</p>
                     </div>
                     <div id="preview-vinyl-box" class="hidden">
                         <i class="fa-solid fa-compact-disc text-2xl text-white/90 vinyl-spin"></i>
                     </div>
                 </div>
 
-                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-6 text-left relative z-10">
+                <!-- SPOTIFY MULTI-LINE LYRICS LIST -->
+                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-4 text-left relative z-10">
                     <p class="text-sm font-bold text-white/40">Matnni yuklang va sinxronlang...</p>
                 </div>
 
                 <div class="flex justify-between items-center text-gray-400 pt-3 border-t border-white/10 text-xs z-10">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio Kinetic</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio Lyrics</span>
                 </div>
             </div>
 
@@ -234,6 +235,7 @@
                     </div>
                 </div>
 
+                <!-- TOZA INSHOT TO'LQINLI TREK -->
                 <div id="inshot-waveform-container" class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2 touch-none">
                     <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3 pointer-events-none">
                         <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
@@ -315,4 +317,4 @@
     <script src="js/sync.js"></script>
     <script src="js/styles.js"></script>
 </body>
-                                                                                                                     </html>
+        </html>
