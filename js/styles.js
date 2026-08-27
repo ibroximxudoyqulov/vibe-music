@@ -1,4 +1,4 @@
-// ==================== 1080x1920 60FPS KINETIC VIDEO & INSHOT TRIMMER ====================
+// ==================== 1080x1920 60FPS JITTER-FREE EXPORTER & INSHOT TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
@@ -95,7 +95,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 1. ULKAN VA TINIQ 60FPS VIDEO EKSPORT ====================
+// ==================== 1. HAR BIR ODAMNING O'Z LICHKASIGA YUBORUVCHI 60FPS VIDEO ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -118,8 +118,15 @@ window.exportAndSendToBot = async function() {
     const maxLyricTime = Math.max(...stampedTimes);
     const exactVideoDuration = maxLyricTime + 2.5;
 
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-    const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
+    // TELEGRAM FOYDALANUVCHISINING O'ZINI 100% ANIQLASH
+    let userId = null;
+    try {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        }
+    } catch (e) {
+        userId = null;
+    }
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
@@ -162,43 +169,48 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Video botingizga yuborilmoqda...";
+            btn.innerHTML = "📤 Botingizga yuborilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
 
-            const formData = new FormData();
-            formData.append('chat_id', userId);
-            formData.append('video', blob, `Kinetic_Lyric_${Date.now()}.mp4`);
-            formData.append('caption', `🎬 <b>VibeStudio 60FPS Kinetik Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
-            formData.append('parse_mode', 'HTML');
+            // AGAR TELEGRAMDAN OCHILGAN BO'LSA -> O'SHA ODAMNING O'ZIGA YUBORADI!
+            if (userId) {
+                const formData = new FormData();
+                formData.append('chat_id', userId);
+                formData.append('video', blob, `VibeStudio_Video_${Date.now()}.mp4`);
+                formData.append('caption', `🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
+                formData.append('parse_mode', 'HTML');
 
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.ok) {
-                    alert("🎉 60FPS Video botingiz lichkasiga yetib bordi! Telegramni oching.");
-                } else {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `Kinetic_Lyric_${Date.now()}.mp4`;
-                    a.click();
-                    alert("✅ Video telefoningizga yuklandi!");
+                try {
+                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        alert("🎉 Video shaxsiy botingizga yuborildi! Telegramni oching.");
+                    } else {
+                        downloadDirectly(blob);
+                    }
+                } catch (err) {
+                    downloadDirectly(blob);
                 }
-            } catch (err) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Kinetic_Lyric_${Date.now()}.mp4`;
-                a.click();
-                alert("✅ Video tayyorlandi va yuklandi!");
+            } else {
+                // Brauzerda ochilgan bo'lsa telefonning o'ziga yuklaydi
+                downloadDirectly(blob);
             }
 
             btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
             btn.disabled = false;
         };
+
+        function downloadDirectly(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+            a.click();
+            alert("✅ Video tayyor bo'ldi va telefoningizga yuklandi!");
+        }
 
         recorder.start();
         bufferSource.start(0);
@@ -218,7 +230,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Fon (#09090d)
+            // 1. Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -251,7 +263,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ 0:00 DAN BOSHLAB 1-SATRNI KO'RSATISH VA SILLIQ YO'QOTISH
+            // 4. ANIQ 0:00 DAN BOSHLAB 1-SATRNI CHIZISH VA SILLIQ YO'QOTISH
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -261,7 +273,6 @@ window.exportAndSendToBot = async function() {
 
             lyrics.forEach((l, i) => {
                 if (i === activeIdx) {
-                    // FAOL SATR: ULKAN (58px), OPPQOQ VA KO'ZGA YAQQOL TASHLANADI
                     ctx.save();
                     ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
                     ctx.shadowBlur = 20;
@@ -271,13 +282,11 @@ window.exportAndSendToBot = async function() {
                     drawWrappedText(ctx, l.text, 90, 850, 900, 72);
                     ctx.restore();
                 } else if (i === activeIdx + 1) {
-                    // KELAYOTGAN KEYINGI SATR: PASTDA XIRA VA KICHIKROQ (NAVAT KUTADI)
                     ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.textAlign = "left";
                     drawWrappedText(ctx, l.text, 90, 1080, 900, 56);
                 }
-                // O'TIB KETGAN SATRLAR BUTUNLAY YO'QOLADI (CHIZILMAYDI)!
             });
 
             requestAnimationFrame(renderFrame);
@@ -287,7 +296,7 @@ window.exportAndSendToBot = async function() {
 
     } catch (err) {
         console.error(err);
-        alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
+        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
         btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
         btn.disabled = false;
     }
@@ -412,8 +421,14 @@ window.executeRealAudioTrimAndSend = async function() {
         return;
     }
 
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-    const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
+    let userId = null;
+    try {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        }
+    } catch (e) {
+        userId = null;
+    }
 
     const btn = document.getElementById('btn-trim-send');
     btn.innerHTML = "⏳ Musiqa qirqilmoqda va MP3 tayyorlanmoqda...";
@@ -439,33 +454,40 @@ window.executeRealAudioTrimAndSend = async function() {
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
 
-        btn.innerHTML = "📤 Asosiy botingizga yuborilmoqda...";
+        if (userId) {
+            btn.innerHTML = "📤 Botingizga yuborilmoqda...";
+            const formData = new FormData();
+            formData.append('chat_id', userId);
+            formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+            formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}\n\n👇 Saqlab olishingiz mumkin!`);
+            formData.append('parse_mode', 'HTML');
 
-        const formData = new FormData();
-        formData.append('chat_id', userId);
-        formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
-        formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}\n\n👇 Saqlab olishingiz mumkin!`);
-        formData.append('parse_mode', 'HTML');
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
 
-        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-
-        if (data.ok) {
-            alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
+            if (data.ok) {
+                alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
+            } else {
+                downloadBlobLocally(wavBlob);
+            }
         } else {
-            const downloadUrl = URL.createObjectURL(wavBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
-            a.click();
-            alert("✅ Qirqilgan MP3 telefoningizga yuklandi!");
+            downloadBlobLocally(wavBlob);
         }
     } catch (e) {
         console.error(e);
         alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+    }
+
+    function downloadBlobLocally(wavBlob) {
+        const downloadUrl = URL.createObjectURL(wavBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
+        a.click();
+        alert("✅ Qirqilgan MP3 telefoningizga yuklandi!");
     }
 
     btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
@@ -499,4 +521,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-}
+        }
