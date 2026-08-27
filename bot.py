@@ -15,11 +15,12 @@ from telebot.types import (
 
 BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o"
 ADMIN_ID = 6526744258
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=pro_clean_final_999"
+SECRET_CHANNEL_ID = "-1004428420836"
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=spotify_master_v1"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=25)
 
-# ==================== 1. RENDER SERVER KO'PRIGI ====================
+# ==================== 1. RENDER 24/7 SERVER KO'PRIGI ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -32,7 +33,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(b"<h1>VibeStudio is 100% Active!</h1>")
+        self.wfile.write(b"<h1>VibeStudio Master Engine is 100% Active!</h1>")
 
     def do_POST(self):
         try:
@@ -43,14 +44,14 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
                 bot.send_video(
                     ADMIN_ID, 
                     post_data, 
-                    caption="🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n\n👇 Videoni ustiga bosib saqlab olishingiz mumkin!", 
+                    caption="🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n\n📥 @ms_mus1c_bot orqali tayyorlandi!", 
                     parse_mode="HTML"
                 )
             elif "upload_audio" in self.path:
                 bot.send_audio(
                     ADMIN_ID, 
                     post_data, 
-                    caption="✂️ <b>VibeStudio Qirqilgan MP3 Musiqangiz!</b>", 
+                    caption="✂️ <b>VibeStudio Qirqilgan MP3 Faylingiz!</b>\n\n📥 @ms_mus1c_bot", 
                     parse_mode="HTML"
                 )
 
@@ -76,7 +77,7 @@ def run_health_server():
 
 threading.Thread(target=run_health_server, daemon=True).start()
 
-# ==================== 2. SQLITE BAZA ====================
+# ==================== 2. SQLITE DOIMIY BAZA ====================
 def init_db():
     conn = sqlite3.connect("users.db", timeout=15, check_same_thread=False)
     cursor = conn.cursor()
@@ -122,10 +123,10 @@ def get_total_users():
     except Exception:
         return 0
 
-# ==================== 3. LUG'AT VA MENYU (REKLAMASIZ) ====================
+# ==================== 3. LUG'AT VA MENYU ====================
 TEXTS = {
     "uz": {
-        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify video yasash, musiqani qirqish va video yuklash <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
+        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify videolar yasash, audioni qirqish va video yuklash <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
         "btn_open_app": "🎨 VibeStudio Ilovasi (Mini App)",
         "btn_downloader": "📥 Video Yuklash (Insta/TikTok)",
         "btn_info": "ℹ️ Bot Haqida",
@@ -174,7 +175,6 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS["uz"]["dl_prompt"], parse_mode="HTML")
         return
 
-    # TIKTOK / INSTAGRAM YUKLASH
     url_match = re.search(r'(https?://[^\s]+)', text)
     if url_match:
         clean_url = url_match.group(1).split('?')[0] if "tiktok.com" in url_match.group(1) else url_match.group(1)
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     except Exception:
         pass
     time.sleep(2)
-    print("VibeStudio Master Bot 24/7 ishga tushdi...")
+    print("VibeStudio Bot 24/7 ishga tushdi...")
     while True:
         try:
             bot.infinity_polling(skip_pending=True, timeout=20)
