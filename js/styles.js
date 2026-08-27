@@ -1,4 +1,4 @@
-// ==================== VIBESTUDIO 1080x1920 60FPS MASTER ENGINE ====================
+// ==================== 1080x1920 60FPS SMOOTH EXPORTER & INSHOT TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
@@ -32,10 +32,8 @@ window.switchTab = function(tab) {
 
 // 2. SHRIFTNI YANGILASH
 window.updatePreviewFont = function(fontFamily) {
-    const slotActive = document.getElementById('cinema-slot-active');
-    const slotNext = document.getElementById('cinema-slot-next');
-    if (slotActive) slotActive.style.fontFamily = fontFamily;
-    if (slotNext) slotNext.style.fontFamily = fontFamily;
+    const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
+    lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
 // 3. SHAXSIY TTF/OTF SHRIFT YUKLASH
@@ -105,8 +103,8 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-// TEBRANMAYDIGAN MATN CHIZISH FUNKSIYASI
-function drawSmartWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+// TINIQ MATN CHIZISH FUNKSIYASI (QOTMAYDIGAN)
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     if (!text) return y;
     const words = text.split(' ');
     let lines = [];
@@ -131,7 +129,7 @@ function drawSmartWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. 100% OVOZLI & SILLIQ ALMASHUVCHI 60FPS VIDEO EKSPORT ====================
+// ==================== 1. 100% OVOZLI & SILLIQ 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -176,7 +174,6 @@ window.exportAndSendToBot = async function() {
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
 
         const canvasStream = canvas.captureStream(60);
 
@@ -241,7 +238,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Qorong'u Fon
+            // 1. Qorong'u Fon (#09090d)
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -274,7 +271,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ VA SILLIQ MATNLAR CHIZISH (TEBRANMAYDI)
+            // 4. SPOTIFY KO'P QATORLI MATNLAR CHIZISH (QOTMASDAN 60 FPS)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -282,30 +279,29 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            const activeText = lyrics[activeIdx] ? lyrics[activeIdx].text : "";
-            const nextText = lyrics[activeIdx + 1] ? lyrics[activeIdx + 1].text : "";
+            // Markaziy Y joylashuv
+            let startY = 650 - (activeIdx * 125);
 
-            const activeFontSize = activeText.length > 55 ? 46 : (activeText.length > 35 ? 50 : 56);
-            const activeLineHeight = activeFontSize + 16;
+            lyrics.forEach((l, i) => {
+                const y = startY + (i * 125);
 
-            // FAOL SATR
-            ctx.save();
-            ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
-            ctx.shadowBlur = 25;
-            ctx.fillStyle = selectedTextColor;
-            ctx.font = `900 ${activeFontSize}px ${selectedFont}`;
-            ctx.textAlign = "left";
-            const nextStartY = drawSmartWrappedText(ctx, activeText, 90, 800, 900, activeLineHeight);
-            ctx.restore();
-
-            // KEYINGI KELAYOTGAN SATR
-            if (nextText) {
-                const nextFontSize = nextText.length > 55 ? 34 : 40;
-                ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-                ctx.font = `bold ${nextFontSize}px ${selectedFont}`;
-                ctx.textAlign = "left";
-                drawSmartWrappedText(ctx, nextText, 90, nextStartY + 60, 900, nextFontSize + 14);
-            }
+                // Faqat ekrandagi ko'rinadigan satrlar chiziladi (Tezkorlik uchun!)
+                if (y > 280 && y < 1720) {
+                    if (i === activeIdx) {
+                        // FAOL SATR: ULKAN VA YORQIN
+                        ctx.fillStyle = selectedTextColor;
+                        ctx.font = `900 56px ${selectedFont}`;
+                        ctx.textAlign = "left";
+                        drawWrappedText(ctx, l.text, 90, y, 900, 68);
+                    } else {
+                        // QOLGAN BARCHA SATRLAR: Xira oq
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.38)";
+                        ctx.font = `bold 42px ${selectedFont}`;
+                        ctx.textAlign = "left";
+                        drawWrappedText(ctx, l.text, 90, y, 900, 52);
+                    }
+                }
+            });
 
             requestAnimationFrame(renderFrame);
         }
@@ -517,4 +513,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-    }
+            }
