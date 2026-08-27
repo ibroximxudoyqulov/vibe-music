@@ -1,14 +1,12 @@
-// ==================== DIRECT CHANNEL & TELEGRAM BOT EXPORTER ====================
+// ==================== 1080x1920 60FPS RENDER BRIDGE EXPORTER & TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// SIZNING BOT TOKENINGIZ VA ANIQ KANALINGIZ:
-const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
-const SECRET_CHANNEL_ID = "-1004428420836"; // https://t.me/+lAvdRc10jkU2ZDcy
+// RENDER SERVER KO'PRIGI MANZILI:
+const RENDER_BRIDGE_URL = "https://vibe-music-iays.onrender.com";
 
-// 1. Sahifalarni almashtirish
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -109,7 +107,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, Math.round(x), currentY);
 }
 
-// ==================== 1. TO'G'RIDAN-TO'G'RI KANALGA 60FPS VIDEO YUKLASH ====================
+// ==================== 1. 60FPS VIDEO EKSPORT VA RENDER KO'PRIGIGA UZATISH ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -131,15 +129,6 @@ window.exportAndSendToBot = async function() {
 
     const maxLyricTime = Math.max(...stampedTimes);
     const exactVideoDuration = maxLyricTime + 2.5;
-
-    let currentUserId = null;
-    try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-            currentUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
-        }
-    } catch (e) {
-        currentUserId = null;
-    }
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
@@ -172,7 +161,6 @@ window.exportAndSendToBot = async function() {
             ...audioDest.stream.getAudioTracks()
         ]);
 
-        // Tezkor 5 Mbps Full HD
         let recorder;
         try {
             recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 5000000 });
@@ -183,53 +171,21 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Kanalga yuklanmoqda...";
+            btn.innerHTML = "📤 Kanalga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
             const videoUrl = URL.createObjectURL(blob);
 
-            const trackTitle = document.getElementById('preview-track-title').innerText;
-            const trackArtist = document.getElementById('preview-track-artist').innerText;
-            const captionText = `🎬 <b>Yangi VibeStudio 60FPS Video!</b>\n🎵 Qo'shiq: ${trackTitle} — ${trackArtist}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n📥 @ms_mus1c_bot orqali tayyorlandi!`;
-
-            // 1. KANALGA YUBORISH
-            const channelFormData = new FormData();
-            channelFormData.append('chat_id', SECRET_CHANNEL_ID);
-            channelFormData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-            channelFormData.append('caption', captionText);
-            channelFormData.append('parse_mode', 'HTML');
-
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+            // 1. RENDER SERVER KO'PRIGIGA YUBORISH (CORS BLOKLANMAYDI!)
+            fetch(`${RENDER_BRIDGE_URL}/upload_video`, {
                 method: 'POST',
-                body: channelFormData
-            }).then(res => res.json()).then(data => {
-                if (data.ok) {
-                    alert("🎉 Video to'g'ridan-to'g'ri kanalingizga yuklandi! Kanalni ochib ko'ring.");
-                } else {
-                    console.log("Kanal javobi:", data);
-                    // Agar kanalda bot admin bo'lmasa ogohlantirish
-                    if (data.description && data.description.includes("chat not found")) {
-                        alert("⚠️ Iltimos, @ms_mus1c_bot ni kanalingizga Admin qilib qo'shing!");
-                    }
-                }
+                body: blob
+            }).then(res => {
+                alert("🎉 Video Render orqali to'g'ridan-to'g'ri Kanalingizga yuklandi!");
             }).catch(err => {
-                console.log("Xato:", err);
+                console.log("[Bridge Error]", err);
             });
 
-            // 2. USER CHATIGA YUBORISH
-            if (currentUserId) {
-                const userFormData = new FormData();
-                userFormData.append('chat_id', currentUserId);
-                userFormData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-                userFormData.append('caption', captionText);
-                userFormData.append('parse_mode', 'HTML');
-
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                    method: 'POST',
-                    body: userFormData
-                }).catch(e => console.log(e));
-            }
-
-            // 3. TELEFON GALEREYASIGA SAQLASH
+            // 2. TELEFON GALEREYASIGA SAQLASH
             const a = document.createElement('a');
             a.href = videoUrl;
             a.download = `VibeStudio_Video_${Date.now()}.mp4`;
@@ -259,7 +215,6 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -280,7 +235,6 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // Kinetik Matnlar (0:00 dan boshlab 58px)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -319,7 +273,7 @@ window.exportAndSendToBot = async function() {
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER (KANALGA YUBORISH) ====================
+// ==================== 2. INSHOT TOUCH TRIMMER (RENDER BRIDGE) ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -439,7 +393,7 @@ window.executeRealAudioTrimAndSend = async function() {
     }
 
     const btn = document.getElementById('btn-trim-send');
-    btn.innerHTML = "⏳ Qirqilmoqda va Kanalga yuborilmoqda...";
+    btn.innerHTML = "⏳ Qirqilmoqda va Kanalga uzatilmoqda...";
     btn.disabled = true;
 
     try {
@@ -461,18 +415,11 @@ window.executeRealAudioTrimAndSend = async function() {
         }
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
-        const cutTimeText = `${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}`;
 
-        // KANALGA YUBORISH
-        const channelFormData = new FormData();
-        channelFormData.append('chat_id', SECRET_CHANNEL_ID);
-        channelFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
-        channelFormData.append('caption', `✂️ <b>Qirqilgan MP3 Fayl!</b>\n⏱ Oraliq: ${cutTimeText}\n\n📥 @ms_mus1c_bot`);
-        channelFormData.append('parse_mode', 'HTML');
-
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+        // RENDER BRIDGE ORQALI KANALGA YUBORISH
+        fetch(`${RENDER_BRIDGE_URL}/upload_audio`, {
             method: 'POST',
-            body: channelFormData
+            body: wavBlob
         });
 
         // TELEFONGA SAQLASH
@@ -484,7 +431,7 @@ window.executeRealAudioTrimAndSend = async function() {
         a.click();
         document.body.removeChild(a);
 
-        alert("🎉 Qirqilgan MP3 kanalingizga yuklandi!");
+        alert("🎉 Qirqilgan MP3 kanalingizga uzatildi va telefoningizga yuklandi!");
     } catch (e) {
         console.error(e);
         alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
@@ -517,3 +464,8 @@ function bufferToWave(abuffer, len) {
             sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
             out.setInt16(pos, sample, true);
             pos += 2;
+        }
+        offset++;
+    }
+    return new Blob([out], { type: "audio/mp3" });
+}
