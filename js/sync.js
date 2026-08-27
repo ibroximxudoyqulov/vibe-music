@@ -1,7 +1,8 @@
-// ==================== JITTER-FREE SMOOTH KINETIC LYRICS ENGINE ====================
+// ==================== 100% SMOOTH 2-SLOT APPLE MUSIC KINETIC ENGINE ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
+let currentRenderedIdx = -1;
 
 window.updateTrackInfo = function() {
     const artist = document.getElementById('track-artist-input').value || 'Artist';
@@ -37,34 +38,33 @@ window.parseLyricsForSync = function() {
         container.appendChild(div);
     });
 
-    renderSmoothPreviewList();
+    initCinemaSlots();
     activeLineIndex = 0;
     highlightNextSyncLine();
-    alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr aytilganda 'Vaqtni Saqlash' tugmasini bosing.");
+    alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr boshlanganda 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
-// 2. Silliq va O'qishga Oson Preview Ro'yxati
-function renderSmoothPreviewList() {
+// 2. 2-Slotli Barqaror Kinematik Ekran Yaratish (Sakramaydi!)
+function initCinemaSlots() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
-    box.innerHTML = '';
-
+    
     const currentFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
+    const selectedColor = window.activeLyricsColor || "#ffffff";
 
-    window.lyricsData.forEach((item, index) => {
-        const p = document.createElement('p');
-        p.id = `spotify-line-${index}`;
-        // Har bir satr uchun barqaror va sakramaydigan silliq CSS o'tish
-        p.className = "text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full my-3";
-        p.style.fontFamily = currentFont;
-        p.innerText = item.text;
-        p.onclick = () => {
-            if (item.time !== null && window.vibeAudioElement) {
-                window.vibeAudioElement.currentTime = item.time;
-            }
-        };
-        box.appendChild(p);
-    });
+    box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-2 my-auto select-none";
+    box.innerHTML = `
+        <!-- 1-SLOT: FAOL AYTILAYOTGAN ULKAN SATR -->
+        <p id="cinema-slot-active" class="text-2xl md:text-3xl font-black transition-all duration-500 ease-out leading-tight my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
+            ${window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang..."}
+        </p>
+
+        <!-- 2-SLOT: KELAYOTGAN KEYINGI XIRA SATR -->
+        <p id="cinema-slot-next" class="text-lg md:text-xl font-bold text-white/30 transition-all duration-500 ease-out leading-snug my-2 break-words w-full" style="font-family: ${currentFont};">
+            ${window.lyricsData[1] ? window.lyricsData[1].text : ""}
+        </p>
+    `;
+    currentRenderedIdx = 0;
 }
 
 function highlightNextSyncLine() {
@@ -101,52 +101,42 @@ window.timestampCurrentLine = function() {
         highlightNextSyncLine();
     } else {
         document.getElementById('btn-stamp-line').classList.add('hidden');
-        alert("🎉 Barcha satrlar sinxronlandi! Endi pastga tushib videoni tayyorlang.");
+        alert("🎉 Barcha satrlar sinxronlandi! Endi videoni tayyorlang.");
     }
 };
 
-// 4. SAKRAMAYDIGAN SILLIQ ALMASHINISH (JITTER-FREE)
+// 4. JONLI SILLIQ 2-SLOTLI ALMASHINISH (SAKRAMAYDI VA SILLIQ SUZIB YO'QOLADI)
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
-    let currentIndex = -1;
+    let targetIdx = 0;
     for (let i = 0; i < window.lyricsData.length; i++) {
         if (window.lyricsData[i].time !== null && currentTime >= window.lyricsData[i].time) {
-            currentIndex = i;
+            targetIdx = i;
         }
     }
 
-    if (currentIndex !== -1) {
-        const scrollBox = document.getElementById('spotify-lyrics-scroll');
-        const selectedGlowColor = window.activeLyricsColor || "#ffffff";
+    const slotActive = document.getElementById('cinema-slot-active');
+    const slotNext = document.getElementById('cinema-slot-next');
+    if (!slotActive || !slotNext) return;
 
-        window.lyricsData.forEach((_, idx) => {
-            const el = document.getElementById(`spotify-line-${idx}`);
-            if (!el) return;
+    // Satr almashganda silliq suzish animatsiyasi
+    if (targetIdx !== currentRenderedIdx) {
+        currentRenderedIdx = targetIdx;
 
-            if (idx === currentIndex) {
-                // AYTILAYOTGAN SATR: Katta, Opppoq va Yorqin porlaydi
-                el.className = "text-xl md:text-2xl font-black scale-105 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] break-words w-full my-3";
-                el.style.color = selectedGlowColor;
-                el.style.opacity = "1";
-                el.style.transform = "translateY(0) scale(1.05)";
-                
-                if (scrollBox) {
-                    const targetScroll = el.offsetTop - scrollBox.offsetTop - 80;
-                    scrollBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
-                }
-            } else if (idx < currentIndex) {
-                // AYTIB BO'LINGAN SATR: Tepaga sekin ko'tarilib, shaffof bo'lib yo'qoladi (Sakramaydi!)
-                el.className = "text-base font-bold text-white/0 transition-all duration-500 ease-in pointer-events-none break-words w-full my-3";
-                el.style.opacity = "0";
-                el.style.transform = "translateY(-20px) scale(0.95)";
-            } else {
-                // KELAYOTGAN SATR: Pastda xira va silliq kutib turadi
-                el.className = "text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full my-3";
-                el.style.color = "#ffffff";
-                el.style.opacity = "0.35";
-                el.style.transform = "translateY(0) scale(1)";
-            }
-        });
+        // 1. Eski satr silliq yuqoriga suzib yo'qoladi
+        slotActive.style.transform = "translateY(-20px)";
+        slotActive.style.opacity = "0";
+
+        setTimeout(() => {
+            // 2. Yangi satr 100% silliq joylashadi
+            slotActive.innerText = window.lyricsData[targetIdx] ? window.lyricsData[targetIdx].text : "";
+            slotActive.style.color = window.activeLyricsColor || "#ffffff";
+            slotActive.style.transform = "translateY(0)";
+            slotActive.style.opacity = "1";
+
+            // 3. Keyingi satr pastda tayyor turadi
+            slotNext.innerText = window.lyricsData[targetIdx + 1] ? window.lyricsData[targetIdx + 1].text : "";
+        }, 150);
     }
 };
