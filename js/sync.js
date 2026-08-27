@@ -1,9 +1,8 @@
-// ==================== 100% SILKY SMOOTH KINETIC PREVIEW ENGINE ====================
+// ==================== SPOTIFY MULTI-LINE AESTHETIC ENGINE (js/sync.js) ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
 let currentRenderedIdx = -1;
-let isTransitioning = false;
 
 window.updateTrackInfo = function() {
     const artist = document.getElementById('track-artist-input');
@@ -26,6 +25,7 @@ window.parseLyricsForSync = function() {
         return;
     }
 
+    // Faqat haqiqiy qatorlar bo'yicha ajratish
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
@@ -52,33 +52,50 @@ window.parseLyricsForSync = function() {
         stampBtn.innerText = `⏱ 1-satr boshlanishida bosing`;
     }
 
-    initCinemaSlots();
+    renderMultiLineSpotifyList();
     activeLineIndex = 0;
     highlightNextSyncLine();
     alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
-// 2. KINEMATIK EKRAN TUZILISHI
-function initCinemaSlots() {
+// 2. SPOTIFY USLUBIDAGI KO'P QATORLI MATNLAR RO'YXATI
+function renderMultiLineSpotifyList() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
 
     const currentFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
     const selectedColor = window.activeLyricsColor || "#ffffff";
-    const firstText = window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang...";
-    const secondText = window.lyricsData[1] ? window.lyricsData[1].text : "";
+    box.innerHTML = '';
 
-    box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-3 my-auto select-none relative";
-    box.innerHTML = `
-        <div id="slot-container" class="w-full transition-transform duration-500 ease-out">
-            <p id="cinema-slot-active" class="text-2xl md:text-3xl font-black text-white leading-tight my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] break-words whitespace-normal w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
-                ${firstText}
-            </p>
-            <p id="cinema-slot-next" class="text-base md:text-lg font-bold text-white/30 leading-snug my-2 break-words whitespace-normal w-full" style="font-family: ${currentFont};">
-                ${secondText}
-            </p>
-        </div>
-    `;
+    window.lyricsData.forEach((item, index) => {
+        const p = document.createElement('p');
+        p.id = `spotify-line-${index}`;
+        p.style.fontFamily = currentFont;
+        p.style.willChange = "transform, opacity, color";
+        
+        if (index === 0) {
+            // 1-satr boshidanoq ulkan va yorqin turadi
+            p.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-relaxed my-3 break-words w-full";
+            p.style.color = selectedColor;
+            p.style.opacity = "1";
+            p.style.transform = "scale(1.03)";
+        } else {
+            // Qolgan satrlar xira (40% shaffoflikda) kitobdek tartib bilan turadi
+            p.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-relaxed my-2.5 break-words w-full";
+            p.style.color = "#ffffff";
+            p.style.opacity = "0.4";
+            p.style.transform = "scale(1)";
+        }
+
+        p.innerText = item.text;
+        p.onclick = () => {
+            if (item.time !== null && window.vibeAudioElement) {
+                window.vibeAudioElement.currentTime = item.time;
+            }
+        };
+        box.appendChild(p);
+    });
+
     currentRenderedIdx = 0;
 }
 
@@ -96,7 +113,7 @@ function highlightNextSyncLine() {
 window.timestampCurrentLine = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
-        alert("⚠️ Iltimos, oldin 1-qadamda MP3 fayl tanlang!");
+        alert("⚠️ Iltimos, oldin MP3 fayl tanlang!");
         return;
     }
     if (activeLineIndex < 0 || activeLineIndex >= window.lyricsData.length) return;
@@ -123,7 +140,7 @@ window.timestampCurrentLine = function() {
     }
 };
 
-// 4. TEBRANMAYDIGAN SILLIQ ALMASHINISH
+// 4. JONLI SPOTIFY KO'P QATORLI HARAKAT
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
@@ -134,30 +151,33 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
         }
     }
 
-    const slotActive = document.getElementById('cinema-slot-active');
-    const slotNext = document.getElementById('cinema-slot-next');
-    if (!slotActive || !slotNext) return;
-
-    if (targetIdx !== currentRenderedIdx && !isTransitioning) {
-        isTransitioning = true;
+    if (targetIdx !== currentRenderedIdx) {
         currentRenderedIdx = targetIdx;
+        const scrollBox = document.getElementById('spotify-lyrics-scroll');
+        const selectedColor = window.activeLyricsColor || "#ffffff";
 
-        slotActive.style.transition = "all 0.4s ease-in";
-        slotActive.style.transform = "translateY(-20px)";
-        slotActive.style.opacity = "0";
+        window.lyricsData.forEach((_, idx) => {
+            const el = document.getElementById(`spotify-line-${idx}`);
+            if (!el) return;
 
-        setTimeout(() => {
-            const curText = window.lyricsData[targetIdx] ? window.lyricsData[targetIdx].text : "";
-            const nextText = window.lyricsData[targetIdx + 1] ? window.lyricsData[targetIdx + 1].text : "";
+            if (idx === targetIdx) {
+                // FAOL AYTILAYOTGAN SATR: ULKAN, YORQIN VA KO'ZGA TASHLANADI
+                el.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-relaxed my-3 break-words w-full";
+                el.style.color = selectedColor;
+                el.style.opacity = "1";
+                el.style.transform = "scale(1.03)";
 
-            slotActive.innerText = curText;
-            slotActive.style.color = window.activeLyricsColor || "#ffffff";
-            slotActive.style.transition = "all 0.4s ease-out";
-            slotActive.style.transform = "translateY(0)";
-            slotActive.style.opacity = "1";
-
-            slotNext.innerText = nextText;
-            isTransitioning = false;
-        }, 150);
+                if (scrollBox) {
+                    const targetScroll = el.offsetTop - scrollBox.offsetTop - 70;
+                    scrollBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+                }
+            } else {
+                // QOLGAN BARCHA SATRLAR: Xira oq (40%) bo'lib o'z joyida turadi
+                el.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-relaxed my-2.5 break-words w-full";
+                el.style.color = "#ffffff";
+                el.style.opacity = "0.4";
+                el.style.transform = "scale(1)";
+            }
+        });
     }
 };
