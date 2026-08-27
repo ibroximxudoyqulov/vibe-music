@@ -1,14 +1,13 @@
-// ==================== 1080x1920 60FPS SMOOTH EXPORTER & INSHOT TRIMMER ====================
+// ==================== DIRECT @ms_music_karaoke CHANNEL EXPORTER & TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// SIZNING BOTINGIZ VA RENDER SERVER KO'PRIGI:
+// SIZNING BOT TOKENINGIZ VA ANIQ OMMATBOP KANALINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
-const RENDER_SERVER_URL = "https://vibe-music-iays.onrender.com";
+const TARGET_CHANNEL = "@ms_music_karaoke"; // https://t.me/ms_music_karaoke
 
-// 1. SAHIFALARNI ALMASHTIRISH (STUDIYA / KESISH)
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -30,29 +29,19 @@ window.switchTab = function(tab) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 2. SHRIFTNI YANGILASH
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
-// 3. SHAXSIY TTF/OTF SHRIFT YUKLASH
 window.handleCustomFontUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const fontName = "CustomFont_" + Date.now();
     const fontUrl = URL.createObjectURL(file);
-
     const newStyle = document.createElement('style');
-    newStyle.appendChild(document.createTextNode(`
-        @font-face {
-            font-family: '${fontName}';
-            src: url('${fontUrl}');
-        }
-    `));
+    newStyle.appendChild(document.createTextNode(`@font-face { font-family: '${fontName}'; src: url('${fontUrl}'); }`));
     document.head.appendChild(newStyle);
-
     const select = document.getElementById('font-family-select');
     if (select) {
         const opt = document.createElement('option');
@@ -62,17 +51,14 @@ window.handleCustomFontUpload = function(event) {
         select.prepend(opt);
         window.updatePreviewFont(opt.value);
     }
-    alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi va qo'llandi!");
+    alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi!");
 };
 
-// 4. SHAXSIY FON YUKLASH
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     document.getElementById('custom-bg-name').innerText = `🖼 ${file.name}`;
     customBgUrl = URL.createObjectURL(file);
-
     const bgLayer = document.getElementById('custom-bg-layer');
     if (bgLayer) {
         bgLayer.style.backgroundImage = `url('${customBgUrl}')`;
@@ -103,8 +89,8 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-// TINIQ MATN CHIZISH FUNKSIYASI (QOTMAYDIGAN)
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+// ANIQ VA SILJIMAYDIGAN MATN CHIZISH
+function drawFixedWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     if (!text) return y;
     const words = text.split(' ');
     let lines = [];
@@ -129,7 +115,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. 100% OVOZLI & SILLIQ 60FPS VIDEO EKSPORT ====================
+// ==================== 1. TO'G'RIDAN-TO'G'RI @ms_music_karaoke KANALIGA YUBORISH ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -153,7 +139,7 @@ window.exportAndSendToBot = async function() {
     const exactVideoDuration = maxLyricTime + 2.5;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -192,28 +178,50 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Botingizga uzatilmoqda...";
+            btn.innerHTML = "📤 @ms_music_karaoke kanaliga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
+            const videoUrl = URL.createObjectURL(blob);
 
-            fetch(`${RENDER_SERVER_URL}/upload_video`, {
+            const trackTitle = document.getElementById('preview-track-title').innerText;
+            const trackArtist = document.getElementById('preview-track-artist').innerText;
+            const captionText = `🎬 <b>${trackTitle} — ${trackArtist}</b>\n\n📥 @ms_music_karaoke kanaliga yuklandi!\n📲 Bot: @ms_mus1c_bot`;
+
+            // TO'G'RIDAN-TO'G'RI OMMATBOP @ms_music_karaoke KANALIGA YUBORISH!
+            const formData = new FormData();
+            formData.append('chat_id', TARGET_CHANNEL);
+            formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
+            formData.append('caption', captionText);
+            formData.append('parse_mode', 'HTML');
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
                 method: 'POST',
-                body: blob
-            }).then(res => {
-                alert("🎉 60FPS Video botingiz chatiga yetkazildi! Telegramni oching.");
-                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
-                btn.disabled = false;
+                body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.ok) {
+                    alert("🎉 Video muvaffaqiyatli @ms_music_karaoke kanaliga joylandi! Kanalni ochib ko'ring.");
+                } else {
+                    console.log("Kanal javobi:", data);
+                    triggerDirectDownload(videoUrl);
+                }
             }).catch(err => {
-                const videoUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = videoUrl;
-                a.download = `VibeStudio_${Date.now()}.mp4`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
-                btn.disabled = false;
+                triggerDirectDownload(videoUrl);
             });
+
+            // Telefoningizga ham avtomatik saqlash
+            triggerDirectDownload(videoUrl);
+
+            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+            btn.disabled = false;
         };
+
+        function triggerDirectDownload(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `VibeStudio_${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
         recorder.start();
         bufferSource.start(0);
@@ -238,11 +246,11 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Qorong'u Fon (#09090d)
+            // Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // 2. Yulduzchalar
+            // Yulduzchalar
             if (isParticlesActive) {
                 stars.forEach(p => {
                     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
@@ -254,7 +262,7 @@ window.exportAndSendToBot = async function() {
                 });
             }
 
-            // 3. Header
+            // Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -271,7 +279,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. SPOTIFY KO'P QATORLI MATNLAR CHIZISH (QOTMASDAN 60 FPS)
+            // SPOTIFY KO'P QATORLI TINIQ MATNLAR (SO'ZLAR SILJIMAYDI)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -279,26 +287,23 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            // Markaziy Y joylashuv
-            let startY = 650 - (activeIdx * 125);
+            let startY = 650 - (activeIdx * 120);
 
             lyrics.forEach((l, i) => {
-                const y = startY + (i * 125);
+                const y = startY + (i * 120);
 
-                // Faqat ekrandagi ko'rinadigan satrlar chiziladi (Tezkorlik uchun!)
                 if (y > 280 && y < 1720) {
+                    ctx.font = `800 48px ${selectedFont}`;
+                    ctx.textAlign = "left";
+
                     if (i === activeIdx) {
-                        // FAOL SATR: ULKAN VA YORQIN
+                        // FAOL SATR: YORQIN RANGLI VA OPPQOQ
                         ctx.fillStyle = selectedTextColor;
-                        ctx.font = `900 56px ${selectedFont}`;
-                        ctx.textAlign = "left";
-                        drawWrappedText(ctx, l.text, 90, y, 900, 68);
+                        drawFixedWrappedText(ctx, l.text, 90, y, 900, 60);
                     } else {
-                        // QOLGAN BARCHA SATRLAR: Xira oq
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.38)";
-                        ctx.font = `bold 42px ${selectedFont}`;
-                        ctx.textAlign = "left";
-                        drawWrappedText(ctx, l.text, 90, y, 900, 52);
+                        // QOLGAN SATRLAR: XIRA OQ (Joyidan siljimaydi)
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+                        drawFixedWrappedText(ctx, l.text, 90, y, 900, 60);
                     }
                 }
             });
@@ -436,7 +441,7 @@ window.executeRealAudioTrimAndSend = async function() {
     }
 
     const btn = document.getElementById('btn-trim-send');
-    btn.innerHTML = "⏳ Qirqilmoqda va Botga yuborilmoqda...";
+    btn.innerHTML = "⏳ Qirqilmoqda va Kanalga uzatilmoqda...";
     btn.disabled = true;
 
     try {
@@ -458,32 +463,35 @@ window.executeRealAudioTrimAndSend = async function() {
         }
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
+        const cutTimeText = `${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}`;
 
-        fetch(`${RENDER_SERVER_URL}/upload_audio`, {
+        const channelFormData = new FormData();
+        channelFormData.append('chat_id', TARGET_CHANNEL);
+        channelFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+        channelFormData.append('caption', `✂️ <b>Qirqilgan MP3 Fayl!</b>\n⏱ Oraliq: ${cutTimeText}\n\n📥 @ms_music_karaoke`);
+        channelFormData.append('parse_mode', 'HTML');
+
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
             method: 'POST',
-            body: wavBlob
-        }).then(res => {
-            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegram chatini oching.");
-            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-            btn.disabled = false;
-        }).catch(err => {
-            const downloadUrl = URL.createObjectURL(wavBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-            btn.disabled = false;
+            body: channelFormData
         });
 
+        const downloadUrl = URL.createObjectURL(wavBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        alert("🎉 Qirqilgan MP3 @ms_music_karaoke kanaliga joylandi!");
     } catch (e) {
         console.error(e);
         alert("⚠️ Xatolik yuz berdi.");
-        btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-        btn.disabled = false;
     }
+
+    btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
+    btn.disabled = false;
 };
 
 function bufferToWave(abuffer, len) {
@@ -513,4 +521,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-            }
+}
