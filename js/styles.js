@@ -105,28 +105,33 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-// TEBRANMAYDIGAN MATN CHIZISH FUNKSIYASI
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
-    if (!text) return;
+// TEBRANMAYDIGAN VA DYNAMIC 2-3 QATORLI MATN CHIZISH
+function drawSmartWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    if (!text) return y;
     const words = text.split(' ');
-    let line = '';
-    let currentY = Math.round(y);
+    let lines = [];
+    let curLine = '';
 
     for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
+        const testLine = curLine + words[n] + ' ';
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && n > 0) {
-            ctx.fillText(line, Math.round(x), currentY);
-            line = words[n] + ' ';
-            currentY += lineHeight;
+            lines.push(curLine);
+            curLine = words[n] + ' ';
         } else {
-            line = testLine;
+            curLine = testLine;
         }
     }
-    ctx.fillText(line, Math.round(x), currentY);
+    lines.push(curLine);
+
+    lines.forEach((line, idx) => {
+        ctx.fillText(line, Math.round(x), Math.round(y + (idx * lineHeight)));
+    });
+
+    return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. 100% OVOZLI & ANIQ SINXRON 60FPS VIDEO EKSPORT ====================
+// ==================== 1. 100% OVOZLI & AQLLI 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -147,16 +152,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const maxLyricTime = Math.max(...stampedTimes);
-    const exactVideoDuration = maxLyricTime + 2.5; // Faqat matn tugaguncha + 2.5s yoziladi!
-
-    let currentUserId = null;
-    try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-            currentUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
-        }
-    } catch (e) {
-        currentUserId = null;
-    }
+    const exactVideoDuration = maxLyricTime + 2.5;
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
@@ -202,20 +198,18 @@ window.exportAndSendToBot = async function() {
             btn.innerHTML = "📤 Botingizga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
 
-            // 1. RENDER SERVERI ORQALI BOTINGIZ CHATIGA YUBORISH
             fetch(`${RENDER_SERVER_URL}/upload_video`, {
                 method: 'POST',
                 body: blob
             }).then(res => {
-                alert("🎉 60FPS Video to'g'ridan-to'g'ri botingiz chatiga yetkazildi! Telegramni oching.");
+                alert("🎉 60FPS Video botingiz chatiga yetkazildi! Telegramni oching.");
                 btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
                 btn.disabled = false;
             }).catch(err => {
-                // Agar internetda uzilish bo'lsa telefon galereyasiga saqlaydi
                 const videoUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = videoUrl;
-                a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+                a.download = `VibeStudio_${Date.now()}.mp4`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -231,7 +225,6 @@ window.exportAndSendToBot = async function() {
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
         const selectedTextColor = window.activeLyricsColor || "#ffffff";
 
-        // Yulduzchalar
         const stars = [];
         for (let i = 0; i < 45; i++) {
             stars.push({ x: Math.random() * 1080, y: Math.random() * 1920, r: Math.random() * 3 + 1, s: Math.random() * 1.5 + 0.5 });
@@ -248,7 +241,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Fon (#09090d)
+            // 1. Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -281,7 +274,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ 0:00 DAN BOSHLAB BAROBAR YURUVCHI MATNLAR (XATOSIZ!)
+            // 4. ANIQ VA MOSLASHUVCHAN MATNLAR (2-3 QATORGA BO'LINADI)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -289,22 +282,28 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            // FAOL AYTILAYOTGAN SATR (ULKAN 58px, O'RNIDA TURADI)
+            const activeText = lyrics[activeIdx] ? lyrics[activeIdx].text : "";
+            const nextText = lyrics[activeIdx + 1] ? lyrics[activeIdx + 1].text : "";
+
+            const activeFontSize = activeText.length > 55 ? 46 : (activeText.length > 35 ? 50 : 56);
+            const activeLineHeight = activeFontSize + 16;
+
             ctx.save();
             ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
             ctx.shadowBlur = 25;
             ctx.fillStyle = selectedTextColor;
-            ctx.font = `900 58px ${selectedFont}`;
+            ctx.font = `900 ${activeFontSize}px ${selectedFont}`;
             ctx.textAlign = "left";
-            drawWrappedText(ctx, lyrics[activeIdx] ? lyrics[activeIdx].text : "", 90, 820, 900, 72);
+            
+            const nextStartY = drawSmartWrappedText(ctx, activeText, 90, 800, 900, activeLineHeight);
             ctx.restore();
 
-            // KEYINGI KELAYOTGAN SATR (PASTDA XIRA KUTADI)
-            if (lyrics[activeIdx + 1]) {
+            if (nextText) {
+                const nextFontSize = nextText.length > 55 ? 34 : 40;
                 ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-                ctx.font = `bold 42px ${selectedFont}`;
+                ctx.font = `bold ${nextFontSize}px ${selectedFont}`;
                 ctx.textAlign = "left";
-                drawWrappedText(ctx, lyrics[activeIdx + 1].text, 90, 1080, 900, 56);
+                drawSmartWrappedText(ctx, nextText, 90, nextStartY + 60, 900, nextFontSize + 14);
             }
 
             requestAnimationFrame(renderFrame);
@@ -320,7 +319,7 @@ window.exportAndSendToBot = async function() {
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER (BOT CHATIGA TASHHORISH) ====================
+// ==================== 2. INSHOT TOUCH TRIMMER ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -340,182 +339,3 @@ window.handleTrimmerUpload = function(event) {
     reader.onload = function(e) {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioCtx.decodeAudioData(e.target.result, function(buffer) {
-            trimmerAudioBuffer = buffer;
-            trimmerTotalDur = buffer.duration;
-            trimStartTime = 0;
-            trimEndTime = Math.min(trimmerTotalDur, 30);
-            document.getElementById('trimmer-controls').classList.remove('hidden');
-            document.getElementById('trimmer-total-duration').innerText = formatAudioTime(trimmerTotalDur);
-            updateInShotUI();
-            setupInShotTouchEvents();
-        });
-    };
-    reader.readAsArrayBuffer(file);
-};
-
-function updateInShotUI() {
-    document.getElementById('trim-start-val').innerText = formatAudioTime(trimStartTime);
-    document.getElementById('trim-end-val').innerText = formatAudioTime(trimEndTime);
-    const track = document.getElementById('inshot-active-track');
-    if (track && trimmerTotalDur > 0) {
-        const leftPercent = (trimStartTime / trimmerTotalDur) * 100;
-        const rightPercent = 100 - ((trimEndTime / trimmerTotalDur) * 100);
-        track.style.left = `${leftPercent}%`;
-        track.style.right = `${rightPercent}%`;
-    }
-}
-
-function setupInShotTouchEvents() {
-    const container = document.getElementById('inshot-waveform-container');
-    const handleStart = document.getElementById('handle-start');
-    const handleEnd = document.getElementById('handle-end');
-    if (!container || !handleStart || !handleEnd) return;
-
-    let draggingType = null;
-    handleStart.ontouchstart = (e) => { e.stopPropagation(); draggingType = 'start'; };
-    handleEnd.ontouchstart = (e) => { e.stopPropagation(); draggingType = 'end'; };
-
-    container.ontouchmove = (e) => {
-        if (!draggingType) return;
-        const rect = container.getBoundingClientRect();
-        const touchX = e.touches[0].clientX - rect.left;
-        const percent = Math.max(0, Math.min(1, touchX / rect.width));
-        const newTime = percent * trimmerTotalDur;
-
-        if (draggingType === 'start') {
-            trimStartTime = Math.min(newTime, trimEndTime - 0.5);
-            if (trimmerMedia.src) {
-                trimmerMedia.currentTime = trimStartTime;
-                trimmerMedia.play();
-                setTimeout(() => { trimmerMedia.pause(); }, 400);
-            }
-        } else if (draggingType === 'end') {
-            trimEndTime = Math.max(newTime, trimStartTime + 0.5);
-            if (trimmerMedia.src) {
-                trimmerMedia.currentTime = trimEndTime;
-                trimmerMedia.play();
-                setTimeout(() => { trimmerMedia.pause(); }, 400);
-            }
-        }
-        updateInShotUI();
-    };
-
-    window.ontouchend = () => { draggingType = null; };
-}
-
-function formatAudioTime(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 10);
-    return `${min}:${sec < 10 ? '0' : ''}${sec}.${ms}`;
-}
-
-window.previewTrimmedAudio = function() {
-    const icon = document.getElementById('btn-trim-play-icon');
-    if (isTrimPlaying) {
-        trimmerMedia.pause();
-        isTrimPlaying = false;
-        icon.className = "fa-solid fa-play";
-        return;
-    }
-    trimmerMedia.currentTime = trimStartTime;
-    trimmerMedia.play();
-    isTrimPlaying = true;
-    icon.className = "fa-solid fa-pause";
-
-    const checkInterval = setInterval(() => {
-        if (trimmerMedia.currentTime >= trimEndTime || trimmerMedia.paused) {
-            trimmerMedia.pause();
-            isTrimPlaying = false;
-            icon.className = "fa-solid fa-play";
-            clearInterval(checkInterval);
-        }
-    }, 100);
-};
-
-window.executeRealAudioTrimAndSend = async function() {
-    if (!trimmerAudioBuffer) {
-        alert("⚠️ Iltimos, oldin musiqa yuklang!");
-        return;
-    }
-
-    const btn = document.getElementById('btn-trim-send');
-    btn.innerHTML = "⏳ Qirqilmoqda va Botga yuborilmoqda...";
-    btn.disabled = true;
-
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const sampleRate = trimmerAudioBuffer.sampleRate;
-        const startOffset = Math.floor(trimStartTime * sampleRate);
-        const endOffset = Math.floor(trimEndTime * sampleRate);
-        const frameCount = endOffset - startOffset;
-
-        const slicedBuffer = audioCtx.createBuffer(
-            trimmerAudioBuffer.numberOfChannels,
-            frameCount,
-            sampleRate
-        );
-
-        for (let channel = 0; channel < trimmerAudioBuffer.numberOfChannels; channel++) {
-            const channelData = trimmerAudioBuffer.getChannelData(channel).subarray(startOffset, endOffset);
-            slicedBuffer.copyToChannel(channelData, channel, 0);
-        }
-
-        const wavBlob = bufferToWave(slicedBuffer, frameCount);
-
-        // RENDER BRIDGE ORQALI BOT CHATIGA YUBORISH
-        fetch(`${RENDER_SERVER_URL}/upload_audio`, {
-            method: 'POST',
-            body: wavBlob
-        }).then(res => {
-            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegramni oching.");
-            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-            btn.disabled = false;
-        }).catch(err => {
-            const downloadUrl = URL.createObjectURL(wavBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-            btn.disabled = false;
-        });
-
-    } catch (e) {
-        console.error(e);
-        alert("⚠️ Xatolik yuz berdi.");
-        btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
-        btn.disabled = false;
-    }
-};
-
-function bufferToWave(abuffer, len) {
-    let numOfChan = abuffer.numberOfChannels,
-        length = len * numOfChan * 2 + 44,
-        out = new DataView(new ArrayBuffer(length)),
-        channels = [], i, sample, offset = 0, pos = 0;
-
-    function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
-    function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
-
-    setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
-    setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
-    setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
-    setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
-    setUint32(length - pos - 4);
-
-    for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
-
-    while (pos < length) {
-        for (i = 0; i < numOfChan; i++) {
-            sample = Math.max(-1, Math.min(1, channels[i][offset]));
-            sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-            out.setInt16(pos, sample, true);
-            pos += 2;
-        }
-        offset++;
-    }
-    return new Blob([out], { type: "audio/mp3" });
-}
