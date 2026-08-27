@@ -1,8 +1,10 @@
-// ==================== 1080x1920 60FPS JITTER-FREE EXPORTER & INSHOT TRIMMER ====================
+// ==================== 1080x1920 60FPS GUARANTEED DELIVERY EXPORTER & TRIMMER ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
+
+// SIZNING BOT TOKENINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
 // Particles
@@ -77,7 +79,6 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-// TEBRANMAYDIGAN VA QAT'IY YAXLITLANGAN MATN CHIZISH
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
     let line = '';
@@ -97,7 +98,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, Math.round(x), currentY);
 }
 
-// ==================== 1. HAR BIR ODAMNING FAQAT O'ZIGA YUBORUVCHI 60FPS VIDEO ====================
+// ==================== 1. HAR BIR ODAMNING O'ZIGA 100% YETKAZUVCHI VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -120,7 +121,7 @@ window.exportAndSendToBot = async function() {
     const maxLyricTime = Math.max(...stampedTimes);
     const exactVideoDuration = maxLyricTime + 2.5;
 
-    // FAQAT SHU TUGMANI BOSGAN ODAMNING O'ZINING CHAT ID SI!
+    // FAQAT SHU ODAMNING SHAXSIY TELEGRAM ID RAQAMI
     let currentUserId = null;
     try {
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
@@ -131,7 +132,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ Video tayyorlanmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -163,7 +164,7 @@ window.exportAndSendToBot = async function() {
 
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
@@ -171,45 +172,46 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Video shaxsiy botingizga yuborilmoqda...";
+            btn.innerHTML = "📤 Video saqlanmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
+            const videoUrl = URL.createObjectURL(blob);
 
-            // AGAR TELEGRAMDA BO'LSA -> FAQAT O'SHA 1-ODAMNING LICHKASIGA BORADI!
+            // 1-YO'L: AGAR TELEGRAM BO'LSA O'SHA ODAMNING O'ZIGA YUBORISH
             if (currentUserId) {
                 const formData = new FormData();
-                formData.append('chat_id', currentUserId); // Boshqa hech kim ko'rmaydi!
-                formData.append('video', blob, `VibeStudio_Video_${Date.now()}.mp4`);
+                formData.append('chat_id', currentUserId); // FAQAT SHU ODAMNING ID SI!
+                formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
                 formData.append('caption', `🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
                 formData.append('parse_mode', 'HTML');
 
-                try {
-                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await res.json();
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                    method: 'POST',
+                    body: formData
+                }).then(res => res.json()).then(data => {
                     if (data.ok) {
-                        alert("🎉 Video shaxsiy botingizga yuborildi! Telegramni oching.");
+                        alert("🎉 Video shaxsiy botingizga yuborildi! Telegram chatini oching.");
                     } else {
-                        downloadDirectly(blob);
+                        triggerPhoneDownload(videoUrl);
                     }
-                } catch (err) {
-                    downloadDirectly(blob);
-                }
+                }).catch(err => {
+                    triggerPhoneDownload(videoUrl);
+                });
             } else {
-                downloadDirectly(blob);
+                triggerPhoneDownload(videoUrl);
             }
 
             btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
             btn.disabled = false;
         };
 
-        function downloadDirectly(blob) {
-            const url = URL.createObjectURL(blob);
+        // 2-YO'L: TELEFON GALEREYASIGA TO'G'RIDAN-TO'G'RI SAQLASH
+        function triggerPhoneDownload(url) {
             const a = document.createElement('a');
             a.href = url;
             a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             alert("✅ Video tayyor bo'ldi va telefoningizga yuklandi!");
         }
 
@@ -231,7 +233,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Fon
+            // 1. Qorong'u Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -264,7 +266,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ 0:00 DAN BOSHLAB TEBRANMAYDIGAN ULKAN MATN
+            // 4. ANIQ KINETIK MATNLAR (FADE-OUT)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -274,7 +276,7 @@ window.exportAndSendToBot = async function() {
 
             lyrics.forEach((l, i) => {
                 if (i === activeIdx) {
-                    // FAOL SATR: QAT'IY 820PX MARKAZDA (TEBRANMAYDI)
+                    // FAOL SATR: ULKAN VA YORQIN
                     ctx.save();
                     ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
                     ctx.shadowBlur = 25;
@@ -284,7 +286,7 @@ window.exportAndSendToBot = async function() {
                     drawWrappedText(ctx, l.text, 90, 820, 900, 72);
                     ctx.restore();
                 } else if (i === activeIdx + 1) {
-                    // KELAYOTGAN SATR: PASTDA XIRA VA SILLIQ KUTADI
+                    // KELAYOTGAN SATR: PASTDA XIRA
                     ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.textAlign = "left";
@@ -299,7 +301,7 @@ window.exportAndSendToBot = async function() {
 
     } catch (err) {
         console.error(err);
-        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+        alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
         btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
         btn.disabled = false;
     }
@@ -460,32 +462,33 @@ window.executeRealAudioTrimAndSend = async function() {
         if (userId) {
             btn.innerHTML = "📤 Botingizga yuborilmoqda...";
             const formData = new FormData();
-            formData.append('chat_id', userId);
+            formData.append('chat_id', userId); // FAQAT SHU ODAMNING ID SI!
             formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
             formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}\n\n👇 Saqlab olishingiz mumkin!`);
             formData.append('parse_mode', 'HTML');
 
-            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
                 method: 'POST',
                 body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.ok) {
+                    alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
+                } else {
+                    downloadDirectly(wavBlob);
+                }
+            }).catch(err => {
+                downloadDirectly(wavBlob);
             });
-            const data = await res.json();
-
-            if (data.ok) {
-                alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
-            } else {
-                downloadBlobLocally(wavBlob);
-            }
         } else {
-            downloadBlobLocally(wavBlob);
+            downloadDirectly(wavBlob);
         }
     } catch (e) {
         console.error(e);
         alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
     }
 
-    function downloadBlobLocally(wavBlob) {
-        const downloadUrl = URL.createObjectURL(wavBlob);
+    function downloadDirectly(blob) {
+        const downloadUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
@@ -524,4 +527,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-        }
+                                }
