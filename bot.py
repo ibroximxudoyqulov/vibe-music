@@ -14,12 +14,12 @@ from telebot.types import (
 )
 
 BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o"
-ADMIN_ID = 6526744258  # Sizning Telegram chat ID raqamingiz
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=direct_bot_v1"
+ADMIN_ID = 6526744258
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=pro_clean_final_999"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=25)
 
-# ==================== 1. SERVER KO'PRIGI (VIDEONI CHATGA TASHLOVCHI) ====================
+# ==================== 1. RENDER SERVER KO'PRIGI ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -39,7 +39,6 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
 
-            # VIDEONI TO'G'RIDAN-TO'G'RI BOTINGIZ CHATIGA YUBORISH
             if "upload_video" in self.path:
                 bot.send_video(
                     ADMIN_ID, 
@@ -123,7 +122,7 @@ def get_total_users():
     except Exception:
         return 0
 
-# ==================== 3. LUG'AT VA MENYU ====================
+# ==================== 3. LUG'AT VA MENYU (REKLAMASIZ) ====================
 TEXTS = {
     "uz": {
         "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify video yasash, musiqani qirqish va video yuklash <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
