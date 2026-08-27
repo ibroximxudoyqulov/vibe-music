@@ -1,11 +1,11 @@
-// ==================== CYBERGLOW PARTICLES & KINETIC 60FPS EXPORTER ====================
+// ==================== 1080x1920 60FPS KINETIC VIDEO & INSHOT TRIMMER ====================
 
 let isVinylActive = false;
-let isParticlesActive = true; // Yulduzchalar yoqilgan
+let isParticlesActive = true;
 let customBgUrl = null;
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 
-// Uchuvchi zarrachalar massivi
+// Particles
 const particles = [];
 for (let i = 0; i < 45; i++) {
     particles.push({
@@ -95,7 +95,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, x, currentY);
 }
 
-// ==================== 1. 100% STEREO OVOZLI & CYBERGLOW 60FPS VIDEO EKSPORT ====================
+// ==================== 1. ULKAN VA TINIQ 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -122,7 +122,7 @@ window.exportAndSendToBot = async function() {
     const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 6526744258;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ 60FPS Trend Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -167,8 +167,8 @@ window.exportAndSendToBot = async function() {
 
             const formData = new FormData();
             formData.append('chat_id', userId);
-            formData.append('video', blob, `CyberGlow_Video_${Date.now()}.mp4`);
-            formData.append('caption', `✨ <b>VibeStudio 60FPS Trend Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
+            formData.append('video', blob, `Kinetic_Lyric_${Date.now()}.mp4`);
+            formData.append('caption', `🎬 <b>VibeStudio 60FPS Kinetik Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
             formData.append('parse_mode', 'HTML');
 
             try {
@@ -178,12 +178,12 @@ window.exportAndSendToBot = async function() {
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    alert("🎉 60FPS Trend video botingiz lichkasiga yetib bordi! Telegramni oching.");
+                    alert("🎉 60FPS Video botingiz lichkasiga yetib bordi! Telegramni oching.");
                 } else {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `CyberGlow_Video_${Date.now()}.mp4`;
+                    a.download = `Kinetic_Lyric_${Date.now()}.mp4`;
                     a.click();
                     alert("✅ Video telefoningizga yuklandi!");
                 }
@@ -191,12 +191,12 @@ window.exportAndSendToBot = async function() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `CyberGlow_Video_${Date.now()}.mp4`;
+                a.download = `Kinetic_Lyric_${Date.now()}.mp4`;
                 a.click();
                 alert("✅ Video tayyorlandi va yuklandi!");
             }
 
-            btn.innerHTML = "🎬 60FPS Trend Videoni Botga Yuborish";
+            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
             btn.disabled = false;
         };
 
@@ -205,7 +205,7 @@ window.exportAndSendToBot = async function() {
         const startTime = audioCtx.currentTime;
 
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
-        const selectedGlowColor = window.activeLyricsColor || "#00f2fe";
+        const selectedTextColor = window.activeLyricsColor || "#ffffff";
 
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
@@ -218,27 +218,23 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Qorong'u Estetik Fon (#09090d)
+            // 1. Fon (#09090d)
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // 2. Uchuvchi Yulduzchalar (Particles) Chizish
+            // 2. Yulduzchalar
             if (isParticlesActive) {
                 particles.forEach(p => {
                     ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                     ctx.fill();
-
                     p.y -= p.speedY;
-                    if (p.y < 0) {
-                        p.y = 1920;
-                        p.x = Math.random() * 1080;
-                    }
+                    if (p.y < 0) { p.y = 1920; p.x = Math.random() * 1080; }
                 });
             }
 
-            // 3. Header Bar
+            // 3. Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -255,31 +251,33 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. SPOTIFYDAN 10X SIFATLI ULKAN VA TINIQ MATNLAR (FADE-OUT)
+            // 4. ANIQ 0:00 DAN BOSHLAB 1-SATRNI KO'RSATISH VA SILLIQ YO'QOTISH
             let activeIdx = 0;
-            lyrics.forEach((l, i) => {
-                if (l.time !== null && elapsedTime >= l.time) activeIdx = i;
-            });
+            for (let i = 0; i < lyrics.length; i++) {
+                if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
+                    activeIdx = i;
+                }
+            }
 
             lyrics.forEach((l, i) => {
                 if (i === activeIdx) {
-                    // AYTILAYOTGAN SATR: ULKAN (62px), OPPQOQ VA KO'ZGA YAQQOL TASHLANADI
+                    // FAOL SATR: ULKAN (58px), OPPQOQ VA KO'ZGA YAQQOL TASHLANADI
                     ctx.save();
                     ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
-                    ctx.shadowBlur = 25;
-                    ctx.fillStyle = selectedGlowColor;
-                    ctx.font = `900 62px ${selectedFont}`;
+                    ctx.shadowBlur = 20;
+                    ctx.fillStyle = selectedTextColor;
+                    ctx.font = `900 58px ${selectedFont}`;
                     ctx.textAlign = "left";
-                    drawWrappedText(ctx, l.text, 90, 850, 900, 75);
+                    drawWrappedText(ctx, l.text, 90, 850, 900, 72);
                     ctx.restore();
                 } else if (i === activeIdx + 1) {
                     // KELAYOTGAN KEYINGI SATR: PASTDA XIRA VA KICHIKROQ (NAVAT KUTADI)
                     ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.textAlign = "left";
-                    drawWrappedText(ctx, l.text, 90, 1080, 900, 58);
+                    drawWrappedText(ctx, l.text, 90, 1080, 900, 56);
                 }
-                // O'TIB KETGAN SATRLAR EKRANDAN BUTUNLAY YO'QOLADI!
+                // O'TIB KETGAN SATRLAR BUTUNLAY YO'QOLADI (CHIZILMAYDI)!
             });
 
             requestAnimationFrame(renderFrame);
@@ -290,7 +288,7 @@ window.exportAndSendToBot = async function() {
     } catch (err) {
         console.error(err);
         alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
-        btn.innerHTML = "🎬 60FPS Trend Videoni Botga Yuborish";
+        btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
         btn.disabled = false;
     }
 };
@@ -501,4 +499,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-    }
+}
