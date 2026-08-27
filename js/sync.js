@@ -1,4 +1,4 @@
-// ==================== 100% SMOOTH 2-SLOT APPLE MUSIC KINETIC ENGINE ====================
+// ==================== 100% SMART & ACCURATE SYNC ENGINE ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
@@ -11,7 +11,7 @@ window.updateTrackInfo = function() {
     document.getElementById('preview-track-title').innerText = title;
 };
 
-// 1. Matnni qatorlarga ajratish
+// 1. CHEKSIZ SATRLARNI TAYYORLASH
 window.parseLyricsForSync = function() {
     const raw = document.getElementById('raw-lyrics-input').value.trim();
     if (!raw) {
@@ -19,13 +19,17 @@ window.parseLyricsForSync = function() {
         return;
     }
 
+    // Cheksiz satrlarni bo'laklash
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
     const container = document.getElementById('sync-container');
     container.innerHTML = '';
     container.classList.remove('hidden');
-    document.getElementById('btn-stamp-line').classList.remove('hidden');
+    
+    const stampBtn = document.getElementById('btn-stamp-line');
+    stampBtn.classList.remove('hidden');
+    stampBtn.innerText = `⏱ 1-satr boshlanishida bosing`;
 
     window.lyricsData.forEach((item, index) => {
         const div = document.createElement('div');
@@ -41,10 +45,9 @@ window.parseLyricsForSync = function() {
     initCinemaSlots();
     activeLineIndex = 0;
     highlightNextSyncLine();
-    alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr boshlanganda 'Vaqtni Saqlash' tugmasini bosing.");
+    alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGAN soniyada tugmani bosing.");
 };
 
-// 2. 2-Slotli Barqaror Kinematik Ekran Yaratish (Sakramaydi!)
 function initCinemaSlots() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
@@ -54,12 +57,12 @@ function initCinemaSlots() {
 
     box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-2 my-auto select-none";
     box.innerHTML = `
-        <!-- 1-SLOT: FAOL AYTILAYOTGAN ULKAN SATR -->
+        <!-- 1-SLOT: FAOL SATR -->
         <p id="cinema-slot-active" class="text-2xl md:text-3xl font-black transition-all duration-500 ease-out leading-tight my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
             ${window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang..."}
         </p>
 
-        <!-- 2-SLOT: KELAYOTGAN KEYINGI XIRA SATR -->
+        <!-- 2-SLOT: KEYINGI SATR -->
         <p id="cinema-slot-next" class="text-lg md:text-xl font-bold text-white/30 transition-all duration-500 ease-out leading-snug my-2 break-words w-full" style="font-family: ${currentFont};">
             ${window.lyricsData[1] ? window.lyricsData[1].text : ""}
         </p>
@@ -77,7 +80,7 @@ function highlightNextSyncLine() {
     }
 }
 
-// 3. Vaqtni Saqlash
+// 2. VAQTNI ANIQ SAQLASH
 window.timestampCurrentLine = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -97,18 +100,22 @@ window.timestampCurrentLine = function() {
     }
 
     activeLineIndex++;
+    const stampBtn = document.getElementById('btn-stamp-line');
+    
     if (activeLineIndex < window.lyricsData.length) {
+        stampBtn.innerText = `⏱ ${activeLineIndex + 1}-satr boshlanishida bosing`;
         highlightNextSyncLine();
     } else {
-        document.getElementById('btn-stamp-line').classList.add('hidden');
-        alert("🎉 Barcha satrlar sinxronlandi! Endi videoni tayyorlang.");
+        stampBtn.classList.add('hidden');
+        alert("🎉 Barcha satrlar aniq sinxronlandi! Endi videoni tayyorlang.");
     }
 };
 
-// 4. JONLI SILLIQ 2-SLOTLI ALMASHINISH (SAKRAMAYDI VA SILLIQ SUZIB YO'QOLADI)
+// 3. AQLLI VA BAROBAR YURUVCHI ALMASHINISH (OFF-BY-ONE XATOSI YO'Q!)
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
+    // Musiqa vaqtiga qarab aynan qaysi satr aytilayotganini aniq topish
     let targetIdx = 0;
     for (let i = 0; i < window.lyricsData.length; i++) {
         if (window.lyricsData[i].time !== null && currentTime >= window.lyricsData[i].time) {
@@ -120,23 +127,20 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
     const slotNext = document.getElementById('cinema-slot-next');
     if (!slotActive || !slotNext) return;
 
-    // Satr almashganda silliq suzish animatsiyasi
     if (targetIdx !== currentRenderedIdx) {
         currentRenderedIdx = targetIdx;
 
-        // 1. Eski satr silliq yuqoriga suzib yo'qoladi
-        slotActive.style.transform = "translateY(-20px)";
+        // 1-satr silliq yo'qoladi, 2-satr o'rniga keladi
+        slotActive.style.transform = "translateY(-15px)";
         slotActive.style.opacity = "0";
 
         setTimeout(() => {
-            // 2. Yangi satr 100% silliq joylashadi
             slotActive.innerText = window.lyricsData[targetIdx] ? window.lyricsData[targetIdx].text : "";
             slotActive.style.color = window.activeLyricsColor || "#ffffff";
             slotActive.style.transform = "translateY(0)";
             slotActive.style.opacity = "1";
 
-            // 3. Keyingi satr pastda tayyor turadi
             slotNext.innerText = window.lyricsData[targetIdx + 1] ? window.lyricsData[targetIdx + 1].text : "";
-        }, 150);
+        }, 120);
     }
 };
