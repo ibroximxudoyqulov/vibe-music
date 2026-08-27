@@ -1,8 +1,9 @@
-// ==================== 100% FAIL-SAFE SMART SYNC ENGINE (js/sync.js) ====================
+// ==================== 100% SILKY SMOOTH KINETIC PREVIEW ENGINE ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
 let currentRenderedIdx = -1;
+let isTransitioning = false;
 
 window.updateTrackInfo = function() {
     const artist = document.getElementById('track-artist-input');
@@ -14,7 +15,7 @@ window.updateTrackInfo = function() {
     if (pTitle && title) pTitle.innerText = title.value || 'Song Title';
 };
 
-// 1. SATRLARNI TAYYORLASH (100% ISHONCHLI)
+// 1. CHEKSIZ SATRLARNI TAYYORLASH
 window.parseLyricsForSync = function() {
     const inputEl = document.getElementById('raw-lyrics-input');
     if (!inputEl) return;
@@ -25,7 +26,6 @@ window.parseLyricsForSync = function() {
         return;
     }
 
-    // Faqat haqiqiy qatorlar bo'yicha ajratish
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
@@ -58,7 +58,7 @@ window.parseLyricsForSync = function() {
     alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
-// 2. KINEMATIK PREVIEW EKRANI
+// 2. KINEMATIK EKRAN TUZILISHI
 function initCinemaSlots() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
@@ -68,14 +68,16 @@ function initCinemaSlots() {
     const firstText = window.lyricsData[0] ? window.lyricsData[0].text : "Matn yuklang...";
     const secondText = window.lyricsData[1] ? window.lyricsData[1].text : "";
 
-    box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-2 my-auto select-none";
+    box.className = "flex-1 flex flex-col justify-center items-start overflow-hidden px-3 my-auto select-none relative";
     box.innerHTML = `
-        <p id="cinema-slot-active" class="text-xl md:text-2xl font-black transition-all duration-500 ease-out leading-snug my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words whitespace-normal w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
-            ${firstText}
-        </p>
-        <p id="cinema-slot-next" class="text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-snug my-2 break-words whitespace-normal w-full" style="font-family: ${currentFont};">
-            ${secondText}
-        </p>
+        <div id="slot-container" class="w-full transition-transform duration-500 ease-out">
+            <p id="cinema-slot-active" class="text-2xl md:text-3xl font-black text-white leading-tight my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] break-words whitespace-normal w-full" style="font-family: ${currentFont}; color: ${selectedColor};">
+                ${firstText}
+            </p>
+            <p id="cinema-slot-next" class="text-base md:text-lg font-bold text-white/30 leading-snug my-2 break-words whitespace-normal w-full" style="font-family: ${currentFont};">
+                ${secondText}
+            </p>
+        </div>
     `;
     currentRenderedIdx = 0;
 }
@@ -90,7 +92,7 @@ function highlightNextSyncLine() {
     }
 }
 
-// 3. VAQTNI SAQLASH TUGMASI
+// 3. VAQTNI SAQLASH
 window.timestampCurrentLine = function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -121,7 +123,7 @@ window.timestampCurrentLine = function() {
     }
 };
 
-// 4. JONLI SILLIQ MOSLASHUVCHAN MATN CHIQISHI
+// 4. TEBRANMAYDIGAN SILLIQ ALMASHINISH
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
@@ -136,28 +138,26 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
     const slotNext = document.getElementById('cinema-slot-next');
     if (!slotActive || !slotNext) return;
 
-    if (targetIdx !== currentRenderedIdx) {
+    if (targetIdx !== currentRenderedIdx && !isTransitioning) {
+        isTransitioning = true;
         currentRenderedIdx = targetIdx;
 
-        slotActive.style.transform = "translateY(-12px)";
+        slotActive.style.transition = "all 0.4s ease-in";
+        slotActive.style.transform = "translateY(-20px)";
         slotActive.style.opacity = "0";
 
         setTimeout(() => {
             const curText = window.lyricsData[targetIdx] ? window.lyricsData[targetIdx].text : "";
             const nextText = window.lyricsData[targetIdx + 1] ? window.lyricsData[targetIdx + 1].text : "";
 
-            if (curText.length > 55) {
-                slotActive.className = "text-lg md:text-xl font-black transition-all duration-500 ease-out leading-snug my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words whitespace-normal w-full";
-            } else {
-                slotActive.className = "text-2xl md:text-3xl font-black transition-all duration-500 ease-out leading-snug my-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] break-words whitespace-normal w-full";
-            }
-
             slotActive.innerText = curText;
             slotActive.style.color = window.activeLyricsColor || "#ffffff";
+            slotActive.style.transition = "all 0.4s ease-out";
             slotActive.style.transform = "translateY(0)";
             slotActive.style.opacity = "1";
 
             slotNext.innerText = nextText;
-        }, 120);
+            isTransitioning = false;
+        }, 150);
     }
 };
