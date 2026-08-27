@@ -1,12 +1,14 @@
-// ==================== DIRECT TELEGRAM BOT DELIVERY EXPORTER & TRIMMER ====================
+// ==================== VIBESTUDIO 1080x1920 60FPS MASTER ENGINE ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// RENDER SERVERINGIZNING ANIQ MANZILI:
+// SIZNING BOTINGIZ VA RENDER SERVER KO'PRIGI:
+const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 const RENDER_SERVER_URL = "https://vibe-music-iays.onrender.com";
 
+// 1. SAHIFALARNI ALMASHTIRISH (STUDIYA / KESISH)
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
@@ -28,19 +30,31 @@ window.switchTab = function(tab) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// 2. SHRIFTNI YANGILASH
 window.updatePreviewFont = function(fontFamily) {
-    const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
-    lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
+    const slotActive = document.getElementById('cinema-slot-active');
+    const slotNext = document.getElementById('cinema-slot-next');
+    if (slotActive) slotActive.style.fontFamily = fontFamily;
+    if (slotNext) slotNext.style.fontFamily = fontFamily;
 };
 
+// 3. SHAXSIY TTF/OTF SHRIFT YUKLASH
 window.handleCustomFontUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
+
     const fontName = "CustomFont_" + Date.now();
     const fontUrl = URL.createObjectURL(file);
+
     const newStyle = document.createElement('style');
-    newStyle.appendChild(document.createTextNode(`@font-face { font-family: '${fontName}'; src: url('${fontUrl}'); }`));
+    newStyle.appendChild(document.createTextNode(`
+        @font-face {
+            font-family: '${fontName}';
+            src: url('${fontUrl}');
+        }
+    `));
     document.head.appendChild(newStyle);
+
     const select = document.getElementById('font-family-select');
     if (select) {
         const opt = document.createElement('option');
@@ -50,14 +64,17 @@ window.handleCustomFontUpload = function(event) {
         select.prepend(opt);
         window.updatePreviewFont(opt.value);
     }
-    alert("🎉 Shaxsiy shrift yuklandi va qo'llandi!");
+    alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi va qo'llandi!");
 };
 
+// 4. SHAXSIY FON YUKLASH
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
+
     document.getElementById('custom-bg-name').innerText = `🖼 ${file.name}`;
     customBgUrl = URL.createObjectURL(file);
+
     const bgLayer = document.getElementById('custom-bg-layer');
     if (bgLayer) {
         bgLayer.style.backgroundImage = `url('${customBgUrl}')`;
@@ -88,7 +105,9 @@ window.toggleParticlesEffect = function() {
     }
 };
 
+// TEBRANMAYDIGAN MATN CHIZISH FUNKSIYASI
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    if (!text) return;
     const words = text.split(' ');
     let line = '';
     let currentY = Math.round(y);
@@ -107,7 +126,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, Math.round(x), currentY);
 }
 
-// ==================== 1. VIDEONI TO'G'RIDAN-TO'G'RI BOTINGIZ CHATIGA YUBORISH ====================
+// ==================== 1. 100% OVOZLI & ANIQ SINXRON 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -128,10 +147,19 @@ window.exportAndSendToBot = async function() {
     }
 
     const maxLyricTime = Math.max(...stampedTimes);
-    const exactVideoDuration = maxLyricTime + 2.5;
+    const exactVideoDuration = maxLyricTime + 2.5; // Faqat matn tugaguncha + 2.5s yoziladi!
+
+    let currentUserId = null;
+    try {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            currentUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        }
+    } catch (e) {
+        currentUserId = null;
+    }
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -163,7 +191,7 @@ window.exportAndSendToBot = async function() {
 
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 6000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
@@ -171,19 +199,19 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Botingiz chatiga yuborilmoqda...";
+            btn.innerHTML = "📤 Botingizga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
 
-            // RENDER SERVERI ORQALI TO'G'RIDAN-TO'G'RI BOT CHATINGIZGA TASHHORISH!
+            // 1. RENDER SERVERI ORQALI BOTINGIZ CHATIGA YUBORISH
             fetch(`${RENDER_SERVER_URL}/upload_video`, {
                 method: 'POST',
                 body: blob
             }).then(res => {
-                alert("🎉 Video to'g'ridan-to'g'ri botingiz chatiga yetib bordi! Telegram chatini oching.");
+                alert("🎉 60FPS Video to'g'ridan-to'g'ri botingiz chatiga yetkazildi! Telegramni oching.");
                 btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
                 btn.disabled = false;
             }).catch(err => {
-                // Agar internet uzilsa telefoniga ham saqlaydi
+                // Agar internetda uzilish bo'lsa telefon galereyasiga saqlaydi
                 const videoUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = videoUrl;
@@ -203,6 +231,12 @@ window.exportAndSendToBot = async function() {
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
         const selectedTextColor = window.activeLyricsColor || "#ffffff";
 
+        // Yulduzchalar
+        const stars = [];
+        for (let i = 0; i < 45; i++) {
+            stars.push({ x: Math.random() * 1080, y: Math.random() * 1920, r: Math.random() * 3 + 1, s: Math.random() * 1.5 + 0.5 });
+        }
+
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
 
@@ -214,11 +248,23 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // Fon
+            // 1. Fon (#09090d)
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // Header
+            // 2. Yulduzchalar
+            if (isParticlesActive) {
+                stars.forEach(p => {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                    ctx.beginPath();
+                    ctx.arc(Math.round(p.x), Math.round(p.y), p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    p.y -= p.s;
+                    if (p.y < 0) { p.y = 1920; p.x = Math.random() * 1080; }
+                });
+            }
+
+            // 3. Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -235,7 +281,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // Kinetik Matnlar (0:00 dan boshlab 58px)
+            // 4. ANIQ 0:00 DAN BOSHLAB BAROBAR YURUVCHI MATNLAR (XATOSIZ!)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -243,23 +289,23 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            lyrics.forEach((l, i) => {
-                if (i === activeIdx) {
-                    ctx.save();
-                    ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
-                    ctx.shadowBlur = 25;
-                    ctx.fillStyle = selectedTextColor;
-                    ctx.font = `900 58px ${selectedFont}`;
-                    ctx.textAlign = "left";
-                    drawWrappedText(ctx, l.text, 90, 850, 900, 72);
-                    ctx.restore();
-                } else if (i === activeIdx + 1) {
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-                    ctx.font = `bold 42px ${selectedFont}`;
-                    ctx.textAlign = "left";
-                    drawWrappedText(ctx, l.text, 90, 1080, 900, 56);
-                }
-            });
+            // FAOL AYTILAYOTGAN SATR (ULKAN 58px, O'RNIDA TURADI)
+            ctx.save();
+            ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = selectedTextColor;
+            ctx.font = `900 58px ${selectedFont}`;
+            ctx.textAlign = "left";
+            drawWrappedText(ctx, lyrics[activeIdx] ? lyrics[activeIdx].text : "", 90, 820, 900, 72);
+            ctx.restore();
+
+            // KEYINGI KELAYOTGAN SATR (PASTDA XIRA KUTADI)
+            if (lyrics[activeIdx + 1]) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
+                ctx.font = `bold 42px ${selectedFont}`;
+                ctx.textAlign = "left";
+                drawWrappedText(ctx, lyrics[activeIdx + 1].text, 90, 1080, 900, 56);
+            }
 
             requestAnimationFrame(renderFrame);
         }
@@ -417,12 +463,12 @@ window.executeRealAudioTrimAndSend = async function() {
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
 
-        // RENDER BRIDGE ORQALI TO'G'RIDAN-TO'G'RI BOT CHATIGA TASHHORISH!
+        // RENDER BRIDGE ORQALI BOT CHATIGA YUBORISH
         fetch(`${RENDER_SERVER_URL}/upload_audio`, {
             method: 'POST',
             body: wavBlob
         }).then(res => {
-            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegram chatini oching.");
+            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegramni oching.");
             btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
             btn.disabled = false;
         }).catch(err => {
@@ -472,4 +518,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-                    }
+}
