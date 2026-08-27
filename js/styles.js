@@ -5,7 +5,7 @@ let isParticlesActive = true;
 let customBgUrl = null;
 
 // SIZNING BOT TOKENINGIZ VA ANIQ OMMATBOP KANALINGIZ:
-const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
+const BOT_TOKEN = "8824021433:AAHsBf1axRyavod-ZZ18uOEmBWxsWYASGV8";
 const TARGET_CHANNEL = "@ms_music_karaoke"; // https://t.me/ms_music_karaoke
 
 window.switchTab = function(tab) {
