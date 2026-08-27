@@ -1,4 +1,4 @@
-// ==================== SPOTIFY MULTI-LINE AESTHETIC ENGINE (js/sync.js) ====================
+// ==================== 100% STABLE NO-JUMP LYRICS ENGINE (js/sync.js) ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
@@ -14,7 +14,7 @@ window.updateTrackInfo = function() {
     if (pTitle && title) pTitle.innerText = title.value || 'Song Title';
 };
 
-// 1. CHEKSIZ SATRLARNI TAYYORLASH
+// 1. FAQAT ENTER BO'YICHA QATORLARGA BO'LISH
 window.parseLyricsForSync = function() {
     const inputEl = document.getElementById('raw-lyrics-input');
     if (!inputEl) return;
@@ -25,7 +25,7 @@ window.parseLyricsForSync = function() {
         return;
     }
 
-    // Faqat haqiqiy qatorlar bo'yicha ajratish
+    // FAQAT ODAM ENTER BOSGAN QATORLAR BO'YICHA AJRATISH
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
@@ -52,14 +52,14 @@ window.parseLyricsForSync = function() {
         stampBtn.innerText = `⏱ 1-satr boshlanishida bosing`;
     }
 
-    renderMultiLineSpotifyList();
+    renderFixedGeometryList();
     activeLineIndex = 0;
     highlightNextSyncLine();
-    alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA 'Vaqtni Saqlash' tugmasini bosing.");
+    alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA tugmani bosing.");
 };
 
-// 2. SPOTIFY USLUBIDAGI KO'P QATORLI MATNLAR RO'YXATI
-function renderMultiLineSpotifyList() {
+// 2. SO'ZLAR SAKRAMAYDIGAN QAT'IY O'LCHAMLI RO'YXAT
+function renderFixedGeometryList() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
 
@@ -71,28 +71,20 @@ function renderMultiLineSpotifyList() {
         const p = document.createElement('p');
         p.id = `spotify-line-${index}`;
         p.style.fontFamily = currentFont;
-        p.style.willChange = "transform, opacity, color";
+        // Barcha satrlar uchun bir xil qat'iy o'lcham (harflar sakramaydi!)
+        p.className = "text-lg md:text-xl font-bold transition-all duration-300 leading-snug my-3 break-words w-full";
         
         if (index === 0) {
-            // 1-satr boshidanoq ulkan va yorqin turadi
-            p.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-relaxed my-3 break-words w-full";
             p.style.color = selectedColor;
             p.style.opacity = "1";
-            p.style.transform = "scale(1.03)";
+            p.style.fontWeight = "900";
         } else {
-            // Qolgan satrlar xira (40% shaffoflikda) kitobdek tartib bilan turadi
-            p.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-relaxed my-2.5 break-words w-full";
             p.style.color = "#ffffff";
-            p.style.opacity = "0.4";
-            p.style.transform = "scale(1)";
+            p.style.opacity = "0.35";
+            p.style.fontWeight = "700";
         }
 
         p.innerText = item.text;
-        p.onclick = () => {
-            if (item.time !== null && window.vibeAudioElement) {
-                window.vibeAudioElement.currentTime = item.time;
-            }
-        };
         box.appendChild(p);
     });
 
@@ -140,7 +132,7 @@ window.timestampCurrentLine = function() {
     }
 };
 
-// 4. JONLI SPOTIFY KO'P QATORLI HARAKAT
+// 4. JONLI SILLIQ YORITISH (SO'ZLAR JOYIDAN QIMIRLAMAYDI)
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
@@ -161,22 +153,20 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
             if (!el) return;
 
             if (idx === targetIdx) {
-                // FAOL AYTILAYOTGAN SATR: ULKAN, YORQIN VA KO'ZGA TASHLANADI
-                el.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-relaxed my-3 break-words w-full";
+                // FAOL SATR: Yorqin yonadi
                 el.style.color = selectedColor;
                 el.style.opacity = "1";
-                el.style.transform = "scale(1.03)";
+                el.style.fontWeight = "900";
 
                 if (scrollBox) {
-                    const targetScroll = el.offsetTop - scrollBox.offsetTop - 70;
+                    const targetScroll = el.offsetTop - scrollBox.offsetTop - 60;
                     scrollBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
                 }
             } else {
-                // QOLGAN BARCHA SATRLAR: Xira oq (40%) bo'lib o'z joyida turadi
-                el.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-relaxed my-2.5 break-words w-full";
+                // QOLGAN SATRLAR: Xira turadi (Joyidan siljimaydi!)
                 el.style.color = "#ffffff";
-                el.style.opacity = "0.4";
-                el.style.transform = "scale(1)";
+                el.style.opacity = "0.35";
+                el.style.fontWeight = "700";
             }
         });
     }
