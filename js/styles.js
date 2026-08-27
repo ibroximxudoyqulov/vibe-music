@@ -1,36 +1,53 @@
-// ==================== VIBESTUDIO 1080x1920 60FPS MASTER ENGINE ====================
+// ==========================================================================
+// VIBESTUDIO 1080x1920 60FPS KINETIC EXPORTER & INSHOT TRIMMER ENGINE
+// ==========================================================================
 
 let isVinylActive = false;
+let isSpectrumActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// SIZNING BOTINGIZ VA RENDER SERVER KO'PRIGI:
+// SIZNING BOT TOKENINGIZ VA RENDER SERVER KO'PRIGI:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 const RENDER_SERVER_URL = "https://vibe-music-iays.onrender.com";
 
-// 1. SAHIFALARNI ALMASHTIRISH (STUDIYA / KESISH)
+// KOSMIK YULDUZCHALAR ZARRACHALARI (PARTICLES)
+const particles = [];
+for (let i = 0; i < 50; i++) {
+    particles.push({
+        x: Math.random() * 1080,
+        y: Math.random() * 1920,
+        radius: Math.random() * 3 + 1,
+        speedY: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.7 + 0.3
+    });
+}
+
+// ==================== 1. SAHIFALARNI ALMASHTIRISH ====================
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
     const trimmer = document.getElementById('tab-trimmer');
     const btnStudio = document.getElementById('nav-btn-studio');
     const btnTrimmer = document.getElementById('nav-btn-trimmer');
 
-    if (studio) studio.classList.add('hidden');
-    if (trimmer) trimmer.classList.add('hidden');
+    if (studio) { studio.classList.add('hidden'); studio.style.display = 'none'; }
+    if (trimmer) { trimmer.classList.add('hidden'); trimmer.style.display = 'none'; }
     if (btnStudio) btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
     if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
 
     if (tab === 'studio' && studio) {
         studio.classList.remove('hidden');
+        studio.style.display = 'block';
         if (btnStudio) btnStudio.className = "flex flex-col items-center text-brand-red space-y-1";
     } else if (tab === 'trimmer' && trimmer) {
         trimmer.classList.remove('hidden');
+        trimmer.style.display = 'block';
         if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-brand-cyan space-y-1";
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 2. SHRIFTNI YANGILASH
+// ==================== 2. SHRIFTLARNI YANGILASH ====================
 window.updatePreviewFont = function(fontFamily) {
     const slotActive = document.getElementById('cinema-slot-active');
     const slotNext = document.getElementById('cinema-slot-next');
@@ -38,7 +55,7 @@ window.updatePreviewFont = function(fontFamily) {
     if (slotNext) slotNext.style.fontFamily = fontFamily;
 };
 
-// 3. SHAXSIY TTF/OTF SHRIFT YUKLASH
+// SHAXSIY TTF / OTF SHRIFT YUKLASH
 window.handleCustomFontUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -67,7 +84,7 @@ window.handleCustomFontUpload = function(event) {
     alert("🎉 Shaxsiy shrift muvaffaqiyatli yuklandi va qo'llandi!");
 };
 
-// 4. SHAXSIY FON YUKLASH
+// ==================== 3. SHAXSIY FON VA EFFEKTLAR ====================
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -87,11 +104,11 @@ window.toggleVinylEffect = function() {
     const vinylBox = document.getElementById('preview-vinyl-box');
     const btn = document.getElementById('btn-vinyl');
     if (isVinylActive) {
-        vinylBox.classList.remove('hidden');
-        btn.classList.add('border-brand-red', 'text-brand-red');
+        if (vinylBox) vinylBox.classList.remove('hidden');
+        if (btn) btn.classList.add('border-brand-red', 'text-brand-red');
     } else {
-        vinylBox.classList.add('hidden');
-        btn.classList.remove('border-brand-red', 'text-brand-red');
+        if (vinylBox) vinylBox.classList.add('hidden');
+        if (btn) btn.classList.remove('border-brand-red', 'text-brand-red');
     }
 };
 
@@ -99,34 +116,43 @@ window.toggleParticlesEffect = function() {
     isParticlesActive = !isParticlesActive;
     const btn = document.getElementById('btn-particles');
     if (isParticlesActive) {
-        btn.classList.add('border-brand-cyan', 'text-brand-cyan');
+        if (btn) btn.classList.add('border-brand-cyan', 'text-brand-cyan');
     } else {
-        btn.classList.remove('border-brand-cyan', 'text-brand-cyan');
+        if (btn) btn.classList.remove('border-brand-cyan', 'text-brand-cyan');
     }
 };
 
-// TEBRANMAYDIGAN MATN CHIZISH FUNKSIYASI
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
-    if (!text) return;
+window.toggleSpectrumEffect = function() {
+    isSpectrumActive = !isSpectrumActive;
+};
+
+// ==================== 4. AQLLI KO'P QATORLI MATN CHIZISH ====================
+function drawSmartWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    if (!text) return y;
     const words = text.split(' ');
-    let line = '';
-    let currentY = Math.round(y);
+    let lines = [];
+    let curLine = '';
 
     for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
+        const testLine = curLine + words[n] + ' ';
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && n > 0) {
-            ctx.fillText(line, Math.round(x), currentY);
-            line = words[n] + ' ';
-            currentY += lineHeight;
+            lines.push(curLine);
+            curLine = words[n] + ' ';
         } else {
-            line = testLine;
+            curLine = testLine;
         }
     }
-    ctx.fillText(line, Math.round(x), currentY);
+    lines.push(curLine);
+
+    lines.forEach((line, idx) => {
+        ctx.fillText(line, Math.round(x), Math.round(y + (idx * lineHeight)));
+    });
+
+    return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. 100% OVOZLI & ANIQ SINXRON 60FPS VIDEO EKSPORT ====================
+// ==================== 5. 100% STEREO OVOZLI 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -147,16 +173,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const maxLyricTime = Math.max(...stampedTimes);
-    const exactVideoDuration = maxLyricTime + 2.5; // Faqat matn tugaguncha + 2.5s yoziladi!
-
-    let currentUserId = null;
-    try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-            currentUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
-        }
-    } catch (e) {
-        currentUserId = null;
-    }
+    const exactVideoDuration = maxLyricTime + 2.5;
 
     const btn = document.getElementById('btn-export-send');
     btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
@@ -202,20 +219,18 @@ window.exportAndSendToBot = async function() {
             btn.innerHTML = "📤 Botingizga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
 
-            // 1. RENDER SERVERI ORQALI BOTINGIZ CHATIGA YUBORISH
             fetch(`${RENDER_SERVER_URL}/upload_video`, {
                 method: 'POST',
                 body: blob
             }).then(res => {
-                alert("🎉 60FPS Video to'g'ridan-to'g'ri botingiz chatiga yetkazildi! Telegramni oching.");
+                alert("🎉 60FPS Video botingiz chatiga yetkazildi! Telegramni oching.");
                 btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
                 btn.disabled = false;
             }).catch(err => {
-                // Agar internetda uzilish bo'lsa telefon galereyasiga saqlaydi
                 const videoUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = videoUrl;
-                a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+                a.download = `VibeStudio_${Date.now()}.mp4`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -231,9 +246,8 @@ window.exportAndSendToBot = async function() {
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
         const selectedTextColor = window.activeLyricsColor || "#ffffff";
 
-        // Yulduzchalar
         const stars = [];
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 50; i++) {
             stars.push({ x: Math.random() * 1080, y: Math.random() * 1920, r: Math.random() * 3 + 1, s: Math.random() * 1.5 + 0.5 });
         }
 
@@ -248,7 +262,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Fon (#09090d)
+            // 1. Qorong'u Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
@@ -281,7 +295,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ 0:00 DAN BOSHLAB BAROBAR YURUVCHI MATNLAR (XATOSIZ!)
+            // 4. ANIQ VA MOSLASHUVCHAN MATNLAR (FADE-OUT)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -289,22 +303,28 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            // FAOL AYTILAYOTGAN SATR (ULKAN 58px, O'RNIDA TURADI)
+            const activeText = lyrics[activeIdx] ? lyrics[activeIdx].text : "";
+            const nextText = lyrics[activeIdx + 1] ? lyrics[activeIdx + 1].text : "";
+
+            const activeFontSize = activeText.length > 55 ? 46 : (activeText.length > 35 ? 50 : 56);
+            const activeLineHeight = activeFontSize + 16;
+
             ctx.save();
             ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
             ctx.shadowBlur = 25;
             ctx.fillStyle = selectedTextColor;
-            ctx.font = `900 58px ${selectedFont}`;
+            ctx.font = `900 ${activeFontSize}px ${selectedFont}`;
             ctx.textAlign = "left";
-            drawWrappedText(ctx, lyrics[activeIdx] ? lyrics[activeIdx].text : "", 90, 820, 900, 72);
+            
+            const nextStartY = drawSmartWrappedText(ctx, activeText, 90, 800, 900, activeLineHeight);
             ctx.restore();
 
-            // KEYINGI KELAYOTGAN SATR (PASTDA XIRA KUTADI)
-            if (lyrics[activeIdx + 1]) {
+            if (nextText) {
+                const nextFontSize = nextText.length > 55 ? 34 : 40;
                 ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-                ctx.font = `bold 42px ${selectedFont}`;
+                ctx.font = `bold ${nextFontSize}px ${selectedFont}`;
                 ctx.textAlign = "left";
-                drawWrappedText(ctx, lyrics[activeIdx + 1].text, 90, 1080, 900, 56);
+                drawSmartWrappedText(ctx, nextText, 90, nextStartY + 60, 900, nextFontSize + 14);
             }
 
             requestAnimationFrame(renderFrame);
@@ -320,7 +340,7 @@ window.exportAndSendToBot = async function() {
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER (BOT CHATIGA TASHHORISH) ====================
+// ==================== 6. INSHOT TOUCH WAVEFORM TRIMMER ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -463,12 +483,11 @@ window.executeRealAudioTrimAndSend = async function() {
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
 
-        // RENDER BRIDGE ORQALI BOT CHATIGA YUBORISH
         fetch(`${RENDER_SERVER_URL}/upload_audio`, {
             method: 'POST',
             body: wavBlob
         }).then(res => {
-            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegramni oching.");
+            alert("🎉 Qirqilgan MP3 botingiz chatiga yetib bordi! Telegram chatini oching.");
             btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
             btn.disabled = false;
         }).catch(err => {
@@ -491,6 +510,7 @@ window.executeRealAudioTrimAndSend = async function() {
     }
 };
 
+// ==================== 7. LOSSLESS PCM WAV/MP3 BINARY ENCODER ====================
 function bufferToWave(abuffer, len) {
     let numOfChan = abuffer.numberOfChannels,
         length = len * numOfChan * 2 + 44,
