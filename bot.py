@@ -14,13 +14,12 @@ from telebot.types import (
 )
 
 BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o"
-ADMIN_ID = 6526744258
-SECRET_CHANNEL_ID = "-1004428420836"
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=server_bridge_v1"
+ADMIN_ID = 6526744258  # Sizning Telegram chat ID raqamingiz
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=direct_bot_v1"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=25)
 
-# ==================== 1. RENDER SERVER KO'PRIGI (CORS & UPLOAD HANDLER) ====================
+# ==================== 1. SERVER KO'PRIGI (VIDEONI CHATGA TASHLOVCHI) ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -33,26 +32,26 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(b"<h1>VibeStudio Render Bridge is 100% Active!</h1>")
+        self.wfile.write(b"<h1>VibeStudio is 100% Active!</h1>")
 
     def do_POST(self):
-        # Mini App'dan yuborilgan video/audioni qabul qilish va Kanalga tashlash
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
 
+            # VIDEONI TO'G'RIDAN-TO'G'RI BOTINGIZ CHATIGA YUBORISH
             if "upload_video" in self.path:
                 bot.send_video(
-                    SECRET_CHANNEL_ID, 
+                    ADMIN_ID, 
                     post_data, 
-                    caption="🎬 <b>VibeStudio 60FPS Video!</b>\n\n📥 @ms_mus1c_bot orqali tayyorlandi!",
+                    caption="🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n\n👇 Videoni ustiga bosib saqlab olishingiz mumkin!", 
                     parse_mode="HTML"
                 )
             elif "upload_audio" in self.path:
                 bot.send_audio(
-                    SECRET_CHANNEL_ID, 
+                    ADMIN_ID, 
                     post_data, 
-                    caption="✂️ <b>VibeStudio Qirqilgan MP3!</b>\n\n📥 @ms_mus1c_bot",
+                    caption="✂️ <b>VibeStudio Qirqilgan MP3 Musiqangiz!</b>", 
                     parse_mode="HTML"
                 )
 
@@ -72,7 +71,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
 
 def run_health_server():
     port = int(os.environ.get("PORT", 10000))
-    print(f"--> [OK] Render Bridge Server {port}-portda ishga tushdi!")
+    print(f"--> [OK] Health Server {port}-portda ishga tushdi!")
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
@@ -130,15 +129,14 @@ TEXTS = {
         "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify video yasash, musiqani qirqish va video yuklash <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
         "btn_open_app": "🎨 VibeStudio Ilovasi (Mini App)",
         "btn_downloader": "📥 Video Yuklash (Insta/TikTok)",
-        "btn_lang": "🌐 Tilni O'zgartirish",
         "btn_info": "ℹ️ Bot Haqida",
-        "dl_prompt": "📥 <b>Universal Media Yuklovchi:</b>\nTikTok, Instagram (Reels), Pinterest havolasini yuboring:",
+        "dl_prompt": "📥 <b>Universal Media Yuklovchi:</b>\nTikTok yoki Instagram havolasini yuboring:",
         "dl_processing": "⏳ Video yuklanmoqda...",
         "dl_error": "⚠️ Havolani tekshirib qaytadan yuboring!"
     }
 }
 
-def get_main_menu(lang="uz"):
+def get_main_menu():
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.row(KeyboardButton(TEXTS["uz"]["btn_open_app"], web_app=WebAppInfo(url=WEBAPP_URL)))
     markup.row(KeyboardButton(TEXTS["uz"]["btn_downloader"]), KeyboardButton(TEXTS["uz"]["btn_info"]))
@@ -149,7 +147,7 @@ def get_main_menu(lang="uz"):
 def start_handler(message):
     user_id = message.from_user.id
     save_user(user_id, message.from_user.username or "user", "uz")
-    bot.send_message(message.chat.id, TEXTS["uz"]["welcome"], parse_mode="HTML", reply_markup=get_main_menu("uz"))
+    bot.send_message(message.chat.id, TEXTS["uz"]["welcome"], parse_mode="HTML", reply_markup=get_main_menu())
 
 @bot.message_handler(commands=['stats'])
 def stats_handler(message):
@@ -177,12 +175,11 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS["uz"]["dl_prompt"], parse_mode="HTML")
         return
 
-    # HAVOLADAN YUKLASH
+    # TIKTOK / INSTAGRAM YUKLASH
     url_match = re.search(r'(https?://[^\s]+)', text)
     if url_match:
         clean_url = url_match.group(1).split('?')[0] if "tiktok.com" in url_match.group(1) else url_match.group(1)
         wait_msg = bot.send_message(message.chat.id, TEXTS["uz"]["dl_processing"])
-        
         try:
             if "tiktok.com" in clean_url:
                 res = requests.post("https://www.tikwm.com/api/", data={"url": clean_url, "hd": 1}, timeout=12).json()
@@ -197,7 +194,7 @@ def message_handler(message):
         bot.send_message(message.chat.id, TEXTS["uz"]["dl_error"])
         return
 
-    bot.send_message(message.chat.id, TEXTS["uz"]["welcome"], parse_mode="HTML", reply_markup=get_main_menu("uz"))
+    bot.send_message(message.chat.id, TEXTS["uz"]["welcome"], parse_mode="HTML", reply_markup=get_main_menu())
 
 # ==================== 5. AUTO-RECONNECT ====================
 if __name__ == '__main__':
