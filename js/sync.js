@@ -1,4 +1,4 @@
-// ==================== APPLE MUSIC "MALVINA" KINETIC SPOTLIGHT ENGINE ====================
+// ==================== JITTER-FREE SMOOTH KINETIC LYRICS ENGINE ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
@@ -14,7 +14,7 @@ window.updateTrackInfo = function() {
 window.parseLyricsForSync = function() {
     const raw = document.getElementById('raw-lyrics-input').value.trim();
     if (!raw) {
-        alert("⚠️ Iltimos, qo'shiq matnini kiriting yoki 🤖 AI Matn tugmasidan foydalaning!");
+        alert("⚠️ Iltimos, oldin qo'shiq matnini kiriting!");
         return;
     }
 
@@ -37,14 +37,14 @@ window.parseLyricsForSync = function() {
         container.appendChild(div);
     });
 
-    renderAppleMusicPreviewList();
+    renderSmoothPreviewList();
     activeLineIndex = 0;
     highlightNextSyncLine();
     alert("✅ Matn tayyor! Musiqani qo'ying va har bir satr aytilganda 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
-// 2. Apple Music Uslubidagi Matnlar Ro'yxati
-function renderAppleMusicPreviewList() {
+// 2. Silliq va O'qishga Oson Preview Ro'yxati
+function renderSmoothPreviewList() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
     box.innerHTML = '';
@@ -54,8 +54,8 @@ function renderAppleMusicPreviewList() {
     window.lyricsData.forEach((item, index) => {
         const p = document.createElement('p');
         p.id = `spotify-line-${index}`;
-        // Dastlab pastdagi satrlar xira (blur) va yarim shaffof turadi
-        p.className = "text-base md:text-lg font-bold text-white/20 blur-[1px] transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full";
+        // Har bir satr uchun barqaror va sakramaydigan silliq CSS o'tish
+        p.className = "text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full my-3";
         p.style.fontFamily = currentFont;
         p.innerText = item.text;
         p.onclick = () => {
@@ -105,7 +105,7 @@ window.timestampCurrentLine = function() {
     }
 };
 
-// 4. JONLI APPLE MUSIC "MALVINA" FADE-OUT ALMASHINISHI
+// 4. SAKRAMAYDIGAN SILLIQ ALMASHINISH (JITTER-FREE)
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
@@ -125,27 +125,27 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
             if (!el) return;
 
             if (idx === currentIndex) {
-                // AYTILAYOTGAN FAOL SATR: #1 Markaziy o'ringa chiqadi, kattalashadi, yorqin porlaydi
-                el.className = "text-xl md:text-2xl font-extrabold scale-105 blur-none transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] break-words w-full";
+                // AYTILAYOTGAN SATR: Katta, Opppoq va Yorqin porlaydi
+                el.className = "text-xl md:text-2xl font-black scale-105 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] break-words w-full my-3";
                 el.style.color = selectedGlowColor;
                 el.style.opacity = "1";
-                el.style.display = "block";
+                el.style.transform = "translateY(0) scale(1.05)";
                 
                 if (scrollBox) {
                     const targetScroll = el.offsetTop - scrollBox.offsetTop - 80;
                     scrollBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
                 }
             } else if (idx < currentIndex) {
-                // AYTIB BO'LINGAN SATR: Yuqoriga siljib BUTUNLAY YO'QOLADI (Fade-Out / Opacity: 0)
-                el.className = "text-sm font-bold text-white/0 -translate-y-4 transition-all duration-500 ease-in pointer-events-none";
+                // AYTIB BO'LINGAN SATR: Tepaga sekin ko'tarilib, shaffof bo'lib yo'qoladi (Sakramaydi!)
+                el.className = "text-base font-bold text-white/0 transition-all duration-500 ease-in pointer-events-none break-words w-full my-3";
                 el.style.opacity = "0";
-                el.style.display = "none"; // Ekrandan butunlay tozalanadi!
+                el.style.transform = "translateY(-20px) scale(0.95)";
             } else {
-                // KELAYOTGAN SATRLAR: Pastda xira (blur) va navbat kutadi
-                el.className = "text-base md:text-lg font-bold text-white/25 blur-[1px] scale-100 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full";
+                // KELAYOTGAN SATR: Pastda xira va silliq kutib turadi
+                el.className = "text-base md:text-lg font-bold text-white/30 transition-all duration-500 ease-out leading-relaxed cursor-pointer transform origin-left break-words w-full my-3";
                 el.style.color = "#ffffff";
                 el.style.opacity = "0.35";
-                el.style.display = "block";
+                el.style.transform = "translateY(0) scale(1)";
             }
         });
     }
