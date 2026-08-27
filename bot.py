@@ -13,7 +13,7 @@ from telebot.types import (
     ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 )
 
-BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o"
+BOT_TOKEN = "8824021433:AAHsBf1axRyavod-ZZ18uOEmBWxsWYASGV8"
 ADMIN_ID = 6526744258
 WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=channel_karaoke_v1"
 
