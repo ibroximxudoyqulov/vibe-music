@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VibeStudio - 60FPS Spotify Lyric Video & Audio Studio</title>
+    <title>VibeStudio - 500K Viral Spotify Lyric Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -34,7 +34,7 @@
 </head>
 <body class="bg-brand-dark text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- HEADER (3 TA TIL) -->
+    <!-- HEADER -->
     <header class="p-4 glass sticky top-0 z-30 flex justify-between items-center border-b border-gray-800/60">
         <div class="flex items-center space-x-2">
             <span class="text-brand-red text-xl"><i class="fa-solid fa-compact-disc vinyl-spin"></i></span>
@@ -82,14 +82,14 @@
             </div>
         </section>
 
-        <!-- 2. STEP: MATN VA SINXRONLASH (CHEKSIZ QATORLAR) -->
+        <!-- 2. STEP: MATN VA SINXRONLASH -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-align-left text-brand-red"></i>
                 <span>2. Matn va Sinxronlash (Cheksiz Satrlar)</span>
             </h3>
 
-            <textarea id="raw-lyrics-input" rows="5" placeholder="Qo'shiq matnini kiriting (xohlagancha uzun va cheksiz satrlar)..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
+            <textarea id="raw-lyrics-input" rows="5" placeholder="Qo'shiq matnini kiriting..." class="w-full p-3 bg-brand-input border border-gray-800 rounded-2xl text-xs focus:outline-none focus:border-brand-red"></textarea>
             
             <button onclick="parseLyricsForSync()" class="w-full py-2.5 bg-brand-input hover:bg-gray-800 border border-gray-700 font-bold text-xs rounded-xl active:scale-95 transition">
                 Satrlarni tayyorlash
@@ -102,14 +102,41 @@
             </button>
         </section>
 
-        <!-- 3. STEP: SHRIFTLAR, RANG PALITRASI VA FON -->
+        <!-- 3. STEP: 5 TA BAXMAL FON, SHRIFTLAR VA RANGLAR -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-4 shadow-xl">
             <h3 class="font-bold text-xs text-gray-300 flex items-center space-x-2">
                 <i class="fa-solid fa-palette text-yellow-400"></i>
-                <span>3. Shriftlar, Ranglar va Fon</span>
+                <span>3. Baxmal Fonlar, Ranglar va Shriftlar</span>
             </h3>
 
-            <!-- 70+ Shriftlar va Shaxsiy Shrift Yuklash -->
+            <!-- 5 TA VIRAL BAXMAL FONLARNI TANLASH -->
+            <div>
+                <label class="text-[10px] text-gray-400 block mb-2 font-bold">🎨 500K Viral Fon Rangini Tanlang:</label>
+                <div class="grid grid-cols-5 gap-2">
+                    <button onclick="setVelvetTheme('caramel')" id="theme-btn-caramel" class="theme-preset-btn p-2 rounded-2xl border-2 border-white bg-gradient-to-b from-[#451f08] to-[#1f0d03] text-center active:scale-95 transition shadow-lg">
+                        <span class="text-xs">🍯</span>
+                        <p class="text-[8px] font-bold mt-0.5 text-orange-200">Karamel</p>
+                    </button>
+                    <button onclick="setVelvetTheme('wine')" id="theme-btn-wine" class="theme-preset-btn p-2 rounded-2xl border border-gray-700 bg-gradient-to-b from-[#450818] to-[#1f030a] text-center active:scale-95 transition">
+                        <span class="text-xs">🍷</span>
+                        <p class="text-[8px] font-bold mt-0.5 text-pink-200">Sharob</p>
+                    </button>
+                    <button onclick="setVelvetTheme('emerald')" id="theme-btn-emerald" class="theme-preset-btn p-2 rounded-2xl border border-gray-700 bg-gradient-to-b from-[#08301e] to-[#03180e] text-center active:scale-95 transition">
+                        <span class="text-xs">🌲</span>
+                        <p class="text-[8px] font-bold mt-0.5 text-emerald-200">Zumrad</p>
+                    </button>
+                    <button onclick="setVelvetTheme('indigo')" id="theme-btn-indigo" class="theme-preset-btn p-2 rounded-2xl border border-gray-700 bg-gradient-to-b from-[#0b1a38] to-[#040a18] text-center active:scale-95 transition">
+                        <span class="text-xs">🌌</span>
+                        <p class="text-[8px] font-bold mt-0.5 text-blue-200">Okean</p>
+                    </button>
+                    <button onclick="setVelvetTheme('charcoal')" id="theme-btn-charcoal" class="theme-preset-btn p-2 rounded-2xl border border-gray-700 bg-gradient-to-b from-[#18181c] to-[#08080a] text-center active:scale-95 transition">
+                        <span class="text-xs">🖤</span>
+                        <p class="text-[8px] font-bold mt-0.5 text-gray-200">Qora</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shriftlar -->
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="text-[10px] text-gray-400">Shriftni tanlang:</label>
@@ -119,7 +146,7 @@
                     <input type="file" id="custom-font-input" accept=".ttf,.otf,.woff" class="hidden" onchange="handleCustomFontUpload(event)">
                 </div>
                 <select id="font-family-select" onchange="updatePreviewFont(this.value)" class="w-full p-3 bg-brand-input border border-gray-800 rounded-xl text-xs focus:outline-none text-white">
-                    <option value="'Montserrat', sans-serif">Montserrat Bold (Spotify Style)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat Bold (Circular Spotify)</option>
                     <option value="'Playfair Display', serif">Playfair Display (Vintage Serif)</option>
                     <option value="'Caveat', cursive">Caveat (Aesthetic Handwriting)</option>
                     <option value="'Lobster', cursive">Lobster (Retro Cyrillic)</option>
@@ -128,9 +155,9 @@
                 </select>
             </div>
 
-            <!-- MATN RANGINI TANLASH (COLOR PALETTE) -->
+            <!-- Matn Rangi -->
             <div>
-                <label class="text-[10px] text-gray-400 block mb-2">🎨 Faol matn rangini tanlang:</label>
+                <label class="text-[10px] text-gray-400 block mb-2">🎨 Faol matn rangi:</label>
                 <div class="flex items-center justify-between space-x-2 bg-brand-input p-2.5 rounded-2xl border border-gray-800">
                     <button id="color-btn-ffffff" onclick="setLyricsColor('#ffffff')" class="color-preset-btn w-7 h-7 rounded-full bg-white ring-4 ring-white scale-110 active:scale-95 transition"></button>
                     <button id="color-btn-1db954" onclick="setLyricsColor('#1db954')" class="color-preset-btn w-7 h-7 rounded-full bg-[#1db954] active:scale-95 transition"></button>
@@ -146,52 +173,37 @@
                 </div>
             </div>
 
-            <!-- Shaxsiy Fon Yuklash (Ixtiyoriy) -->
+            <!-- Shaxsiy Rasm Yuklash (Videoda 100% chiqadi!) -->
             <div>
-                <label class="text-[10px] text-gray-400 block mb-1">Shaxsiy rasm yoki video fon (Ixtiyoriy):</label>
+                <label class="text-[10px] text-gray-400 block mb-1">Shaxsiy rasm fon (Ixtiyoriy):</label>
                 <label for="custom-bg-input" class="w-full p-3 bg-brand-input hover:bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
-                    <span id="custom-bg-name" class="text-xs text-gray-300 truncate">🖼 Rasm yoki video tanlang...</span>
+                    <span id="custom-bg-name" class="text-xs text-gray-300 truncate">🖼 Rasm tanlash...</span>
                     <i class="fa-solid fa-image text-brand-cyan"></i>
                 </label>
-                <input type="file" id="custom-bg-input" accept="image/*,video/*" class="hidden" onchange="handleCustomBgUpload(event)">
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <button onclick="toggleVinylEffect()" id="btn-vinyl" class="p-2.5 bg-brand-input border border-gray-800 rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
-                    <i class="fa-solid fa-compact-disc"></i>
-                    <span>💿 3D Vinil Disk</span>
-                </button>
-                <button onclick="toggleParticlesEffect()" id="btn-particles" class="p-2.5 bg-brand-input border border-brand-cyan text-brand-cyan rounded-xl flex items-center justify-center space-x-1.5 active:scale-95">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>✨ Yulduzlar</span>
-                </button>
+                <input type="file" id="custom-bg-input" accept="image/*" class="hidden" onchange="handleCustomBgUpload(event)">
             </div>
         </section>
 
-        <!-- 4. STEP: PREVIEW & 60FPS VIDEO YUBORISH -->
+        <!-- 4. STEP: TIKTOK SAFE PREVIEW & 60FPS VIDEO -->
         <section class="bg-brand-card p-4 rounded-3xl border border-gray-800 space-y-3 shadow-xl">
-            <h3 class="font-bold text-xs text-gray-300">Превью (Spotify 9:16 HD):</h3>
+            <h3 class="font-bold text-xs text-gray-300">Превью (TikTok 9:16 HD):</h3>
             
-            <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-[#09090d] border border-gray-700 flex flex-col justify-between p-5 shadow-2xl select-none">
-                <div id="custom-bg-layer" class="absolute inset-0 bg-cover bg-center z-0 opacity-35"></div>
+            <div id="video-canvas-preview" class="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-gradient-to-b from-[#451f08] to-[#1f0d03] border border-gray-700 flex flex-col justify-between p-6 shadow-2xl select-none transition-colors duration-500">
+                <div id="custom-bg-layer" class="absolute inset-0 bg-cover bg-center z-0 opacity-40"></div>
 
-                <div class="flex items-center space-x-3 text-white/90 border-b border-white/10 pb-3 z-10">
-                    <div class="text-left flex-1">
-                        <p id="preview-track-title" class="text-sm font-bold text-white tracking-wide">Yolg'onchi yor</p>
-                        <p id="preview-track-artist" class="text-[11px] text-gray-400">Sevinch Mo'minova</p>
-                    </div>
-                    <div id="preview-vinyl-box" class="hidden">
-                        <i class="fa-solid fa-compact-disc text-2xl text-white/90 vinyl-spin"></i>
-                    </div>
+                <!-- TikTok Safe Header (y = 340 darajasi) -->
+                <div class="pt-6 border-b border-white/15 pb-3 z-10 text-left">
+                    <p id="preview-track-title" class="text-base font-black text-white tracking-wide leading-tight">Yolg'onchi yor</p>
+                    <p id="preview-track-artist" class="text-xs text-white/70 font-medium">Sevinch Mo'minova</p>
                 </div>
 
-                <!-- SPOTIFY MULTI-LINE LYRICS LIST -->
-                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar my-4 py-8 space-y-4 text-left relative z-10">
+                <!-- SPOTIFY MULTI-LINE MATNLAR (OXIRGI SATRLAR HAM MARKAZGA CHIQADI) -->
+                <div id="spotify-lyrics-scroll" class="flex-1 overflow-y-auto hide-scrollbar py-6 pb-40 space-y-4 text-left relative z-10">
                     <p class="text-sm font-bold text-white/40">Matnni yuklang va sinxronlang...</p>
                 </div>
 
-                <div class="flex justify-between items-center text-gray-400 pt-3 border-t border-white/10 text-xs z-10">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">VibeStudio Lyrics</span>
+                <div class="flex justify-between items-center text-white/40 pt-3 border-t border-white/10 text-xs z-10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider">VibeStudio Master</span>
                 </div>
             </div>
 
@@ -235,7 +247,6 @@
                     </div>
                 </div>
 
-                <!-- TOZA INSHOT TO'LQINLI TREK -->
                 <div id="inshot-waveform-container" class="relative w-full h-24 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden flex items-center justify-center p-2 touch-none">
                     <div class="absolute inset-0 flex items-center justify-around opacity-30 px-3 pointer-events-none">
                         <span class="w-1.5 bg-purple-500 h-8 rounded-full"></span>
@@ -270,7 +281,7 @@
         </section>
     </main>
 
-    <!-- 2 TA ASOSIY TUGMA (STUDIYA VA KESISH) -->
+    <!-- 2 TA ASOSIY TUGMA -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800/80 px-8 py-3 flex justify-around items-center z-40">
         <button onclick="switchTab('studio')" id="nav-btn-studio" class="flex flex-col items-center text-brand-red space-y-1">
             <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
@@ -309,38 +320,6 @@
         }
         window.switchTab = switchTab;
     </script>
-    <!-- ==================== TAYYOR VIDEONI KO'RSATISH VA SAQLASH MODALI ==================== -->
-    <div id="video-result-modal" class="hidden fixed inset-0 z-50 bg-black/95 flex flex-col justify-center items-center p-4 select-none">
-        <div class="w-full max-w-sm bg-[#13131c] border border-cyan-500/50 p-5 rounded-3xl space-y-4 shadow-2xl relative text-center">
-            
-            <h3 class="font-bold text-base text-white flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-                <span>Videongiz 100% Tayyor!</span>
-            </h3>
-
-            <!-- TAYYOR VIDEO PLEYERI -->
-            <div class="relative w-full aspect-[9/16] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-gray-700 shadow-xl mx-auto">
-                <video id="finished-video-player" controls autoplay loop playsinline class="w-full h-full object-cover"></video>
-            </div>
-
-            <!-- 1-TUGMA: GALEREYAGA SAQLASH -->
-            <button id="btn-modal-download" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-extrabold text-xs rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-download text-sm"></i>
-                <span>📥 Telefon Galereyasiga Saqlash (MP4)</span>
-            </button>
-
-            <!-- 2-TUGMA: TELEGRAMDA ULASHISH -->
-            <button id="btn-modal-share" class="w-full py-3 bg-[#229ed9] text-white font-bold text-xs rounded-2xl active:scale-95 transition flex items-center justify-center space-x-2">
-                <i class="fa-brands fa-telegram text-sm"></i>
-                <span>✈️ Telegramda Saqlash / Do'stlarga Yuborish</span>
-            </button>
-
-            <!-- YOPISH TUGMASI -->
-            <button onclick="closeVideoResultModal()" class="text-xs text-gray-400 hover:text-white font-medium">
-                ❌ Oynani Yopish
-            </button>
-        </div>
-    </div>
 
     <!-- SCRIPTS -->
     <script src="js/i18n.js"></script>
@@ -349,4 +328,4 @@
     <script src="js/sync.js"></script>
     <script src="js/styles.js"></script>
 </body>
-        </html>
+                </html>
