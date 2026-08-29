@@ -1,4 +1,4 @@
-// ==================== 100% STABLE NO-JUMP LYRICS ENGINE (js/sync.js) ====================
+// ==================== SPOTIFY MULTI-LINE MASTER SYNC (js/sync.js) ====================
 
 window.lyricsData = [];
 let activeLineIndex = -1;
@@ -14,7 +14,7 @@ window.updateTrackInfo = function() {
     if (pTitle && title) pTitle.innerText = title.value || 'Song Title';
 };
 
-// 1. FAQAT ENTER BO'YICHA QATORLARGA BO'LISH
+// 1. CHEKSIZ SATRLARNI TAYYORLASH
 window.parseLyricsForSync = function() {
     const inputEl = document.getElementById('raw-lyrics-input');
     if (!inputEl) return;
@@ -25,7 +25,6 @@ window.parseLyricsForSync = function() {
         return;
     }
 
-    // FAQAT ODAM ENTER BOSGAN QATORLAR BO'YICHA AJRATISH
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     window.lyricsData = lines.map(line => ({ time: null, text: line }));
 
@@ -52,14 +51,14 @@ window.parseLyricsForSync = function() {
         stampBtn.innerText = `⏱ 1-satr boshlanishida bosing`;
     }
 
-    renderFixedGeometryList();
+    renderMultiLineSpotifyList();
     activeLineIndex = 0;
     highlightNextSyncLine();
-    alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA tugmani bosing.");
+    alert("✅ Matn tayyor! Musiqani qo'ying va xonanda har bir satrni aytishni BOSHLAGANDA 'Vaqtni Saqlash' tugmasini bosing.");
 };
 
-// 2. SO'ZLAR SAKRAMAYDIGAN QAT'IY O'LCHAMLI RO'YXAT
-function renderFixedGeometryList() {
+// 2. SPOTIFY RO'YXATI
+function renderMultiLineSpotifyList() {
     const box = document.getElementById('spotify-lyrics-scroll');
     if (!box) return;
 
@@ -71,20 +70,24 @@ function renderFixedGeometryList() {
         const p = document.createElement('p');
         p.id = `spotify-line-${index}`;
         p.style.fontFamily = currentFont;
-        // Barcha satrlar uchun bir xil qat'iy o'lcham (harflar sakramaydi!)
-        p.className = "text-lg md:text-xl font-bold transition-all duration-300 leading-snug my-3 break-words w-full";
+        p.style.willChange = "transform, opacity, color";
         
         if (index === 0) {
+            p.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-snug my-3 break-words w-full";
             p.style.color = selectedColor;
             p.style.opacity = "1";
-            p.style.fontWeight = "900";
         } else {
+            p.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-snug my-2.5 break-words w-full";
             p.style.color = "#ffffff";
-            p.style.opacity = "0.35";
-            p.style.fontWeight = "700";
+            p.style.opacity = "0.4";
         }
 
         p.innerText = item.text;
+        p.onclick = () => {
+            if (item.time !== null && window.vibeAudioElement) {
+                window.vibeAudioElement.currentTime = item.time;
+            }
+        };
         box.appendChild(p);
     });
 
@@ -132,7 +135,7 @@ window.timestampCurrentLine = function() {
     }
 };
 
-// 4. JONLI SILLIQ YORITISH (SO'ZLAR JOYIDAN QIMIRLAMAYDI)
+// 4. JONLI SILLIQ MARKAZLASHUV (OXIRGI SATRLAR HAM MARKAZGA CHIQADI)
 window.updateLiveKaraokeDisplay = function(currentTime) {
     if (!window.lyricsData || window.lyricsData.length === 0) return;
 
@@ -153,20 +156,18 @@ window.updateLiveKaraokeDisplay = function(currentTime) {
             if (!el) return;
 
             if (idx === targetIdx) {
-                // FAOL SATR: Yorqin yonadi
+                el.className = "text-xl md:text-2xl font-black transition-all duration-400 ease-out leading-snug my-3 break-words w-full";
                 el.style.color = selectedColor;
                 el.style.opacity = "1";
-                el.style.fontWeight = "900";
 
                 if (scrollBox) {
                     const targetScroll = el.offsetTop - scrollBox.offsetTop - 60;
                     scrollBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
                 }
             } else {
-                // QOLGAN SATRLAR: Xira turadi (Joyidan siljimaydi!)
+                el.className = "text-base md:text-lg font-bold text-white/40 transition-all duration-400 ease-out leading-snug my-2.5 break-words w-full";
                 el.style.color = "#ffffff";
-                el.style.opacity = "0.35";
-                el.style.fontWeight = "700";
+                el.style.opacity = "0.4";
             }
         });
     }
