@@ -1,8 +1,8 @@
 import os
-import io
 import re
 import sys
 import time
+import json
 import sqlite3
 import datetime
 import threading
@@ -14,15 +14,14 @@ from telebot.types import (
     ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 )
 
-# SIZNING BOTINGIZ VA KANALINGIZ:
 BOT_TOKEN = "8824021433:AAHsBf1axRyavod-ZZ18uOEmBWxsWYASGV8"
 ADMIN_ID = 6526744258
-TARGET_CHANNEL = "@ms_music_karaoke" # https://t.me/ms_music_karaoke
-WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=channel_master_v15"
+TARGET_CHANNEL = "@ms_music_karaoke"
+WEBAPP_URL = "https://ibroximxudoyqulov.github.io/vibe-music/?v=pro_final_v130"
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True, num_threads=25)
 
-# ==================== 1. RENDER SERVER KO'PRIGI (BYTESIO FAYL YUKLOVCHI) ====================
+# ==================== 1. RENDER 24/7 SERVER ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -35,48 +34,29 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(b"<h1>VibeStudio Channel Bridge is 100% Active!</h1>")
+        self.wfile.write(b"<h1>VibeStudio Server is 100% Active!</h1>")
 
     def do_POST(self):
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
 
+            # Mini App'dan yuborilgan tayyor video faylni qabul qilish
             if "upload_video" in self.path:
-                # XOM BAYTLARNI VIRTUAL MP4 FAYLGA O'RASH (BYTESIO)
-                video_file = io.BytesIO(post_data)
-                video_file.name = f"VibeStudio_{int(time.time())}.mp4"
-
-                # 1. KANALGA YUBORISH
                 bot.send_video(
                     TARGET_CHANNEL, 
-                    video_file, 
+                    post_data, 
                     caption="🎬 <b>Yangi VibeStudio 60FPS Video!</b>\n\n📥 @ms_music_karaoke kanaliga yuklandi!\n📲 Bot: @ms_mus1c_bot", 
                     parse_mode="HTML"
                 )
-                print("--> [SUCCESS] Video @ms_music_karaoke kanaliga muvaffaqiyatli joylandi!")
-
-            elif "upload_audio" in self.path:
-                # XOM BAYTLARNI VIRTUAL MP3 FAYLGA O'RASH
-                audio_file = io.BytesIO(post_data)
-                audio_file.name = f"VibeStudio_Cut_{int(time.time())}.mp3"
-
-                bot.send_audio(
-                    TARGET_CHANNEL, 
-                    audio_file, 
-                    caption="✂️ <b>VibeStudio Qirqilgan MP3 Musiqa!</b>\n\n📥 @ms_music_karaoke", 
-                    parse_mode="HTML"
-                )
-                print("--> [SUCCESS] Audio @ms_music_karaoke kanaliga muvaffaqiyatli joylandi!")
 
             self.send_response(200)
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(b'{"status":"success"}')
-
         except Exception as e:
-            print(f"[Upload Error] {e}")
+            print(f"[Server Error] {e}")
             self.send_response(500)
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
@@ -86,7 +66,6 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
 
 def run_health_server():
     port = int(os.environ.get("PORT", 10000))
-    print(f"--> [OK] Render Channel Bridge Server {port}-portda ishga tushdi!")
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
@@ -141,7 +120,7 @@ def get_total_users():
 # ==================== 3. LUG'AT VA MENYU ====================
 TEXTS = {
     "uz": {
-        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify video yasash, musiqani qirqish va kanaldagi musiqalar <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
+        "welcome": "Assalomu alaykum! <b>VibeStudio</b>ga xush kelibsiz. 🎧✨\n\n🎬 Spotify uslubidagi videolarni yasash va musiqani qirqish <b>100% BEPUL!</b>\n\n👇 Ilovani ochish uchun pastdagi tugmani bosing:",
         "btn_open_app": "🎨 VibeStudio Ilovasi (Mini App)",
         "btn_info": "ℹ️ Bot Haqida"
     }
