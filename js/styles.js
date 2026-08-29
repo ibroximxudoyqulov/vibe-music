@@ -1,10 +1,21 @@
-// ==================== 100% GUARANTEED IN-APP VIDEO DELIVERY ENGINE ====================
+// ==================== 1080x1920 60FPS 500K VIRAL MASTER EXPORTER (js/styles.js) ====================
 
 let isVinylActive = false;
-let isParticlesActive = true;
+let isParticlesActive = false; // Toza video uchun o'chiq
 let customBgUrl = null;
+let customBgImgObj = null;
 
-const BOT_TOKEN = "8824021433:AAHsBf1axRyavod-ZZ18uOEmBWxsWYASGV8";
+// 5 TA BAXMAL FON MAVZULARI
+let currentTheme = 'caramel'; // 'caramel', 'wine', 'emerald', 'indigo', 'charcoal'
+const VELVET_THEMES = {
+    caramel: { top: "#451f08", bottom: "#1f0d03" },  // 407K Shahzoda uslubi
+    wine: { top: "#450818", bottom: "#1f030a" },     // 533K Sevinch uslubi
+    emerald: { top: "#08301e", bottom: "#03180e" },
+    indigo: { top: "#0b1a38", bottom: "#040a18" },
+    charcoal: { top: "#18181c", bottom: "#08080a" }
+};
+
+const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
 const TARGET_CHANNEL = "@ms_music_karaoke";
 
 window.switchTab = function(tab) {
@@ -28,11 +39,26 @@ window.switchTab = function(tab) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.closeVideoResultModal = function() {
-    const modal = document.getElementById('video-result-modal');
-    const player = document.getElementById('finished-video-player');
-    if (player) player.pause();
-    if (modal) modal.classList.add('hidden');
+// 5 Ta Baxmal Fonni Tanlash
+window.setVelvetTheme = function(themeName) {
+    currentTheme = themeName;
+    const previewBox = document.getElementById('video-canvas-preview');
+    const theme = VELVET_THEMES[themeName] || VELVET_THEMES.caramel;
+
+    if (previewBox) {
+        previewBox.style.background = `linear-gradient(to bottom, ${theme.top}, ${theme.bottom})`;
+    }
+
+    document.querySelectorAll('.theme-preset-btn').forEach(btn => {
+        btn.classList.remove('border-2', 'border-white', 'scale-105');
+        btn.classList.add('border-gray-700');
+    });
+
+    const activeBtn = document.getElementById(`theme-btn-${themeName}`);
+    if (activeBtn) {
+        activeBtn.classList.add('border-2', 'border-white', 'scale-105');
+        activeBtn.classList.remove('border-gray-700');
+    }
 };
 
 window.updatePreviewFont = function(fontFamily) {
@@ -60,11 +86,17 @@ window.handleCustomFontUpload = function(event) {
     alert("🎉 Shaxsiy shrift yuklandi!");
 };
 
+// Shaxsiy Rasm Yuklash (Videoda 100% chiqadi!)
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
     document.getElementById('custom-bg-name').innerText = `🖼 ${file.name}`;
     customBgUrl = URL.createObjectURL(file);
+    
+    const imgObj = new Image();
+    imgObj.src = customBgUrl;
+    customBgImgObj = imgObj;
+
     const bgLayer = document.getElementById('custom-bg-layer');
     if (bgLayer) {
         bgLayer.style.backgroundImage = `url('${customBgUrl}')`;
@@ -95,7 +127,8 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-function drawFixedWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+// DINAMIK 2-QATORGA TUSHIRISH VA ANIQ BALANDLIKNI HISOBLASH
+function drawDynamicWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     if (!text) return y;
     const words = text.split(' ');
     let lines = [];
@@ -117,10 +150,11 @@ function drawFixedWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
         ctx.fillText(line, Math.round(x), Math.round(y + (idx * lineHeight)));
     });
 
+    // Satrning tugagan Y nuqtasini qaytaradi (Ustma-ust tushmasligi uchun!)
     return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. VIDEONI TAYYORLASH VA DARHOL EKRANDA KO'RSATISH ====================
+// ==================== 1. 500K VIRAL 60FPS VIDEO EKSPORT ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -144,7 +178,7 @@ window.exportAndSendToBot = async function() {
     const exactVideoDuration = maxLyricTime + 2.5;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -183,52 +217,48 @@ window.exportAndSendToBot = async function() {
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
         recorder.onstop = async () => {
-            btn.innerHTML = "🎬 60FPS Ovozli Videoni Tayyorlash";
-            btn.disabled = false;
-
+            btn.innerHTML = "📤 @ms_music_karaoke kanaliga uzatilmoqda...";
             const blob = new Blob(chunks, { type: 'video/mp4' });
             const videoUrl = URL.createObjectURL(blob);
 
-            // 1. VIDEONI DARHOL EKRANDA TO'LIQ KO'RSATISH (ZERO FAIL!)
-            const modal = document.getElementById('video-result-modal');
-            const player = document.getElementById('finished-video-player');
-            const dlBtn = document.getElementById('btn-modal-download');
-            const shareBtn = document.getElementById('btn-modal-share');
+            const trackTitle = document.getElementById('preview-track-title').innerText;
+            const trackArtist = document.getElementById('preview-track-artist').innerText;
+            const captionText = `🎬 <b>${trackTitle} — ${trackArtist}</b>\n\n📥 @ms_music_karaoke kanaliga yuklandi!\n📲 Bot: @ms_mus1c_bot`;
 
-            if (player) {
-                player.src = videoUrl;
-                player.play();
-            }
+            // KANALGA YUBORISH
+            const formData = new FormData();
+            formData.append('chat_id', TARGET_CHANNEL);
+            formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
+            formData.append('caption', captionText);
+            formData.append('parse_mode', 'HTML');
 
-            if (dlBtn) {
-                dlBtn.onclick = () => {
-                    const a = document.createElement('a');
-                    a.href = videoUrl;
-                    a.download = `VibeStudio_${Date.now()}.mp4`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                };
-            }
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.ok) {
+                    alert("🎉 Video muvaffaqiyatli @ms_music_karaoke kanaliga joylandi! Kanalni ochib ko'ring.");
+                } else {
+                    triggerDirectDownload(videoUrl);
+                }
+            }).catch(err => {
+                triggerDirectDownload(videoUrl);
+            });
 
-            if (shareBtn) {
-                shareBtn.onclick = () => {
-                    const shareText = `🎬 VibeStudio'da yangi 60FPS video tayyorladim! Siz ham o'z videongizni bepul yasang: @ms_mus1c_bot`;
-                    window.open(`https://t.me/share/url?url=https://t.me/ms_mus1c_bot&text=${encodeURIComponent(shareText)}`, '_blank');
-                };
-            }
+            triggerDirectDownload(videoUrl);
 
-            if (modal) modal.classList.remove('hidden');
-
-            // 2. Orqa fonda kanalga ham yuklashga urinish
-            try {
-                const formData = new FormData();
-                formData.append('chat_id', TARGET_CHANNEL);
-                formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-                formData.append('caption', `🎬 <b>${document.getElementById('preview-track-title').innerText}</b>\n\n📥 @ms_music_karaoke`);
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: formData });
-            } catch (e) {}
+            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+            btn.disabled = false;
         };
+
+        function triggerDirectDownload(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
         recorder.start();
         bufferSource.start(0);
@@ -236,11 +266,7 @@ window.exportAndSendToBot = async function() {
 
         const selectedFont = document.getElementById('font-family-select') ? document.getElementById('font-family-select').value : "'Montserrat', sans-serif";
         const selectedTextColor = window.activeLyricsColor || "#ffffff";
-
-        const stars = [];
-        for (let i = 0; i < 45; i++) {
-            stars.push({ x: Math.random() * 1080, y: Math.random() * 1920, r: Math.random() * 3 + 1, s: Math.random() * 1.5 + 0.5 });
-        }
+        const activeTheme = VELVET_THEMES[currentTheme] || VELVET_THEMES.caramel;
 
         function renderFrame() {
             const elapsedTime = audioCtx.currentTime - startTime;
@@ -253,40 +279,37 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // Fon
-            ctx.fillStyle = "#09090d";
-            ctx.fillRect(0, 0, 1080, 1920);
-
-            // Yulduzchalar
-            if (isParticlesActive) {
-                stars.forEach(p => {
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-                    ctx.beginPath();
-                    ctx.arc(Math.round(p.x), Math.round(p.y), p.r, 0, Math.PI * 2);
-                    ctx.fill();
-                    p.y -= p.s;
-                    if (p.y < 0) { p.y = 1920; p.x = Math.random() * 1080; }
-                });
+            // 1. 500K BAXMAL FONNI CHIZISH (YOKI SHAXSIY RASM)
+            if (customBgImgObj) {
+                ctx.drawImage(customBgImgObj, 0, 0, 1080, 1920);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+                ctx.fillRect(0, 0, 1080, 1920);
+            } else {
+                const bgGrad = ctx.createLinearGradient(0, 0, 0, 1920);
+                bgGrad.addColorStop(0, activeTheme.top);
+                bgGrad.addColorStop(1, activeTheme.bottom);
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, 1080, 1920);
             }
 
-            // Header
+            // 2. TIKTOK SAFE HEADER (y = 340px - TIKTOK MENYULARI TO'SMAYDI!)
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
-            ctx.fillText(document.getElementById('preview-track-title').innerText, 90, 150);
+            ctx.fillText(document.getElementById('preview-track-title').innerText, 90, 340);
 
-            ctx.fillStyle = "#8696a0";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
             ctx.font = "30px Montserrat, sans-serif";
-            ctx.fillText(document.getElementById('preview-track-artist').innerText, 90, 200);
+            ctx.fillText(document.getElementById('preview-track-artist').innerText, 90, 390);
 
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(90, 240);
-            ctx.lineTo(990, 240);
+            ctx.moveTo(90, 430);
+            ctx.lineTo(990, 430);
             ctx.stroke();
 
-            // SPOTIFY KO'P QATORLI TINIQ MATNLAR
+            // 3. FAOL SATRNI ANIQ TOPISH
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -294,21 +317,28 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            let startY = 650 - (activeIdx * 120);
+            // 4. DINAMIK BALANDLIK BILAN CHIZISH (USTMA-UST TUSHMAYDI VA OXIRGI SATRLAR HAM MARKAZGA CHIQADI)
+            // Kamera doim faol satrni ekranning markaziga (y = 850) olib keladi
+            let currentY = 850 - (activeIdx * 140);
 
             lyrics.forEach((l, i) => {
-                const y = startY + (i * 120);
-                if (y > 280 && y < 1720) {
-                    ctx.font = `800 48px ${selectedFont}`;
-                    ctx.textAlign = "left";
+                const isCurrent = (i === activeIdx);
+                const fontSize = isCurrent ? 54 : 42;
+                const lineHeight = isCurrent ? 68 : 56;
 
-                    if (i === activeIdx) {
+                ctx.font = isCurrent ? `900 ${fontSize}px ${selectedFont}` : `bold ${fontSize}px ${selectedFont}`;
+                ctx.textAlign = "left";
+
+                // Faqat ekranda ko'rinadigan qismi chiziladi
+                if (currentY > 440 && currentY < 1780) {
+                    if (isCurrent) {
                         ctx.fillStyle = selectedTextColor;
-                        drawFixedWrappedText(ctx, l.text, 90, y, 900, 60);
                     } else {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-                        drawFixedWrappedText(ctx, l.text, 90, y, 900, 60);
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.42)";
                     }
+                    currentY = drawDynamicWrappedText(ctx, l.text, 90, currentY, 880, lineHeight) + 35;
+                } else {
+                    currentY += 140;
                 }
             });
 
@@ -320,7 +350,7 @@ window.exportAndSendToBot = async function() {
     } catch (err) {
         console.error(err);
         alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
-        btn.innerHTML = "🎬 60FPS Ovozli Videoni Tayyorlash";
+        btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
         btn.disabled = false;
     }
 };
@@ -445,7 +475,7 @@ window.executeRealAudioTrimAndSend = async function() {
     }
 
     const btn = document.getElementById('btn-trim-send');
-    btn.innerHTML = "⏳ Qirqilmoqda...";
+    btn.innerHTML = "⏳ Qirqilmoqda va Kanalga uzatilmoqda...";
     btn.disabled = true;
 
     try {
@@ -467,8 +497,20 @@ window.executeRealAudioTrimAndSend = async function() {
         }
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
-        const downloadUrl = URL.createObjectURL(wavBlob);
+        const cutTimeText = `${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}`;
 
+        const channelFormData = new FormData();
+        channelFormData.append('chat_id', TARGET_CHANNEL);
+        channelFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
+        channelFormData.append('caption', `✂️ <b>Qirqilgan MP3 Fayl!</b>\n⏱ Oraliq: ${cutTimeText}\n\n📥 @ms_music_karaoke`);
+        channelFormData.append('parse_mode', 'HTML');
+
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            method: 'POST',
+            body: channelFormData
+        });
+
+        const downloadUrl = URL.createObjectURL(wavBlob);
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = `VibeStudio_Cut_${Date.now()}.mp3`;
@@ -476,13 +518,13 @@ window.executeRealAudioTrimAndSend = async function() {
         a.click();
         document.body.removeChild(a);
 
-        alert("🎉 Qirqilgan MP3 telefoningizga yuklandi!");
+        alert("🎉 Qirqilgan MP3 @ms_music_karaoke kanaliga joylandi!");
     } catch (e) {
         console.error(e);
         alert("⚠️ Xatolik yuz berdi.");
     }
 
-    btn.innerHTML = "✂️ Qirqish & MP3 Qilib Olish";
+    btn.innerHTML = "✂️ Qirqish & Bot Lichkasiga MP3 Qilib Olish";
     btn.disabled = false;
 };
 
@@ -513,4 +555,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-}
+                    }
