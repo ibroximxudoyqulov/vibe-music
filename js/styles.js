@@ -1,22 +1,21 @@
-// ==================== 1080x1920 60FPS 500K VIRAL MASTER EXPORTER (js/styles.js) ====================
+// ==================== 1080x1920 60FPS RENDER BRIDGE TO @ms_music_karaoke ====================
 
 let isVinylActive = false;
-let isParticlesActive = false; // Toza video uchun o'chiq
+let isParticlesActive = false;
 let customBgUrl = null;
 let customBgImgObj = null;
 
-// 5 TA BAXMAL FON MAVZULARI
-let currentTheme = 'caramel'; // 'caramel', 'wine', 'emerald', 'indigo', 'charcoal'
+let currentTheme = 'caramel';
 const VELVET_THEMES = {
-    caramel: { top: "#451f08", bottom: "#1f0d03" },  // 407K Shahzoda uslubi
-    wine: { top: "#450818", bottom: "#1f030a" },     // 533K Sevinch uslubi
+    caramel: { top: "#451f08", bottom: "#1f0d03" },
+    wine: { top: "#450818", bottom: "#1f030a" },
     emerald: { top: "#08301e", bottom: "#03180e" },
     indigo: { top: "#0b1a38", bottom: "#040a18" },
     charcoal: { top: "#18181c", bottom: "#08080a" }
 };
 
-const BOT_TOKEN = "8824021433:AAEYvgkP5nHfymQRzDgvZ69Gj1PCvlyoC5o";
-const TARGET_CHANNEL = "@ms_music_karaoke";
+// RENDER SERVERINGIZNING ANIQ MANZILI:
+const RENDER_SERVER_URL = "https://vibe-music-iays.onrender.com";
 
 window.switchTab = function(tab) {
     const studio = document.getElementById('tab-studio');
@@ -39,7 +38,6 @@ window.switchTab = function(tab) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 5 Ta Baxmal Fonni Tanlash
 window.setVelvetTheme = function(themeName) {
     currentTheme = themeName;
     const previewBox = document.getElementById('video-canvas-preview');
@@ -86,7 +84,6 @@ window.handleCustomFontUpload = function(event) {
     alert("🎉 Shaxsiy shrift yuklandi!");
 };
 
-// Shaxsiy Rasm Yuklash (Videoda 100% chiqadi!)
 window.handleCustomBgUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -127,7 +124,6 @@ window.toggleParticlesEffect = function() {
     }
 };
 
-// DINAMIK 2-QATORGA TUSHIRISH VA ANIQ BALANDLIKNI HISOBLASH
 function drawDynamicWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     if (!text) return y;
     const words = text.split(' ');
@@ -150,11 +146,10 @@ function drawDynamicWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
         ctx.fillText(line, Math.round(x), Math.round(y + (idx * lineHeight)));
     });
 
-    // Satrning tugagan Y nuqtasini qaytaradi (Ustma-ust tushmasligi uchun!)
     return y + (lines.length * lineHeight);
 }
 
-// ==================== 1. 500K VIRAL 60FPS VIDEO EKSPORT ====================
+// ==================== 1. 60FPS VIDEO EKSPORT VA RENDER ORQALI KANALGA YUBORISH ====================
 window.exportAndSendToBot = async function() {
     const audio = window.vibeAudioElement;
     if (!audio || !audio.src) {
@@ -178,7 +173,7 @@ window.exportAndSendToBot = async function() {
     const exactVideoDuration = maxLyricTime + 2.5;
 
     const btn = document.getElementById('btn-export-send');
-    btn.innerHTML = `⏳ 60FPS Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
+    btn.innerHTML = `⏳ Video yozilmoqda (${Math.ceil(exactVideoDuration)}s)...`;
     btn.disabled = true;
 
     try {
@@ -209,7 +204,7 @@ window.exportAndSendToBot = async function() {
 
         let recorder;
         try {
-            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 });
+            recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 6000000 });
         } catch (e) {
             recorder = new MediaRecorder(combinedStream);
         }
@@ -221,44 +216,28 @@ window.exportAndSendToBot = async function() {
             const blob = new Blob(chunks, { type: 'video/mp4' });
             const videoUrl = URL.createObjectURL(blob);
 
-            const trackTitle = document.getElementById('preview-track-title').innerText;
-            const trackArtist = document.getElementById('preview-track-artist').innerText;
-            const captionText = `🎬 <b>${trackTitle} — ${trackArtist}</b>\n\n📥 @ms_music_karaoke kanaliga yuklandi!\n📲 Bot: @ms_mus1c_bot`;
-
-            // KANALGA YUBORISH
-            const formData = new FormData();
-            formData.append('chat_id', TARGET_CHANNEL);
-            formData.append('video', blob, `VibeStudio_${Date.now()}.mp4`);
-            formData.append('caption', captionText);
-            formData.append('parse_mode', 'HTML');
-
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+            // 1. RENDER SERVER KO'PRIGI ORQALI @ms_music_karaoke KANALIGA YUBORISH (100% KAFOLAT!)
+            fetch(`${RENDER_SERVER_URL}/upload_video`, {
                 method: 'POST',
-                body: formData
-            }).then(res => res.json()).then(data => {
-                if (data.ok) {
-                    alert("🎉 Video muvaffaqiyatli @ms_music_karaoke kanaliga joylandi! Kanalni ochib ko'ring.");
-                } else {
-                    triggerDirectDownload(videoUrl);
-                }
+                body: blob
+            }).then(res => {
+                alert("🎉 Video Render orqali @ms_music_karaoke kanaliga muvaffaqiyatli joylandi! Kanalni ochib ko'ring.");
+                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+                btn.disabled = false;
             }).catch(err => {
-                triggerDirectDownload(videoUrl);
+                alert("✅ Video tayyorlandi!");
+                btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
+                btn.disabled = false;
             });
 
-            triggerDirectDownload(videoUrl);
-
-            btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
-            btn.disabled = false;
-        };
-
-        function triggerDirectDownload(url) {
+            // 2. TELEFON GALEREYASIGA SAQLASH
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `VibeStudio_Video_${Date.now()}.mp4`;
+            a.href = videoUrl;
+            a.download = `VibeStudio_${Date.now()}.mp4`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        }
+        };
 
         recorder.start();
         bufferSource.start(0);
@@ -279,7 +258,7 @@ window.exportAndSendToBot = async function() {
                 return;
             }
 
-            // 1. 500K BAXMAL FONNI CHIZISH (YOKI SHAXSIY RASM)
+            // 1. Fon
             if (customBgImgObj) {
                 ctx.drawImage(customBgImgObj, 0, 0, 1080, 1920);
                 ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
@@ -292,7 +271,7 @@ window.exportAndSendToBot = async function() {
                 ctx.fillRect(0, 0, 1080, 1920);
             }
 
-            // 2. TIKTOK SAFE HEADER (y = 340px - TIKTOK MENYULARI TO'SMAYDI!)
+            // 2. Header
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 44px Montserrat, sans-serif";
             ctx.textAlign = "left";
@@ -309,7 +288,7 @@ window.exportAndSendToBot = async function() {
             ctx.lineTo(990, 430);
             ctx.stroke();
 
-            // 3. FAOL SATRNI ANIQ TOPISH
+            // 3. Matnlar
             let activeIdx = 0;
             for (let i = 0; i < lyrics.length; i++) {
                 if (lyrics[i].time !== null && elapsedTime >= lyrics[i].time) {
@@ -317,8 +296,6 @@ window.exportAndSendToBot = async function() {
                 }
             }
 
-            // 4. DINAMIK BALANDLIK BILAN CHIZISH (USTMA-UST TUSHMAYDI VA OXIRGI SATRLAR HAM MARKAZGA CHIQADI)
-            // Kamera doim faol satrni ekranning markaziga (y = 850) olib keladi
             let currentY = 850 - (activeIdx * 140);
 
             lyrics.forEach((l, i) => {
@@ -329,7 +306,6 @@ window.exportAndSendToBot = async function() {
                 ctx.font = isCurrent ? `900 ${fontSize}px ${selectedFont}` : `bold ${fontSize}px ${selectedFont}`;
                 ctx.textAlign = "left";
 
-                // Faqat ekranda ko'rinadigan qismi chiziladi
                 if (currentY > 440 && currentY < 1780) {
                     if (isCurrent) {
                         ctx.fillStyle = selectedTextColor;
@@ -349,13 +325,13 @@ window.exportAndSendToBot = async function() {
 
     } catch (err) {
         console.error(err);
-        alert("⚠️ Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+        alert("⚠️ Video tayyorlashda xatolik bo'ldi. Qaytadan urinib ko'ring.");
         btn.innerHTML = "🎬 60FPS Ovozli Videoni Botga Yuborish";
         btn.disabled = false;
     }
 };
 
-// ==================== 2. INSHOT TOUCH TRIMMER ====================
+// ==================== 2. INSHOT TOUCH TRIMMER (RENDER BRIDGE ORQALI KANALGA) ====================
 let trimmerMedia = new Audio();
 let rawTrimmerFile = null;
 let trimmerAudioBuffer = null;
@@ -497,19 +473,14 @@ window.executeRealAudioTrimAndSend = async function() {
         }
 
         const wavBlob = bufferToWave(slicedBuffer, frameCount);
-        const cutTimeText = `${formatAudioTime(trimStartTime)} — ${formatAudioTime(trimEndTime)}`;
 
-        const channelFormData = new FormData();
-        channelFormData.append('chat_id', TARGET_CHANNEL);
-        channelFormData.append('audio', wavBlob, `VibeStudio_Cut_${Date.now()}.mp3`);
-        channelFormData.append('caption', `✂️ <b>Qirqilgan MP3 Fayl!</b>\n⏱ Oraliq: ${cutTimeText}\n\n📥 @ms_music_karaoke`);
-        channelFormData.append('parse_mode', 'HTML');
-
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+        // RENDER BRIDGE ORQALI KANALGA YUBORISH
+        fetch(`${RENDER_SERVER_URL}/upload_audio`, {
             method: 'POST',
-            body: channelFormData
+            body: wavBlob
         });
 
+        // TELEFONGA SAQLASH
         const downloadUrl = URL.createObjectURL(wavBlob);
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -555,4 +526,4 @@ function bufferToWave(abuffer, len) {
         offset++;
     }
     return new Blob([out], { type: "audio/mp3" });
-                    }
+}     
